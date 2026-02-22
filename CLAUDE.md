@@ -11,7 +11,7 @@ The entity behind this is Pando Industries.
 - **Framework:** Astro (static site generation, zero JS by default)
 - **Hosting:** Cloudflare Pages, auto-deploys on push to `main`
 - **Build:** `npm run build` → output in `dist/`
-- **JS policy:** Vanilla JS by default. React islands permitted ONLY for interactive essay visualizations in `src/components/*.jsx`, hydrated via Astro's `client:visible` or `client:load` directives. No React in layouts, navigation, or page chrome.
+- **JS policy:** Vanilla JS by default. React islands permitted ONLY for interactive essay visualizations in `src/components/islands/*.tsx`, hydrated via Astro's `client:visible` or `client:load` directives. No React in layouts, navigation, or page chrome.
 - **CSS:** Custom properties for theming. No Tailwind. No CSS frameworks. Scoped styles in `.astro` files, shared tokens in `src/styles/global.css`.
 - **Dependencies:** No charting libraries. No external JS beyond Astro and React (for islands). Diagrams are built from HTML + CSS + IntersectionObserver.
 
@@ -27,7 +27,16 @@ src/
 │   ├── ProjectCard.astro       # Reusable project card
 │   ├── PostPreview.astro       # Writing index list item
 │   ├── MandalaCanvas.astro     # Animated background (vanilla JS, gold on warm white)
-│   └── *.jsx                   # React islands for essay interactives ONLY
+│   └── islands/                # React interactive components for essays
+│       ├── shared/
+│       │   ├── tokens.ts       # Design tokens (references CSS custom properties)
+│       │   ├── useInView.ts    # Intersection observer hook (fire-once, reduced-motion aware)
+│       │   ├── SectionDivider.tsx  # Reusable section divider
+│       │   └── PullQuote.tsx       # Reusable pull quote with scroll animation
+│       ├── AB*.tsx             # Absolute Beginners++ essay islands
+│       ├── Notice*.tsx         # Notice essay islands
+│       ├── LC*.tsx             # Learned Compilation essay islands
+│       └── Scholion*.tsx       # Scholion essay islands
 ├── pages/
 │   ├── index.astro             # Homepage
 │   ├── now.astro               # Now page
@@ -138,6 +147,38 @@ These are deliberate vocabulary choices, not generic labels:
 
 Section dividers: section number (JetBrains Mono, small uppercase, --accent) + horizontal rule (--border-mid), displayed as a flex row.
 
+## Island Architecture
+
+React islands are used exclusively for interactive essay visualizations. They are hydrated inside MDX content via Astro's `client:visible` directive.
+
+### Rules
+
+- All island components are TypeScript (`.tsx` / `.ts`)
+- Island components import shared utilities from `./shared/`
+- MDX files import islands with relative paths: `import X from '../../components/islands/X.tsx'`
+- Default hydration directive: `client:visible` (all current components are scroll-triggered)
+- Only use `client:load` if a component must be interactive above the fold
+- Islands receive data via props, not global state
+- Design tokens defined once in `shared/tokens.ts`, referencing CSS custom properties from `global.css`
+- `useInView` hook lives in `shared/useInView.ts` — handles IntersectionObserver + `prefers-reduced-motion`
+- No animation libraries — all transitions use CSS `transition` property
+- No icon libraries (lucide-react, etc.) — build icons from HTML/CSS/SVG inline
+
+### Naming Convention
+
+- **Essay-specific:** `[Prefix][ComponentName].tsx` — e.g., `ABConvergenceDiagram.tsx`, `NoticeCompetitiveGap.tsx`
+- **Prefixes:** `AB` (Absolute Beginners++), `Notice`, `LC` (Learned Compilation), `Scholion`
+- **Shared:** descriptive name — e.g., `SectionDivider.tsx`, `PullQuote.tsx`
+
+### Shared Infrastructure (`islands/shared/`)
+
+| File | Purpose |
+|------|---------|
+| `tokens.ts` | Design tokens as `var(--x)` strings — stays in sync with `global.css` |
+| `useInView.ts` | `[ref, inView]` hook — fire-once IntersectionObserver, respects reduced motion |
+| `SectionDivider.tsx` | Section number + label + horizontal rule |
+| `PullQuote.tsx` | Centered italic quote with scroll-triggered fade-in |
+
 ## Content
 
 ### Essays
@@ -175,8 +216,8 @@ Add entry to the projects data in `src/pages/index.astro`. Use the `ProjectCard.
 **Update experience/about:**
 Edit `src/pages/about.astro`. Preserve section naming conventions (Path, Instruments, Marks, Lineage).
 
-**Add a React interactive to an essay page:**
-Create `.jsx` in `src/components/`. Import in the `.astro` page with `client:visible`. Do NOT add React to any non-essay page.
+**Add a React interactive to an essay:**
+Create `.tsx` in `src/components/islands/` using the `[Prefix][Name].tsx` convention. Import shared utilities from `./shared/`. In the MDX file, import with a relative path and use `client:visible`. Do NOT add React to any non-essay page.
 
 ## Verification Checklist
 

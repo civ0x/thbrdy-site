@@ -1,6 +1,6 @@
 # thbrdy.dev — Migration Status
 
-Last updated: 2026-02-21
+Last updated: 2026-02-22
 
 ## Migration Roadmap
 
@@ -44,13 +44,30 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 **Exit criteria:** `/writing` lists 4 essays. Each renders at `/writing/[slug]/`. Build passes (8 pages, zero errors). Interactive component locations marked with TODO comments in MDX.
 
-### Phase 4: Remaining Content
+### Phase 4: Interactive Islands — In Progress
 
+**Island infrastructure validated (Session 0, 2026-02-22):**
+- [x] `@astrojs/react` confirmed installed and configured
+- [x] Shared utilities extracted to `src/components/islands/shared/`:
+  - `tokens.ts` — design tokens referencing CSS custom properties
+  - `useInView.ts` — fire-once IntersectionObserver hook, reduced-motion aware
+  - `SectionDivider.tsx` — section number + label + rule
+  - `PullQuote.tsx` — centered italic quote with scroll fade-in
+- [x] Test island hydrated correctly via `client:visible` in MDX
+- [x] CLAUDE.md updated with island architecture conventions
+- [x] Test artifacts removed
+
+**Remaining — essay island porting (Sessions 1–4):**
+- [ ] Session 1: Absolute Beginners++ (`ab-essay.mdx`) — ConvergenceDiagram, WrongFirstFlow, CouplingDiagram, etc.
+- [ ] Session 2: Notice (`notice.mdx`) — CompetitiveGap, and other visuals from `reference/notice-essay-visuals.jsx`
+- [ ] Session 3: Learned Compilation (`learned-compilation.mdx`) — visuals from `reference/learned-compilation-essay.jsx`
+- [ ] Session 4: Scholion (`scholion.mdx`) — visuals TBD
+
+**Other remaining content:**
 - [ ] Pando essay (source file doesn't exist yet — `pando_research_report.md` is a research report, not an essay)
 - [ ] `/now` page content (currently a stub)
-- [ ] React interactive components for essays (TODO markers in MDX files)
 
-**Exit criteria:** All essays render. All nav links resolve. Interactive components hydrated where marked.
+**Exit criteria:** All essays render with interactive components hydrated. All nav links resolve. Build passes clean.
 
 ### Phase 5: Polish (not yet scoped)
 - [ ] Self-host fonts (eliminate Google Fonts render-blocking request)
@@ -61,7 +78,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 3 complete. Content pipeline operational with 4 essays migrated as MDX. Build produces 8 pages in ~970ms.
+Phase 4 in progress. Island infrastructure validated — shared utilities extracted, test island hydrated successfully via `client:visible` in MDX. Ready for essay-specific component porting (Sessions 1–4). Build produces 8 pages in ~930ms.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds
