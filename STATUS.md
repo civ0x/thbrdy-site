@@ -82,8 +82,19 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] Ensō image (`public/images/enso-transparent.png`) committed
 - [x] Build passes clean (8 pages, ~1s, zero errors)
 
-**Remaining — essay island porting (Sessions 3–4):**
-- [ ] Session 3: Learned Compilation (`learned-compilation.mdx`) — visuals from `reference/learned-compilation-essay.jsx`
+**Session 3 complete (2026-02-22): Learned Compilation essay islands**
+- [x] `LCCouplingDiagram.tsx` — Diamond-layout SVG with 4 decision space nodes, 6 coupling lines with hover hitboxes + evidence detail panel, 4 inline SVG icons
+- [x] `LCLandscapeQuadrant.tsx` — Scatter plot with 7 system dots, axis labels, dashed target zone, hover detail panel; Y-axis oriented Learned (top) → Heuristic (bottom)
+- [x] `LCNestedClaimsFlow.tsx` — 3 sequential claim cards with timer-driven reveal (600ms intervals), chevron connectors, Kill if / Cheapest test sub-cards, uniform steel blue card styling
+- [x] `LCEvidenceGrid.tsx` — 10-row × 3-column data table with colored strength pips, horizontal scroll on mobile, staggered row animation
+- [x] `LCStrategicImplications.tsx` — 3-column card grid with inline SVG icons, staggered scroll animation
+- [x] MDX updated: SectionDividers (01 The Problem, 02 If It Works, 03 The Landscape, 04 Evidence, 05 Validation, 06 Positioning), PullQuote between sections 02 and 03, all five islands at correct prose positions
+- [x] PullQuote redesigned: full-width border replaced with centered 40px gold accent bars (top + bottom)
+- [x] Steel blue accent (`#3A7CA5`) as local constants; semantic tokens for decision-space colors
+- [x] No lucide-react — all 11 icon types are inline SVGs
+- [x] Build passes clean (8 pages, ~1s, zero errors)
+
+**Remaining — essay island porting (Session 4):**
 - [ ] Session 4: Scholion (`scholion.mdx`) — visuals TBD
 
 **Other remaining content:**
@@ -101,7 +112,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 in progress. Sessions 1–2r complete. AB essay has two islands + SectionDividers + PullQuote. Notice essay has four islands (CompetitiveGap, InteractionFlow, ArchitectureDiagram, BuildTimeline) + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). Venn diagram refined across sessions 2f–2r (circle sizing, label positioning, ensō badge). Notice essay prose revised (2026-02-22): depersonalized retreat testimonial, expanded Barrett/frame-dependence paragraph with cross-link. Sessions 3–4 remain. Build produces 8 pages in ~1s.
+Phase 4 in progress. Sessions 1–3 complete. AB essay has two islands + SectionDividers + PullQuote. Notice essay has four islands + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). LC essay has five islands + SectionDividers + PullQuote with steel blue accent color. PullQuote shared component redesigned (accent bars instead of border lines). Session 4 (Scholion) remains. Build produces 8 pages in ~1s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds

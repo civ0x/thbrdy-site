@@ -40,6 +40,17 @@
 **Decision:** Depersonalize jhana retreat testimonial (remove specific community/person attribution). Expand Barrett paragraph to foreground frame-dependence as a design principle, linking to thbrdy.dev/softmax post.
 **Rationale:** The retreat reference should credit the practice, not specific individuals. The Barrett paragraph needed to connect constructed emotion theory to the broader frame-dependence thesis that underpins the product philosophy. The hyperlink to "The Frame-Dependent Mind" creates a cross-reference between essays.
 
+## 009: Per-essay accent colors as local constants
+**Date:** 2026-02-22
+**Decision:** Essay-specific accent colors live as local constants inside each component file, not in `tokens.ts` or `global.css`. The LC essay uses steel blue (`#3A7CA5`); Notice uses purple/gold. Semantic diagram colors (red, green, blue, teal) use the shared `tokens.*` values.
+**Rationale:** Each essay benefits from its own visual identity without polluting the global palette. Local constants make the accent self-contained — if an essay is removed, no global cleanup needed. Semantic tokens are shared because they encode meaning (strong/weak, categories) rather than essay identity.
+**Constraint:** Do not add new CSS custom properties for per-essay accents. Do not use `var()` strings with hex-opacity appends (e.g., `${var(--teal)}30`) — this produces invalid CSS. Use pre-computed local constants for opacity variants.
+
+## 010: PullQuote accent bars instead of border lines
+**Date:** 2026-02-22
+**Decision:** PullQuote uses centered 40px gold accent bars (top and bottom) instead of full-width `borderTop`/`borderBottom`. Bottom margin reduced to 24px.
+**Rationale:** Full-width borders stacked visually with SectionDivider horizontal rules, creating double/triple line effects between sections. Short accent bars provide visual punctuation without competing with structural dividers.
+
 ## 003: Cinzel 400 for hero display
 **Date:** 2025-02-21  
 **Decision:** Use Cinzel at weight 400 with letter-spacing: 0.12em, uppercase, for the hero name only.

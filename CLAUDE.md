@@ -1,5 +1,15 @@
 # thbrdy.dev — Agent Guidelines
 
+## Cowork Mode Rule
+
+**Do not edit source files directly.** In Cowork mode, plan changes and produce session prompts for execution in separate sessions. No direct modifications to any files under `src/`, `public/`, or content files. This applies to all code, content, config, and style files. The only files Cowork may create or edit are session prompt files (e.g., `session-*.md`) and documentation files (`STATUS.md`, `DECISIONS.md`, this file).
+
+**Session prompt execution protocol.** Each session prompt is a self-contained mission file. When handing a prompt to an executing agent (e.g., Claude Code), the standard kickoff is:
+
+> Read `CLAUDE.md`, `STATUS.md`, and `[session-prompt-filename].md`, then execute.
+
+No additional context is needed — the prompt file contains the full situation, mission, technical constraints, and verification checklist. The executing agent reads the three files in that order and works autonomously.
+
 ## What This Is
 
 Personal thinking space for Thomas Brady (techno-vajrapāṇi). Writing is the spine; projects are evidence of an intellectual framework centered on making invisible structures visible and navigable. This is not a portfolio or a blog — it's a research site where each page does cognitive work.

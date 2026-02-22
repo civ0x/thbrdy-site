@@ -14,16 +14,22 @@ export function PullQuote({ children }: PullQuoteProps) {
       ref={ref}
       style={{
         maxWidth: "720px",
-        margin: "56px auto",
-        padding: "48px 0",
-        borderTop: `1px solid ${tokens.borderMid}`,
-        borderBottom: `1px solid ${tokens.borderMid}`,
+        margin: "56px auto 24px",
+        padding: "0",
         textAlign: "center",
         opacity: inView ? 1 : 0,
         transform: inView ? "translateY(0)" : "translateY(16px)",
         transition: "all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
       }}
     >
+      <div
+        style={{
+          width: "40px",
+          height: "2px",
+          background: tokens.accent,
+          margin: "0 auto 28px",
+        }}
+      />
       <p
         style={{
           fontFamily: tokens.serif,
@@ -38,6 +44,14 @@ export function PullQuote({ children }: PullQuoteProps) {
       >
         {children}
       </p>
+      <div
+        style={{
+          width: "40px",
+          height: "2px",
+          background: tokens.accent,
+          margin: "28px auto 0",
+        }}
+      />
     </div>
   );
 }
