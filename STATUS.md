@@ -64,8 +64,16 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] MDX updated: SectionDividers (01–05), PullQuote, both islands integrated at correct positions
 - [x] Build passes clean (8 pages, 923ms, zero errors)
 
-**Remaining — essay island porting (Sessions 2–4):**
-- [ ] Session 2: Notice (`notice.mdx`) — CompetitiveGap, and other visuals from `reference/notice-essay-visuals.jsx`
+**Session 2 complete (2026-02-22): Notice essay islands**
+- [x] `NoticeCompetitiveGap.tsx` — Venn diagram + 4-column feature comparison grid, inline SVG check/X icons
+- [x] `NoticeInteractionFlow.tsx` — 4-step Frame Snap flow with timer-driven sequential reveal, inline SVG icons
+- [x] `NoticeArchitectureDiagram.tsx` — Two-tier architecture (on-device/cloud) with hover state, ~11 inline SVG icons, dark code block
+- [x] `NoticeBuildTimeline.tsx` — Vertical timeline with 7 milestones, gold→purple gradient line
+- [x] MDX updated: SectionDividers (01–06), all four islands integrated at correct positions
+- [x] Two TODOs preserved: SnapDepth tiers, EmotionTaxonomy (no reference implementations — deferred)
+- [x] Build passes clean (8 pages, 986ms, zero errors)
+
+**Remaining — essay island porting (Sessions 3–4):**
 - [ ] Session 3: Learned Compilation (`learned-compilation.mdx`) — visuals from `reference/learned-compilation-essay.jsx`
 - [ ] Session 4: Scholion (`scholion.mdx`) — visuals TBD
 
@@ -84,7 +92,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 in progress. Session 1 complete — AB essay has two islands (ABConvergenceDiagram, ABWrongFirstFlow) plus SectionDividers and PullQuote integrated. Responsive pattern established (injected `<style>` tags). Sessions 2–4 remain. Build produces 8 pages in ~923ms.
+Phase 4 in progress. Sessions 1–2 complete. AB essay has two islands + SectionDividers + PullQuote. Notice essay has four islands (CompetitiveGap, InteractionFlow, ArchitectureDiagram, BuildTimeline) + SectionDividers; two deferred (SnapDepth, EmotionTaxonomy). Sessions 3–4 remain. Build produces 8 pages in ~986ms.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds
