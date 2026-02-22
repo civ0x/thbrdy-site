@@ -29,6 +29,12 @@
 **Rationale:** CSS media queries apply before React hydrates, eliminating layout flash on first paint. No JS execution needed for responsive behavior. CSS transitions between breakpoints work naturally. Each component is self-contained — no shared responsive utility to maintain. Breakpoints: 640px (tablet), 420px (phone).
 **Alternatives considered:** `useMediaQuery` / `useBreakpoint` hook — would cause hydration mismatch if SSR viewport differs from client, requires JS for layout, and doesn't support CSS transitions between breakpoints.
 
+## 007: Conditional project icon in PostLayout
+**Date:** 2026-02-22
+**Decision:** PostLayout.astro renders an ensō image + "Notice" label above the essay title when `connected_project === "Notice"`. The icon is part of the layout, not the MDX content.
+**Rationale:** The project identifier needs to appear above the `<h1>` title, which is rendered by the layout — not reachable from MDX content. Conditional rendering keeps other essays unaffected. The pattern can extend to other projects (Scholion, Pando) by adding additional conditions.
+**Constraint:** Project icons are in the layout only. MDX content should not duplicate them.
+
 ## 003: Cinzel 400 for hero display
 **Date:** 2025-02-21  
 **Decision:** Use Cinzel at weight 400 with letter-spacing: 0.12em, uppercase, for the hero name only.

@@ -26,6 +26,13 @@ const formattedDate = date.toLocaleDateString('en-US', {
       <hr />
     </div>
 
+    {connected_project === "Notice" && (
+      <div class="post__project-icon">
+        <img src="/images/enso-transparent.png" alt="" width="64" height="64" />
+        <span>Notice</span>
+      </div>
+    )}
+
     <header class="post__header">
       <h1 class="post__title">{title}</h1>
       <div class="post__meta">
@@ -83,6 +90,24 @@ const formattedDate = date.toLocaleDateString('en-US', {
     flex: 1;
     border: none;
     border-top: 1px solid var(--border-mid);
+  }
+
+  .post__project-icon {
+    text-align: center;
+    margin: 0 0 1.5rem;
+  }
+
+  .post__project-icon img {
+    display: block;
+    margin: 0 auto 2px;
+    object-fit: contain;
+  }
+
+  .post__project-icon span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
   }
 
   .post__header {

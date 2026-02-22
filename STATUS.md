@@ -73,6 +73,15 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] Two TODOs preserved: SnapDepth tiers, EmotionTaxonomy (no reference implementations — deferred)
 - [x] Build passes clean (8 pages, 986ms, zero errors)
 
+**Sessions 2f–2r complete (2026-02-22): Venn diagram refinement + ensō header**
+- [x] Venn circles shrunk (60%→44%) so labels fit inside container bounds
+- [x] Overlap labels repositioned outside circles but inside container
+- [x] Category labels centered on circle centers with outward nudge into solo regions
+- [x] "Notice" label added to ensō badge in Venn diagram center
+- [x] Ensō + "Notice" project icon added to PostLayout.astro (conditional on `connected_project === "Notice"`)
+- [x] Ensō image (`public/images/enso-transparent.png`) committed
+- [x] Build passes clean (8 pages, ~1s, zero errors)
+
 **Remaining — essay island porting (Sessions 3–4):**
 - [ ] Session 3: Learned Compilation (`learned-compilation.mdx`) — visuals from `reference/learned-compilation-essay.jsx`
 - [ ] Session 4: Scholion (`scholion.mdx`) — visuals TBD
@@ -92,7 +101,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 in progress. Sessions 1–2 complete. AB essay has two islands + SectionDividers + PullQuote. Notice essay has four islands (CompetitiveGap, InteractionFlow, ArchitectureDiagram, BuildTimeline) + SectionDividers; two deferred (SnapDepth, EmotionTaxonomy). Sessions 3–4 remain. Build produces 8 pages in ~986ms.
+Phase 4 in progress. Sessions 1–2r complete. AB essay has two islands + SectionDividers + PullQuote. Notice essay has four islands (CompetitiveGap, InteractionFlow, ArchitectureDiagram, BuildTimeline) + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). Venn diagram refined across sessions 2f–2r (circle sizing, label positioning, ensō badge). Sessions 3–4 remain. Build produces 8 pages in ~1s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds
