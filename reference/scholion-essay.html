@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholion — Safety Cases Are Dependency Graphs That Nobody Maintains</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens ── */
+:root {
+  --bg: #FAF6F0;
+  --bg-warm: #F4EFE7;
+  --bg-card: #EFEBE4;
+  --bg-dark: #1C1A17;
+  --bg-dark-mid: #2A2722;
+  --border: rgba(44, 36, 22, 0.1);
+  --border-mid: rgba(44, 36, 22, 0.18);
+  --text: #2C2416;
+  --text-mid: #4A3D30;
+  --text-light: #6B5D4F;
+  --text-muted: #9B8E80;
+  --text-faint: #C4B8AA;
+  --accent: #B8860B;
+  --accent-dim: rgba(184, 134, 11, 0.08);
+  --accent-glow: rgba(184, 134, 11, 0.04);
+  --red: #A63D2F;
+  --red-dim: rgba(166, 61, 47, 0.08);
+  --green: #4A7A4A;
+  --green-dim: rgba(74, 122, 74, 0.08);
+  --blue: #2A5A8A;
+  --blue-dim: rgba(42, 90, 138, 0.08);
+  --teal: #2A7A6A;
+  --teal-dim: rgba(42, 122, 106, 0.08);
+  --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --prose-width: 640px;
+  --diagram-width: 720px;
+  --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 18px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--serif);
+  line-height: 1.75;
+}
+
+/* ── Grain ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.018;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Layout ── */
+.prose { max-width: var(--prose-width); margin: 0 auto; padding: 0 1.5rem; }
+.wide { max-width: var(--diagram-width); margin: 0 auto; padding: 0 1.5rem; }
+
+/* ── Scroll animation ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ── Header ── */
+.site-nav {
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.site-nav a {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.site-nav a:hover { color: var(--accent); }
+
+.hero {
+  max-width: var(--prose-width);
+  margin: 0 auto;
+  padding: 5rem 1.5rem 3rem;
+}
+.hero-label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+  display: block;
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-size: 2.8rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 1.2rem;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.hero-sub {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-light);
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+/* ── Section dividers ── */
+.section-break {
+  max-width: var(--prose-width);
+  margin: 3.5rem auto 2.5rem;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.section-num {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.section-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--border-mid);
+}
+
+/* ── Prose ── */
+.prose p {
+  color: var(--text-mid);
+  margin-bottom: 1.1rem;
+  font-size: 1rem;
+  font-weight: 400;
+}
+.prose p:first-of-type::first-line {
+  /* subtle emphasis on opening line of sections */
+}
+.prose h2 {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--text);
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+.prose h3 {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2rem 0 0.8rem;
+}
+.prose strong {
+  font-weight: 600;
+  color: var(--text);
+}
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: rgba(184, 134, 11, 0.3);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s;
+}
+.prose a:hover {
+  text-decoration-color: var(--accent);
+}
+
+/* ── Pull quote ── */
+.pull-quote {
+  max-width: var(--diagram-width);
+  margin: 3rem auto;
+  padding: 2.5rem 3rem;
+  text-align: center;
+}
+.pull-quote p {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.pull-quote .attribution {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 1rem;
+  display: block;
+}
+
+/* ── Dependency Chain Diagram ── */
+.chain-diagram {
+  max-width: var(--diagram-width);
+  margin: 2.5rem auto;
+  padding: 2rem 1.5rem;
+}
+.chain-inner {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2.5rem 2rem;
+  position: relative;
+}
+.chain-title {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.chain-nodes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.chain-node {
+  width: 100%;
+  max-width: 440px;
+  background: white;
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  padding: 1rem 1.4rem;
+  position: relative;
+  transition: all 0.4s var(--ease);
+}
+.chain-node.foundation {
+  border-color: var(--red);
+  border-width: 2px;
+  background: var(--red-dim);
+}
+.chain-node .node-label {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+}
+.chain-node.foundation .node-label {
+  color: var(--red);
+}
+.chain-node .node-text {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+.chain-node.foundation .node-text {
+  color: var(--red);
+}
+.chain-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 36px;
+  justify-content: center;
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  position: relative;
+}
+.chain-arrow::before {
+  content: '';
+  width: 1px;
+  height: 12px;
+  background: var(--border-mid);
+}
+.chain-arrow::after {
+  content: '↑';
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: -2px;
+}
+.chain-arrow-label {
+  position: absolute;
+  right: -8px;
+  transform: translateX(100%);
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+.chain-annotation {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.chain-annotation p {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  max-width: 380px;
+  margin: 0 auto;
+}
+.chain-annotation em {
+  color: var(--red);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* ── Positioning Grid ── */
+.positioning {
+  max-width: var(--diagram-width);
+  margin: 2.5rem auto;
+  padding: 0 1.5rem;
+}
+.positioning-inner {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.positioning-header {
+  padding: 1.5rem 2rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.positioning-header h4 {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.pos-grid {
+  display: grid;
+  grid-template-columns: 2fr repeat(5, 1fr);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+}
+.pos-grid .pos-header {
+  padding: 0.7rem 0.8rem;
+  font-weight: 500;
+  color: var(--text-light);
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  text-align: center;
+}
+.pos-grid .pos-header:first-child {
+  text-align: left;
+}
+.pos-grid .pos-row-label {
+  padding: 0.7rem 0.8rem;
+  font-weight: 500;
+  color: var(--text-mid);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pos-grid .pos-cell {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pos-grid .pos-cell.yes {
+  color: var(--green);
+  font-weight: 500;
+}
+.pos-grid .pos-cell.no {
+  color: var(--text-faint);
+}
+.pos-grid .pos-cell.partial {
+  color: var(--accent);
+}
+.pos-grid .pos-cell.gap {
+  background: var(--red-dim);
+  color: var(--red);
+  font-weight: 600;
+}
+.pos-row-label .row-icon {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pos-footer {
+  padding: 1rem 2rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 1.5rem;
+}
+.pos-legend {
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.pos-legend .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* ── Pipeline Flow ── */
+.pipeline {
+  max-width: var(--diagram-width);
+  margin: 2.5rem auto;
+  padding: 0 1.5rem;
+}
+.pipeline-inner {
+  background: var(--bg-dark);
+  border-radius: 8px;
+  padding: 2rem;
+  overflow: hidden;
+}
+.pipeline-title {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 1.5rem;
+}
+.pipeline-stages {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+.pipeline-stage {
+  background: var(--bg-dark-mid);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 1.2rem 1rem;
+  position: relative;
+}
+.pipeline-stage .stage-num {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+  display: block;
+}
+.pipeline-stage .stage-name {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+.pipeline-stage .stage-desc {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.5;
+}
+.pipeline-stage .stage-schema {
+  margin-top: 0.8rem;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--accent);
+  opacity: 0.7;
+  line-height: 1.6;
+}
+.pipeline-connector {
+  display: none; /* handled by gap + visual rhythm */
+}
+.pipeline-callout {
+  margin-top: 1rem;
+  padding: 1rem 1.2rem;
+  background: rgba(184, 134, 11, 0.06);
+  border: 1px solid rgba(184, 134, 11, 0.15);
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.6;
+}
+.pipeline-callout strong {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Validation Timeline ── */
+.validation {
+  max-width: var(--diagram-width);
+  margin: 2.5rem auto;
+  padding: 0 1.5rem;
+}
+.validation-inner {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2rem;
+}
+.validation-title {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+.val-claims {
+  position: relative;
+  padding-left: 1.8rem;
+}
+.val-claims::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 12px;
+  bottom: 12px;
+  width: 1px;
+  background: var(--border-mid);
+}
+.val-claim {
+  position: relative;
+  margin-bottom: 2rem;
+  padding-left: 1.2rem;
+}
+.val-claim:last-child { margin-bottom: 0; }
+.val-claim::before {
+  content: '';
+  position: absolute;
+  left: -1.8rem;
+  top: 10px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--bg-warm);
+  z-index: 1;
+}
+.val-claim.active::before {
+  background: var(--accent);
+}
+.val-claim-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+.val-claim-num {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  font-weight: 500;
+}
+.val-claim-title {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.val-claim-body {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--text-light);
+  line-height: 1.65;
+  margin-bottom: 0.6rem;
+}
+.val-criteria {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.val-criterion {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+.val-criterion.validated {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(74, 122, 74, 0.15);
+}
+.val-criterion.killed {
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(166, 61, 47, 0.15);
+}
+.val-criterion strong {
+  font-weight: 600;
+}
+
+/* ── Credibility Block ── */
+.credibility {
+  max-width: var(--diagram-width);
+  margin: 2.5rem auto;
+  padding: 0 1.5rem;
+}
+.cred-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+.cred-card {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.2rem 1.4rem;
+}
+.cred-card .cred-label {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+.cred-card .cred-text {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--text-mid);
+  line-height: 1.55;
+}
+.cred-card .cred-text strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Footer ── */
+.essay-footer {
+  max-width: var(--prose-width);
+  margin: 4rem auto 0;
+  padding: 2rem 1.5rem 4rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.essay-footer a {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-decoration: none;
+}
+.essay-footer a:hover {
+  text-decoration: underline;
+}
+.essay-footer p {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  html { font-size: 16px; }
+  .hero { padding: 3rem 1.5rem 2rem; }
+  .hero h1 { font-size: 2.1rem; }
+  .pull-quote { padding: 2rem 1.5rem; }
+  .pull-quote p { font-size: 1.2rem; }
+  .pos-grid { grid-template-columns: 2fr repeat(5, 1fr); font-size: 0.6rem; overflow-x: auto; }
+  .pipeline-stages { grid-template-columns: 1fr 1fr; }
+  .cred-inner { grid-template-columns: 1fr; }
+  .val-criteria { grid-template-columns: 1fr; }
+  .chain-arrow-label { display: none; }
+}
+@media (max-width: 480px) {
+  .pipeline-stages { grid-template-columns: 1fr; }
+  .pos-grid { font-size: 0.55rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="site-nav">
+  <a href="/">← thbrdy.dev</a>
+  <a href="/scholion/">Scholion</a>
+</nav>
+
+<!-- Hero -->
+<header class="hero reveal">
+  <span class="hero-label">Scholion · Research</span>
+  <h1>Safety Cases Are <em>Dependency Graphs</em> That Nobody Maintains</h1>
+  <p class="hero-sub">Claim-dependency tracking for scientific research — and the verification infrastructure that safety cases need to survive contact with reality.</p>
+</header>
+
+<!-- ── Section 01: The Problem ── -->
+<div class="section-break reveal">
+  <span class="section-num">01 · The Problem</span>
+  <div class="section-rule"></div>
+</div>
+
+<div class="prose reveal">
+  <p>Every organization building frontier AI systems faces the same structural problem: demonstrating that a system is safe requires assembling a web of interdependent claims — capability evaluations, behavioral tests, monitoring results, theoretical arguments — into a coherent safety case. The conclusions depend on the evaluations, which depend on the threat models, which depend on capability assumptions, which depend on forecasts about what the system can do. This is a dependency graph. And right now, every organization maintains it informally.</p>
+  <p>When a capability evaluation returns a surprising result, there is no systematic way to trace which safety claims are undermined. When a new attack vector is published, there is no automated process for identifying which behavioral guarantees depend on the assumption that the attack was infeasible. The dependency structure exists — it has to, because the safety argument has logical structure — but it lives in researchers' heads, in prose documents, and in slide decks. It is implicit, manually maintained, and brittle in exactly the way that matters most.</p>
+</div>
+
+<!-- Pull Quote -->
+<div class="pull-quote reveal">
+  <p>The dependency structure exists — it has to, because the safety argument has logical structure — but it lives in researchers' heads, in prose documents, and in slide decks.</p>
+</div>
+
+<div class="prose reveal">
+  <p>Karl Weick's analysis of the Mann Gulch disaster identified a pattern he called the <strong>collapse of sensemaking</strong>: an organization's shared interpretive framework — the implicit structure that makes individual observations coherent — can disintegrate under stress, and when it does, the failure is catastrophic precisely because the structure was never explicit enough to reconstruct. The smokejumpers didn't just lose coordination. They lost the shared framework that made coordination possible.</p>
+  <p>Safety cases at frontier AI organizations have the same structural vulnerability. Consider a concrete example.</p>
+</div>
+
+<!-- RSP Dependency Chain -->
+<div class="chain-diagram reveal">
+  <div class="chain-inner">
+    <div class="chain-title">Implicit dependency chain in a responsible scaling policy</div>
+    <div class="chain-nodes">
+      <div class="chain-node">
+        <div class="node-label">Layer 4</div>
+        <div class="node-text">Deployment decision — "this system is safe to deploy at this capability level"</div>
+      </div>
+      <div class="chain-arrow"><span class="chain-arrow-label">depends on</span></div>
+      <div class="chain-node">
+        <div class="node-label">Layer 3</div>
+        <div class="node-text">Capability assessment — "we have evaluated the dangerous capabilities and they are below threshold"</div>
+      </div>
+      <div class="chain-arrow"><span class="chain-arrow-label">depends on</span></div>
+      <div class="chain-node">
+        <div class="node-label">Layer 2</div>
+        <div class="node-text">Evaluation schedule — "we assess capabilities before they cross dangerous thresholds"</div>
+      </div>
+      <div class="chain-arrow"><span class="chain-arrow-label">depends on</span></div>
+      <div class="chain-node foundation">
+        <div class="node-label">Foundation · Acknowledged open question</div>
+        <div class="node-text">Informal forecasts — "we can predict capability trajectories well enough to trigger assessments in time"</div>
+      </div>
+    </div>
+    <div class="chain-annotation">
+      <p>The RSP itself describes these forecasting methods as <em>"open research questions"</em> that need improvement before being relied upon for risk judgments. A four-level dependency chain resting on an acknowledged open question.</p>
+    </div>
+  </div>
+</div>
+
+<div class="prose reveal">
+  <p>Anthropic's Responsible Scaling Policy commits to evaluating dangerous capabilities before they emerge, using what the policy describes as "informal forecasts" to predict capability trajectories between evaluation cycles. This is a load-bearing claim: the entire evaluation framework assumes that capability jumps can be anticipated well enough to trigger assessments before dangerous thresholds are crossed.</p>
+  <p>This is not a criticism of the RSP — it's the most carefully reasoned public safety framework in the industry. The point is structural. If informal forecasting fails to anticipate a capability jump, the failure doesn't stay local — it propagates through the entire chain, potentially undermining deployment decisions that appeared well-supported.</p>
+  <p>The RSP documents this chain in prose. Invalidating conditions are maintained as lists in appendix tables. When conditions change, humans must read the prose, identify which claims are affected, and manually update their assessments. This is sensemaking in Weick's sense — an interpretive process that works when conditions are stable and familiar, and fails when they aren't, precisely because the structure it depends on was never externalized.</p>
+</div>
+
+<!-- ── Section 02: Prior Art ── -->
+<div class="section-break reveal">
+  <span class="section-num">02 · What exists and what doesn't</span>
+  <div class="section-rule"></div>
+</div>
+
+<div class="prose reveal">
+  <p>Several systems address pieces of this problem. Citation graphs track paper-level relationships but treat all citations as equivalent. Argument mining represents structure within single documents but doesn't track dependencies across papers or through time. Truth Maintenance Systems solve the single-agent version but were designed for one reasoner's beliefs, not an entire research community. Knowledge graphs operate at the entity level, not the argumentative structure level.</p>
+  <p>The gap is specific: claim-level dependency tracking across documents with crux identification and automated invalidation propagation.</p>
+</div>
+
+<!-- Positioning Grid -->
+<div class="positioning reveal">
+  <div class="positioning-inner">
+    <div class="positioning-header">
+      <h4>Capability comparison across existing approaches</h4>
+    </div>
+    <div class="pos-grid">
+      <div class="pos-header">System</div>
+      <div class="pos-header">Paper-level</div>
+      <div class="pos-header">Claim-level</div>
+      <div class="pos-header">Cross-doc</div>
+      <div class="pos-header">Crux ID</div>
+      <div class="pos-header">Propagation</div>
+
+      <div class="pos-row-label"><span class="row-icon" style="background:var(--blue)"></span> Citation graphs</div>
+      <div class="pos-cell yes">●</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell yes">●</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell no">—</div>
+
+      <div class="pos-row-label"><span class="row-icon" style="background:var(--teal)"></span> Scite.ai</div>
+      <div class="pos-cell yes">●</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell yes">●</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell no">—</div>
+
+      <div class="pos-row-label"><span class="row-icon" style="background:var(--green)"></span> Argument mining</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell yes">●</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell no">—</div>
+
+      <div class="pos-row-label"><span class="row-icon" style="background:var(--accent)"></span> TMS / ATMS</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell yes">●</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell yes">●</div>
+      <div class="pos-cell yes">●</div>
+
+      <div class="pos-row-label"><span class="row-icon" style="background:var(--text-muted)"></span> Knowledge graphs</div>
+      <div class="pos-cell yes">●</div>
+      <div class="pos-cell partial">◐</div>
+      <div class="pos-cell yes">●</div>
+      <div class="pos-cell no">—</div>
+      <div class="pos-cell no">—</div>
+
+      <div class="pos-row-label" style="font-weight:700;color:var(--accent)"><span class="row-icon" style="background:var(--red)"></span> Scholion</div>
+      <div class="pos-cell gap">●</div>
+      <div class="pos-cell gap">●</div>
+      <div class="pos-cell gap">●</div>
+      <div class="pos-cell gap">●</div>
+      <div class="pos-cell gap">●</div>
+    </div>
+    <div class="pos-footer">
+      <div class="pos-legend"><span class="dot" style="background:var(--green)"></span> Exists</div>
+      <div class="pos-legend"><span class="dot" style="background:var(--accent)"></span> Partial</div>
+      <div class="pos-legend"><span class="dot" style="background:var(--text-faint)"></span> Missing</div>
+      <div class="pos-legend"><span class="dot" style="background:var(--red)"></span> Scholion's contribution</div>
+    </div>
+  </div>
+</div>
+
+<div class="prose reveal">
+  <p>The hardest problem in safety case maintenance isn't finding contradictions — it's tracing their consequences through a web of implicit dependencies that nobody has made explicit. TMS and ATMS solved the propagation logic for single-agent reasoning in the 1970s–80s. Citation graphs solved cross-document linking at the paper level. Argument mining solved claim-level extraction within single documents. No system combines all three: Toulmin-structured extraction, cross-document dependency tracking, and automated propagation. That's the gap Scholion fills.</p>
+</div>
+
+<!-- ── Section 03: What It Enables ── -->
+<div class="section-break reveal">
+  <span class="section-num">03 · What Scholion enables</span>
+  <div class="section-rule"></div>
+</div>
+
+<div class="prose reveal">
+  <p>If claim-dependency tracking works, three things change beyond the immediate utility of better-maintained safety cases.</p>
+  <p><strong>Structural oversight becomes possible.</strong> The scalable oversight problem is usually framed as a knowledge problem. But it's also a structural one. A judge that can inspect the dependency graph of an argument doesn't need to evaluate every claim on its merits. It needs to verify that the structure is sound: that conclusions actually depend on their stated premises, that load-bearing claims have adequate support, that cruxes are identified and monitored. Logic and argumentation structures are inherently more legible than raw natural language. If this holds, a structurally competent judge can oversee a substantively stronger researcher — not by competing on knowledge, but on structural integrity.</p>
+  <p><strong>Safety cases become living documents.</strong> When a monitoring system flags an anomalous behavior, it's not just an incident — it's evidence that propagates through the dependency graph and potentially undermines specific safety claims, which undermines specific deployment decisions. The graph provides the propagation logic that manual review cannot scale.</p>
+  <p><strong>Research communities gain a shared epistemic map.</strong> The AI safety literature — roughly 2,000 to 5,000 papers in the narrow scope, 50,000 to 100,000 including adjacent fields — has dependency structures spanning hundreds of papers. When a foundational result is challenged, the implications take months to propagate through informal channels. A maintained dependency graph makes the propagation immediate and complete.</p>
+</div>
+
+<!-- Pull Quote -->
+<div class="pull-quote reveal">
+  <p>A structurally competent judge can oversee a substantively stronger researcher — not by competing on knowledge, but on structural integrity.</p>
+  <span class="attribution">The scalable oversight thesis</span>
+</div>
+
+<div class="prose reveal">
+  <p>Each of these claims is contingent on capabilities that haven't been fully validated. But the strategic value concentrates in the first — structural oversight — because it addresses a problem that grows more acute as AI systems become more capable. If structural verification is feasible, it provides an oversight mechanism that scales with system capability rather than requiring the overseer to match the system's knowledge.</p>
+</div>
+
+<!-- ── Section 04: Why Now ── -->
+<div class="section-break reveal">
+  <span class="section-num">04 · Why these claims are testable now</span>
+  <div class="section-rule"></div>
+</div>
+
+<div class="prose reveal">
+  <p>Three capabilities have matured to the point where Scholion is buildable rather than aspirational.</p>
+  <p><strong>LLM extraction is good enough for structured claims.</strong> Multi-pass pipelines using structured output achieve 25–80% accuracy improvements over single-pass extraction on complex decomposition tasks. The closest argument mining benchmarks show 35–70% F1 on full argument structure, with inter-annotator agreement at κ = 0.35–0.63 — which means even experts disagree substantially. The extraction problem is genuinely hard, but the gap between current LLM capability and the state of the art suggests significant room for improvement with well-designed schemas.</p>
+  <p><strong>The corpus is tractably small.</strong> The narrow AI safety corpus contains roughly 2,000 to 5,000 papers. Processing 50,000 papers through a 5-stage extraction pipeline costs approximately $200–$400 through batch APIs. The binding constraint is not compute but schema design and validation.</p>
+  <p><strong>Formal substrates for dependency reasoning exist.</strong> Datalog with provenance semirings provides algebraically precise support tracking that generalizes de Kleer's ATMS labels. Truth Maintenance Systems from the 1970s–80s solved the single-agent version; Scholion extends it across an entire research community. The CALM theorem gives principled guidance on which operations distribute coordination-free.</p>
+</div>
+
+<!-- Extraction Pipeline -->
+<div class="pipeline reveal">
+  <div class="pipeline-inner">
+    <div class="pipeline-title">Toulmin extraction pipeline · 4 stages per paper</div>
+    <div class="pipeline-stages">
+      <div class="pipeline-stage">
+        <span class="stage-num">Stage 01</span>
+        <div class="stage-name">Passage Extraction</div>
+        <div class="stage-desc">Identify argumentative passages using paper structure as scaffolding</div>
+        <div class="stage-schema">→ passage, section, type</div>
+      </div>
+      <div class="pipeline-stage">
+        <span class="stage-num">Stage 02</span>
+        <div class="stage-name">Atomic Decomposition</div>
+        <div class="stage-desc">Break passages into atomic propositions with Toulmin roles</div>
+        <div class="stage-schema">→ claim, warrant, backing, qualifier, rebuttal</div>
+      </div>
+      <div class="pipeline-stage">
+        <span class="stage-num">Stage 03</span>
+        <div class="stage-name">Dependency Mapping</div>
+        <div class="stage-desc">Identify which claims depend on or support which other claims</div>
+        <div class="stage-schema">→ source, target, direction, type</div>
+      </div>
+      <div class="pipeline-stage">
+        <span class="stage-num">Stage 04</span>
+        <div class="stage-name">Crux Detection</div>
+        <div class="stage-desc">Classify edge types and identify load-bearing dependencies</div>
+        <div class="stage-schema">→ edge_type, is_crux, reasoning</div>
+      </div>
+    </div>
+    <div class="pipeline-callout">
+      <strong>Critical gap:</strong> No validated Toulmin-structured dataset for scientific papers exists. The annotation schema and dataset are themselves research contributions — the ground truth against which any extraction pipeline must be evaluated.
+    </div>
+  </div>
+</div>
+
+<div class="prose reveal">
+  <p>The gap that matters most: no validated Toulmin-structured dataset for scientific papers exists. The closest benchmarks use simpler schemas on shorter documents. This means the annotation schema and dataset are themselves research contributions — potentially the most valuable near-term output, because they provide the ground truth against which any extraction pipeline must be evaluated. Six specific ontological problems surfaced during manual extraction work: claims aren't atomic, limitations function as negative dependencies, circular evaluation structures need detection, evidential support requires weighted edges, counterfactual claims hide in discussion sections, and epistemological taxonomies don't carve the domain at the joints that matter for dependency tracking.</p>
+</div>
+
+<!-- ── Section 05: Validation ── -->
+<div class="section-break reveal">
+  <span class="section-num">05 · How I'm validating</span>
+  <div class="section-rule"></div>
+</div>
+
+<div class="prose reveal">
+  <p>Three nested claims, each depending on the previous one holding, with explicit kill criteria at each stage.</p>
+</div>
+
+<!-- Validation Timeline -->
+<div class="validation reveal">
+  <div class="validation-inner">
+    <div class="validation-title">Validation program · nested claims with kill criteria</div>
+    <div class="val-claims">
+
+      <div class="val-claim active">
+        <div class="val-claim-header">
+          <span class="val-claim-num">Claim 01</span>
+          <span class="val-claim-title">Toulmin extraction is reliable enough to be useful</span>
+        </div>
+        <div class="val-claim-body">Annotate 20–50 AI safety papers using a formalized Toulmin schema with typed dependency edges. Measure inter-annotator agreement, iterate on guidelines. Produces a publishable dataset regardless of downstream results.</div>
+        <div class="val-criteria">
+          <div class="val-criterion validated"><strong>Validated if</strong> multi-pass LLM pipeline achieves &gt;70% F1 on claims, &gt;50% F1 on dependencies</div>
+          <div class="val-criterion killed"><strong>Killed if</strong> inter-annotator agreement below κ = 0.4 — schema doesn't carve at the joints</div>
+        </div>
+      </div>
+
+      <div class="val-claim">
+        <div class="val-claim-header">
+          <span class="val-claim-num">Claim 02</span>
+          <span class="val-claim-title">Cross-document dependency matching works</span>
+        </div>
+        <div class="val-claim-body">Take a known dependency chain spanning 3–5 papers. Extract claims independently, evaluate whether automated matching recovers the chain.</div>
+        <div class="val-criteria">
+          <div class="val-criterion validated"><strong>Validated if</strong> &gt;60% precision at &gt;40% recall on cross-document claim matching</div>
+          <div class="val-criterion killed"><strong>Killed if</strong> false positive rate makes the graph too noisy — every claim appears to depend on everything</div>
+        </div>
+      </div>
+
+      <div class="val-claim">
+        <div class="val-claim-header">
+          <span class="val-claim-num">Claim 03</span>
+          <span class="val-claim-title">The system is useful for safety case maintenance</span>
+        </div>
+        <div class="val-claim-body">A safety researcher reviewing a dependency graph identifies a non-obvious vulnerability faster than reviewing the same material in prose.</div>
+        <div class="val-criteria">
+          <div class="val-criterion validated"><strong>Validated if</strong> domain experts find graph representation faster / more complete than prose review</div>
+          <div class="val-criterion killed"><strong>Killed if</strong> structural overhead consistently exceeds structural benefit</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="prose reveal">
+  <p>The methodology matters because the question is pre-paradigmatic. Either there's a real opportunity in an underexplored space, or the problem is intractable — which would explain why so few people work on it. The validation program is designed to distinguish between these possibilities before committing significant resources. Before running experiments, I'm building calibrated judgment through the existing literature and direct conversations with researchers working on scalable oversight, argument mining, and safety case methodology.</p>
+</div>
+
+<!-- ── Section 06: Why Me ── -->
+<div class="section-break reveal">
+  <span class="section-num">06 · Why I'm working on this</span>
+  <div class="section-rule"></div>
+</div>
+
+<div class="prose reveal">
+  <p>The thread across my career has been the same: identifying where research capabilities are mature enough to become production systems, then building the bridge.</p>
+</div>
+
+<!-- Credibility Cards -->
+<div class="credibility reveal">
+  <div class="cred-inner">
+    <div class="cred-card">
+      <span class="cred-label">ML Compilation</span>
+      <div class="cred-text">Built the <strong>initial compiler pipeline for AWS Neuron SDK</strong>, the compilation stack for Trainium chips.</div>
+    </div>
+    <div class="cred-card">
+      <span class="cred-label">Graph ML</span>
+      <div class="cred-text">Built <strong>Neptune ML</strong>, bringing graph machine learning to production on AWS.</div>
+    </div>
+    <div class="cred-card">
+      <span class="cred-label">AutoML</span>
+      <div class="cred-text">Worked on AutoML at <strong>H2O.ai</strong> with the team that built Driverless AI.</div>
+    </div>
+    <div class="cred-card">
+      <span class="cred-label">LLM Training</span>
+      <div class="cred-text">Led training for <strong>Amazon's first production LLM</strong> with Smola, Karypis, and Chilimbi.</div>
+    </div>
+  </div>
+</div>
+
+<div class="prose reveal">
+  <p>The safety case problem isn't one I encountered abstractly. It's a structural pattern I recognize from building production ML systems: implicit dependencies that work until they don't, maintained through institutional knowledge and manual review, accumulating untracked debt. The difference is that in ML infrastructure, dependency failures cause production outages. In safety cases, the stakes are higher and the feedback loops are longer — which makes the case for explicit dependency tracking stronger, not weaker.</p>
+  <p>Scholion is part of a broader investigation into what research infrastructure looks like when the pace of AI capability development outstrips the tools for reasoning about it. Safety cases maintained in prose documents and appendix tables are a specific instance of a general pattern: sequential, manual processes designed for a slower pace of change failing to keep up when the underlying technology accelerates. A system that makes the dependency structure of safety reasoning explicit, machine-maintainable, and automatically updated when evidence changes is one piece of what adapted infrastructure looks like.</p>
+  <p>I've built working prototypes of the reading interface — a single reading surface with simultaneous structural decomposition and guided reasoning overlays — and I've done manual claim extraction and dependency tracing on AI safety literature to validate the schema and surface the hard ontological problems. The findings from that work are what convinced me the problem is tractable, and that the binding constraint is schema design, not compute.</p>
+</div>
+
+<!-- Footer -->
+<footer class="essay-footer reveal">
+  <a href="mailto:thomas@thbrdy.dev">thomas@thbrdy.dev</a>
+  <p>If you work on safety cases, scalable oversight, argument mining, or related areas — I'd like to hear from you.</p>
+</footer>
+
+<!-- ── Scroll Animation ── -->
+<script>
+(function() {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          // Stagger children within the entry
+          const delay = 0;
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, delay);
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+  );
+
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transitionDelay = '0s';
+    observer.observe(el);
+  });
+
+  // Stagger internal elements within diagrams
+  const staggerObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const children = entry.target.querySelectorAll('.chain-node, .pipeline-stage, .val-claim, .cred-card, .pos-grid > div');
+          children.forEach((child, i) => {
+            child.style.opacity = '0';
+            child.style.transform = 'translateY(8px)';
+            child.style.transition = `opacity 0.5s var(--ease) ${i * 0.06}s, transform 0.5s var(--ease) ${i * 0.06}s`;
+            setTimeout(() => {
+              child.style.opacity = '1';
+              child.style.transform = 'translateY(0)';
+            }, 50);
+          });
+          staggerObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.15 }
+  );
+
+  document.querySelectorAll('.chain-diagram, .pipeline, .validation, .credibility, .positioning').forEach(el => {
+    staggerObserver.observe(el);
+  });
+})();
+</script>
+
+</body>
+</html>

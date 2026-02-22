@@ -1,0 +1,61 @@
+# ML Compilers Are Leaving 15–30% of Training Throughput on the Table
+
+Every major ML compiler — XLA, TorchInductor, Triton, AWS Neuron — faces the same constrained optimization problem: maximize training throughput subject to memory limits, numerical correctness, and hardware topology. The solution requires four tightly coupled decisions: which operations to fuse into single kernels, which activations to recompute rather than store, how to partition work across devices, and what numerical precision each operation should use.
+
+Every production compiler makes these decisions sequentially. Optimize fusion, then checkpointing, then parallelism, then precision — each pass treating the others' outputs as fixed. This is the standard approach in compiler engineering. It's also an architectural choice that no one has seriously challenged, despite mounting evidence that the interaction effects between these passes are large enough to matter at scale.
+
+I'm investigating whether a learned planner — a graph neural network trained to make these decisions jointly — could close the gap. Here's what the evidence says, what it would take to validate, and what changes if it works.
+
+## Sizing the opportunity
+
+The coupling between compiler decision spaces is the claim with the strongest existing evidence and the most direct economic implication. If sequential optimization is leaving 15–30% of achievable throughput unrealized, then at the scale organizations are spending on training runs, this is a compiler problem with hardware-budget consequences.
+
+The numbers come from production systems and peer-reviewed results, not projections. A 2023 MLSys paper demonstrated that making checkpointing decisions *aware of* downstream fusion opportunities improves throughput by 12% and enables up to 1.75× larger batch sizes — simultaneously improving both dimensions of a tradeoff that sequential optimization treats as fixed. Alpa (OSDI 2022) showed that jointly optimizing parallelism strategies matches hand-tuned systems like Megatron-LM, which teams of experts spent months configuring. AStitch (ASPLOS 2022) found up to 2.73× speedup from reasoning about parallelism during fusion decisions. Unity (OSDI 2022) demonstrated gains from jointly handling algebraic transformations and parallelization.
+
+No system addresses all four decision spaces at once. But the pairwise evidence is consistent: coupling is real, material, and currently unaddressed by production compilers. Characterizing the full coupling matrix — which pairs of decisions interact most strongly, and whether coupling increases or decreases at scale — is an open measurement problem and the first thing worth testing.
+
+The counterargument deserves respect: hierarchical decomposition may capture most of the benefit without true joint optimization. Alpa's two-level approach works well. The gap between a well-designed hierarchy and a true oracle joint optimizer is unknown, and quantifying it is the first empirical question.
+
+## What a learned planner enables
+
+If a learned policy can exploit the joint decision space, three things change beyond raw throughput improvement.
+
+**Heterogeneous training becomes viable.** Organizations currently hoard identical GPU SKUs because compilation stacks can't efficiently target mixed hardware. A hardware-conditioned planner that generalizes across accelerator families converts stranded capacity into usable compute, changing the supply curve for ML training. This is the most strategically valuable claim and the one with the thinnest evidence — within-family transfer works (TenSet for CPUs, Fasor across GPU generations), but cross-family generalization is unproven.
+
+**The planner becomes a chip co-design tool.** A model that generalizes across hardware profiles can evaluate compilation strategies for hypothetical accelerators — specified memory bandwidth, compute throughput, interconnect characteristics — before fabrication. Chip architects could answer questions like "if we doubled memory bandwidth but halved on-chip SRAM, what happens to achievable training throughput for transformers?" without building custom compiler heuristics for each configuration.
+
+**Compiler development decouples from hardware release cycles.** Today, new accelerators ship months before their compilation stacks are mature. A learned planner conditioned on hardware descriptions eliminates this bottleneck — the planner adapts to new hardware instead of requiring manual heuristic development per target.
+
+Each of these is contingent on claims that haven't been validated. But the strategic value concentrates in the hardest claim (hardware generalization), which is worth knowing early — it determines whether this is a research contribution or a platform opportunity.
+
+## Why these claims are testable now
+
+The evidence supporting learnability is indirect but encouraging. MLGO deploys learned inlining policies in production LLVM at Google. GO (NeurIPS 2020) jointly optimizes device placement and fusion using a GNN policy — the closest prior art, but covering only two of four decision spaces. TVM's Ansor uses learned cost models that transfer across hardware with fine-tuning. GNN-based RL policies for job-shop scheduling, a structurally analogous combinatorial problem, generalize from small instances to much larger ones because the network operates on local graph structure.
+
+Transformer architectures offer structural advantages: repeated identical blocks mean optimization decisions discovered for one layer transfer to all layers, dramatically reducing effective dimensionality. Memory profiles are statically determinable. Scaling laws provide a low-dimensional parameterization of the problem family. MoE architectures are the harder test.
+
+The gap that matters: no existing system learns a joint policy across all four decision spaces. The interaction effects between four coupled spaces may create optimization landscapes harder to learn than any individual space. Sample efficiency is the practical constraint — if each policy evaluation requires compiling and profiling a training iteration, the total cost could be prohibitive.
+
+## How I'm validating
+
+I've structured this as three nested claims, each depending on the previous one holding, with explicit kill criteria at each stage.
+
+**Claim 1 — coupling exists and matters.** Validated if pairwise joint optimization yields >5% throughput improvement over sequential passes. Killed if coupling is consistently below 5%. The cheapest test: profile GPT-2 124M on a single A100 under four configurations varying fusion and checkpointing strategy. If the joint improvement isn't the sum of individual improvements, coupling is confirmed. About $200 in cloud spot time.
+
+**Claim 2 — the joint space is learnable.** Validated if a GNN policy outperforms sequential optimization on fusion × rematerialization, the pair with strongest demonstrated coupling. Killed if the policy can't beat sequential optimization even on training data.
+
+**Claim 3 — hardware generalization works.** Validated if a hardware-conditioned planner matches per-hardware fine-tuning with zero-shot inference. Killed if fine-tuning with 100 measurements consistently wins, meaning the explicit conditioning adds nothing.
+
+Before running any experiments, I'm building calibrated judgment through structured reading and direct conversations with key researchers. The community working on learned compiler optimization is exceptionally small — perhaps a dozen groups worldwide — which means conversations may be more valuable than further literature review. I'm engaging researchers at Berkeley (Alpa/TenSet), CMU/Purdue (FlexFlow/Unity), Google (MLGO/Shardy), and Meta (TorchInductor) after building enough context to ask specific, evidence-grounded questions rather than generalities.
+
+The methodology matters because the question is pre-paradigmatic. Either there's a real opportunity in an underexplored space, or the problem is intractable — which would explain why so few people work on it. The validation program is designed to distinguish between these possibilities before committing significant resources.
+
+## Why I'm working on this
+
+I built the initial compiler pipeline for AWS Neuron SDK, the compilation stack for Trainium chips. Before that I built Neptune ML (graph ML on AWS), worked on AutoML at H2O.ai, and most recently led training for Amazon's first production LLM. The thread across these roles has been the same: identifying where research capabilities are mature enough to become production systems, then building the bridge.
+
+The coupling effects I'm investigating aren't theoretical concerns. They're engineering problems I've watched compiler teams work around with manual tuning and architecture-specific heuristics. I know from direct experience how sequential pass optimization works in production and where it breaks down — and I also know that "breaks down" means "requires a team of experts to hand-tune for each new model and hardware target," which is a product problem, not just a research problem.
+
+This investigation is part of a broader research thread on AI acceleration infrastructure — the growing gap between how fast ML capabilities advance and how quickly the tooling adapts. The compilation problem is a concrete, measurable instance of a general pattern: sequential processes designed for a slower pace of change failing to keep up when the underlying technology accelerates. A compiler that learns to jointly optimize for new hardware and architectures, rather than requiring manual heuristic updates for each, is one piece of what adapted infrastructure looks like.
+
+I'll be writing about findings as the work progresses. If you work in ML compilation, learned optimization, or related areas — [thomas@thbrdy.dev](mailto:thomas@thbrdy.dev).

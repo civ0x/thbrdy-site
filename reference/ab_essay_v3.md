@@ -1,0 +1,63 @@
+# Absolute Beginners++
+
+## Everyone's Teaching You About AI. Nobody's Teaching You How to Think.
+
+I spent a year watching people make decisions about AI. Not researchers or engineers — the people one layer out. Product managers evaluating vendor tools. Consultants advising clients on adoption. Founders deciding where AI fits in their stack. Team leads trying to figure out whether a new capability means they should restructure their workflow or ride out the hype cycle.
+
+The pattern was remarkably consistent. Someone encounters an AI decision — should we adopt this tool, how should we evaluate it, why isn't our deployment working, what do we do now that the tool we picked six months ago is outperformed by something released last Tuesday. And instead of slowing down to figure out what they're actually deciding, they react. The experienced people pattern-match against previous technology cycles. The enthusiastic people expand scope before they've defined scope. The cautious people wait for someone else to go first. Reaction, reaction, paralysis.
+
+What almost nobody does is orient — pause to understand the problem before trying to solve it.
+
+This isn't a criticism. It's the normal human condition. The same thing happens when a couple browses apartment listings for two weeks without realizing they're optimizing for different futures, or when a team runs a quarterly planning process that produces a plan nobody follows. People act before they understand, not because they're lazy, but because understanding feels like inaction and action feels like progress. The gap between reacting and thinking is invisible from the inside.
+
+I wanted to close that gap. So I started looking for methods — and found something I wasn't expecting.
+
+---
+
+I went looking for one framework and found five. Then I realized they were all the same framework.
+
+George Pólya's *How to Solve It* (1945) gave mathematics a four-step problem-solving heuristic: understand the problem, devise a plan, carry out the plan, look back. It's endured for eighty years because Pólya wasn't really describing a method for math. He was describing a method for thinking about unfamiliar problems.
+
+John Boyd's OODA loop — Observe, Orient, Decide, Act — was built for fighter pilots making decisions under lethal time pressure. Boyd's central insight wasn't the loop; it was that orientation does the real cognitive work. Everything downstream is only as good as your model of the situation.
+
+The U.S. Army's crawl-walk-run is a training doctrine applied to every capability from rifle marksmanship to combined arms operations. You don't practice the hard version until you've verified the easy version. You don't combine skills until each one is solid on its own.
+
+Benjamin Bloom's mastery learning research demonstrated that students who achieve genuine understanding before advancing outperform control groups by two standard deviations — equivalent to moving an average student to the 98th percentile. The mechanism is simple: verified foundations support load. Unverified ones don't.
+
+James Paul Gee's learning principles from video games explain why games produce deep learning so efficiently. They drop you in over your head, give immediate feedback, let you fail cheaply, and make identity formation part of the process. You don't just learn a game's mechanics — you become someone who thinks in them.
+
+Five frameworks. Five unrelated domains. Eight decades of independent development. No shared vocabulary, no shared methods, no shared assumptions about how the world works.
+
+All five describe the same three-layer structure: orient before you execute, execute in small complete verifiable loops, reflect to ratchet understanding forward.
+
+I didn't expect the convergence. I was reading Pólya alongside Boyd because both were relevant to a problem I was working on, and the structural mapping was so clean it stopped me. I pulled in the Army doctrine because I'd trained under it — same skeleton. Then Bloom, which I knew from a different context. Then Gee, who shouldn't map at all (video games have nothing obvious in common with military training) — and maps perfectly. At some point the question flipped from "can I synthesize these?" to "why hasn't anyone noticed these are isomorphic?"
+
+The answer, I think, is domain walls. Pólya lives in mathematics education. Boyd lives in military strategy and business. Bloom lives in educational psychology. Gee lives in literacy studies and game design. The Army's doctrine lives in field manuals that academics don't read. Each framework is well-known inside its discipline and nearly invisible outside it. The convergence is only visible if you happen to be reading across all five — which almost nobody does, because there's no obvious reason to.
+
+---
+
+The convergence matters because of what it reveals: method is the durable layer. Capabilities change. Tools change. Domain knowledge goes stale. But the structure of good thinking — orient before you act, verify before you build, reflect before you move on — doesn't. Pólya's approach to unfamiliar math problems in 1945 and the right approach to an AI vendor evaluation in 2026 share deep structure, because the underlying cognitive challenge is the same: you're facing a situation you don't fully understand, and you need to figure out what you're dealing with before you start making decisions.
+
+This has a specific implication for how AI is reshaping expertise. In stable domains, expertise is a massive advantage — your pattern library is calibrated, your intuitions track reality, your experience produces reliable shortcuts. But when the territory shifts faster than maps can update, expertise develops a structural liability: confident pattern-matching against a landscape that no longer exists. Not a character flaw. A feature of how expertise works. You get good at recognizing situations. Then the situations change.
+
+In AI, this has been visible for years. When large language models began demonstrating unexpected capabilities, the people most consistently wrong about what was possible were domain experts in NLP — not because they were less intelligent, but because they had strong priors trained on a paradigm that had just ended. The people most consistently right were often outsiders who tried the thing and observed what happened, unburdened by a model telling them it shouldn't work.
+
+This isn't an argument for ignorance over knowledge. The argument is narrower: in a fast-moving domain, the absence of stale priors is a genuine structural advantage — but only if you have a method for making sense of what you're seeing. Beginner's mind without method is confusion. Beginner's mind with method is openness plus traction.
+
+---
+
+The methodology is one thing. Turning it into something people actually use is a different problem — a product problem. Research that stays in synthesis form doesn't change behavior. I needed a delivery mechanism that would survive contact with how people actually learn.
+
+The key design decision was what I call wrong-first pedagogy. Every chapter opens with characters making the natural mistake — not a straw-man error, but the specific failure mode that a smart, motivated person falls into when relying on default behavior instead of method. Browsing apartment listings without defining what you're optimizing for. Evaluating an AI tool based on how impressive the demo is rather than whether it fits the actual problem. Measuring operational success without having defined what success means. Consuming AI content as a substitute for learning.
+
+Wrong-first works because recognition is a stronger learning signal than instruction. When you watch someone make the mistake you've made — from inside their reasoning, where it feels justified — and then see what changes when they orient first, the method earns its way in. You don't learn it as a rule imposed from outside. You learn it as the thing that would have prevented your own failure. That's Gee's identity principle in action: the method becomes part of how you think, not something you perform.
+
+The alternative — direct instruction, "here are the five steps, now apply them" — is how most methodology books work, and it's why most methodology books don't change behavior. You read them, you nod, you agree, you never use them. The spectator failure mode. I've watched it happen with people who were smarter and more experienced than the problem required. The fix isn't better frameworks. It's a better sequence: encounter the failure, feel its logic, then learn the move that resolves it.
+
+---
+
+What I keep returning to — and what I can't yet prove — is whether this kind of structured methodology changes how someone approaches problems they haven't encountered yet. You can demonstrate a method. You can scaffold it with worksheets and reference cards. But the real test is whether someone who has practiced Orient → Execute → Reflect reaches for it on a novel problem, unprompted, without the book open.
+
+That's an identity shift, not a skill acquisition. The deepest learning doesn't produce someone who *uses* a method — it produces someone who *thinks from inside one*. The contemplative traditions have always understood this. So has every serious training culture. The question is whether a book-length intervention can catalyze it, or whether that kind of shift requires something more — practice environments, feedback loops, a community, a tool that meets you in the moment of decision.
+
+I think it probably requires more. The book is the first layer. What the method actually wants to be is an environment — something that can orient alongside you in real time, surface the wrong-first you're about to make, scaffold the move you need without removing the cognitive work that makes it stick. That's an AI product, not a PDF. It's the version of this project I haven't built yet, and the version I think matters most.
