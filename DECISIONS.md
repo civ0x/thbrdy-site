@@ -6,13 +6,14 @@
 **Rationale:** Two substantial prototypes (ab-essay.jsx, learned-compilation-essay.jsx) already exist as React. Rewriting to vanilla JS is effort with no user-facing benefit. Astro's partial hydration scopes the React runtime to pages that use it — zero JS ships on pages that don't use React.
 **Constraint:** React is only permitted in `src/components/` for essay visualizations. No React in layouts, page chrome, or navigation.
 
-## 002: Astro over Hugo
+## 002: Unified light-mode palette
 **Date:** 2025-02-21
-**Decision:** Use Astro as the static site generator.
-**Rationale:** Outputs pure static HTML with no JS runtime by default, so existing vanilla JS (mandala canvas, scroll reveal, IntersectionObserver) drops in unchanged. Native Markdown content collections with frontmatter validation. Component model (`.astro` files) is enhanced HTML — closer to what Thomas already knows than Hugo's Go templates. Supports React islands for the essay prototypes without forcing a framework on the whole site.
-**Alternatives considered:** Hugo (faster builds, more opinionated, but Go templating is a new mental model with less payoff).
+**Decision:** Adopt warm light palette (--bg: #FAF6F0) site-wide. No dark mode.
+**Rationale:** The dark Buddhist-cyberpunk aesthetic fought readability. The Scholion essay page proved the warm off-white surface works better for content-heavy pages. The mandala and sacred geometry survive recolored in gold — the identity carries through atmosphere and typography rather than background darkness.
+**What this replaces:** Original void-black (#07080D) palette with electric blue (#00C2FF) accents.
 
-## 003: Fresh repo, not in-place migration
-**Date:** 2025-02-21
-**Decision:** Initialize `thbrdy-site/` as a new directory rather than converting the existing static file folder.
-**Rationale:** Clean git history representing the actual project structure. No risk of accidental manual deploys conflicting with the new CI/CD pipeline. Old folder preserved as read-only reference for Phase 2 migration.
+## 003: Cinzel 400 for hero display
+**Date:** 2025-02-21  
+**Decision:** Use Cinzel at weight 400 with letter-spacing: 0.12em, uppercase, for the hero name only.
+**Rationale:** Inscriptional serif at light weight has lapidary quality without heaviness — "stone made light." Pairs naturally with Cormorant Garamond (prose) since both are classically rooted. Replaces CODEINK, which was too brush-stroke/graffiti for the site's actual character.
+**Constraint:** Cinzel is scoped exclusively to the hero name. Not for section headings or any other use.

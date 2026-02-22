@@ -1,94 +1,211 @@
 # thbrdy.dev — Agent Guidelines
 
-## What this is
-Personal thinking space for Thomas Brady (techno-vajrapāṇi). Writing-first, projects as evidence. The site makes invisible structures visible and navigable — that thesis governs what gets published and how it's presented.
+## What This Is
+
+Personal thinking space for Thomas Brady (techno-vajrapāṇi). Writing is the spine; projects are evidence of an intellectual framework centered on making invisible structures visible and navigable. This is not a portfolio or a blog — it's a research site where each page does cognitive work.
+
+The entity behind this is Pando Industries.
 
 ## Stack
-- Astro static site generator
-- Cloudflare Pages deployment (auto-deploys on push to `main`)
-- Build command: `npm run build`, output directory: `dist/`
-- React integration (`@astrojs/react`) for interactive essay components only
+
+- **Framework:** Astro (static site generation, zero JS by default)
+- **Hosting:** Cloudflare Pages, auto-deploys on push to `main`
+- **Build:** `npm run build` → output in `dist/`
+- **JS policy:** Vanilla JS by default. React islands permitted ONLY for interactive essay visualizations in `src/components/*.jsx`, hydrated via Astro's `client:visible` or `client:load` directives. No React in layouts, navigation, or page chrome.
+- **CSS:** Custom properties for theming. No Tailwind. No CSS frameworks. Scoped styles in `.astro` files, shared tokens in `src/styles/global.css`.
+- **Dependencies:** No charting libraries. No external JS beyond Astro and React (for islands). Diagrams are built from HTML + CSS + IntersectionObserver.
+
+## Directory Structure
+
+```
+src/
+├── layouts/
+│   └── Base.astro              # Shared shell: <head>, nav, footer, mandala canvas
+├── components/
+│   ├── Nav.astro               # Navigation
+│   ├── Footer.astro            # Footer with mantra
+│   ├── ProjectCard.astro       # Reusable project card
+│   ├── PostPreview.astro       # Writing index list item
+│   ├── MandalaCanvas.astro     # Animated background (vanilla JS, gold on warm white)
+│   └── *.jsx                   # React islands for essay interactives ONLY
+├── pages/
+│   ├── index.astro             # Homepage
+│   ├── writing.astro           # Writing index
+│   ├── now.astro               # Now page
+│   ├── about.astro             # Resume/background
+│   ├── [...slug].astro         # Dynamic route for posts (flat URLs)
+│   └── projects/
+│       └── scholion/           # Scholion subpages
+├── content/
+│   └── posts/                  # Markdown posts with frontmatter
+└── styles/
+    └── global.css              # Design tokens + shared styles
+public/
+├── fonts/                      # CODEINK.woff2 (if retained for any use), AkzidenzGrotesk.woff2
+└── favicon.svg
+reference/                      # Old dark-mode index.html — visual reference, not deployed
+```
 
 ## Design System
 
-### Colors
+The site uses a single unified warm light palette. There is no dark mode.
+
+### Palette
+
+```css
+--bg: #FAF6F0;                        /* Page background — warm off-white, NEVER pure white */
+--bg-warm: #F4EFE7;                    /* Elevated surfaces, cards */
+--bg-card: #EFEBE4;                    /* Card backgrounds */
+--bg-dark: #1C1A17;                    /* Dark code blocks, system diagram interiors */
+--bg-dark-mid: #2A2722;               /* Secondary dark surface */
+--border: rgba(44, 36, 22, 0.1);      /* Subtle borders */
+--border-mid: rgba(44, 36, 22, 0.18); /* Visible borders */
+--text: #2C2416;                       /* Primary text */
+--text-mid: #4A3D30;                   /* Secondary text */
+--text-light: #6B5D4F;                 /* Tertiary text */
+--text-muted: #9B8E80;                 /* Metadata, labels */
+--text-faint: #C4B8AA;                 /* Decorative text (mantra, hints) */
+--accent: #B8860B;                     /* Dark gold — section labels, highlights, interactive borders */
+--accent-dim: rgba(184, 134, 11, 0.08); /* Accent background tint */
+--accent-glow: rgba(184, 134, 11, 0.15); /* Accent hover/focus states */
 ```
---bg-void: #07080D
---electric-blue: #00C2FF     (accent — section labels, key highlights, interactive borders)
---gold: #FFFFFF               (primary text — yes, white is "gold" in this system)
---deep-red: #8B1A1A
---accent-dim: rgba(0,194,255,0.06)  (accent background tint)
+
+Semantic colors for diagrams only (never in page chrome):
+```css
+--red: #A63D2F;    --red-dim: rgba(166, 61, 47, 0.08);
+--green: #4A7A4A;  --green-dim: rgba(74, 122, 74, 0.08);
+--blue: #2A5A8A;   --blue-dim: rgba(42, 90, 138, 0.08);
+--teal: #2A7A6A;   --teal-dim: rgba(42, 122, 106, 0.08);
 ```
-Dark backgrounds only. No light mode. No white backgrounds anywhere.
 
-### Fonts
-- **CODEINK** — Display only. Used for the site name "Thomas Brady" and nothing else.
-- **Cinzel** — Serif headings. The editorial, contemplative voice.
-- **JetBrains Mono** — Code blocks, metadata labels, section numbers, navigation. The structural voice.
-- **AkzidenzGrotesk** — Body text. Swiss modernist undertone.
+Each project page can have its own accent color while sharing the neutral palette. The accent appears in section labels, key highlights, and interactive element borders — never as large background fills.
 
-The split between serif (prose/headings) and mono (labels/metadata) is the core typographic identity. Don't mix them.
+### Typography
 
-### Aesthetic
-Tibetan/cyberpunk. Dense, navigable, warm, weighty. Restraint over ornament. Presentation should be isomorphic to content — form does cognitive work. Think Meiji Jingu meets terminal.
+**Four font roles, strictly separated:**
 
-### Section naming (on /about)
-- **Path** — experience
-- **Instruments** — skills
-- **Marks** — awards
-- **Lineage** — education
+| Role | Font | Usage |
+|------|------|-------|
+| Display | `Cinzel` 400, uppercase, letter-spacing: 0.12em | Hero name only. Inscriptional, lapidary. |
+| Prose | `Cormorant Garamond` 400–700, mixed case | All body text, headings, pull quotes. The author's voice. |
+| Structural | `DM Sans` 400–600 | Diagram labels, metadata grids, comparison tables, UI elements. |
+| Code/Meta | `JetBrains Mono` 300–500 | Code blocks, eyebrow labels, section markers, navigation, footer. |
+
+**Rules:**
+- Cinzel is ONLY for the hero name. Do not use it for section headings or anywhere else.
+- Cormorant Garamond is the default for all prose, headings (h1–h3 inside content), and pull quotes.
+- DM Sans is for anything structural or data-oriented — diagram labels, comparison grids, card metadata.
+- JetBrains Mono is for code, navigation links, eyebrow text, section numbers, and small metadata.
+- Never use serif fonts for diagram labels or metadata. Never use mono/sans for body prose.
+
+### Hero Section
+
+```
+[mantra — JetBrains Mono, 0.6rem, --text-faint, letter-spacing: 0.5em]
+oṃ vajrapāṇi hūṃ phaṭ
+
+[name — Cinzel 400, clamp(2.5rem, 8vw, 6.5rem), --text, uppercase, letter-spacing: 0.12em]
+THOMAS BRADY
+────── (gold gradient line, 100px)
+
+[identity — JetBrains Mono, 0.65rem, --accent, letter-spacing: 0.25em, uppercase]
+TECHNO-VAJRAPĀṆI
+
+[thesis — Cormorant Garamond italic, 1.15rem, --text-light, max-width: 520px]
+Making invisible structures visible and navigable...
+
+[vajra icon — stroke: --accent, opacity: 0.4, subtle pulse animation]
+```
+
+### Mandala Canvas
+
+The animated mandala background renders in warm gold tones (`rgba(184, 134, 11, ...)`) at very low opacity on the light background. It reads as parchment texture — present when noticed, invisible when reading. Same sacred geometry as the original, recolored from electric blue to gold. Vanilla JS, requestAnimationFrame.
+
+### Animations
+
+- Scroll-triggered via IntersectionObserver, fire once
+- Pattern: opacity 0→1, translateY(12–20px → 0), staggered timing
+- Easing: `cubic-bezier(0.25, 0.46, 0.45, 0.94)`
+- All animations MUST respect `prefers-reduced-motion: reduce`
+
+### Section Naming (About Page)
+
+These are deliberate vocabulary choices, not generic labels:
+- **Path** = experience/career
+- **Instruments** = skills
+- **Marks** = awards/certifications
+- **Lineage** = education
+
+Section dividers: section number (JetBrains Mono, small uppercase, --accent) + horizontal rule (--border-mid), displayed as a flex row.
 
 ## Content
 
 ### Posts
-- Location: `src/content/posts/` as `.md` with validated frontmatter
-- Frontmatter schema: title (string), date (date), description (string), tags (string[], optional), connected_project (string, optional)
-- Flat URLs: `thbrdy.dev/[slug]/` — NOT `thbrdy.dev/writing/[slug]/`
-- The `/writing` index page lists all posts, but individual posts live at the root path
+- Location: `src/content/posts/*.md`
+- URLs are flat: `thbrdy.dev/[slug]/` NOT `thbrdy.dev/writing/[slug]/`
+- The `/writing` index lists all posts
+- Frontmatter schema:
+  ```yaml
+  title: string (required)
+  date: date (required)
+  description: string (required)
+  tags: string[] (optional)
+  connected_project: string (optional — "scholion", "notice", etc.)
+  ```
+- Reading time is computed, not manually set
 
 ### Projects
-- Location: `src/pages/projects/[name]/`
-- Each project can have its own accent color while sharing the neutral palette
 
-## Conventions
-
-### JavaScript
-- Vanilla JS by default for all site chrome, navigation, scroll animations, canvas effects
-- React permitted ONLY for interactive essay visualizations in `src/components/*.jsx`
-- React components hydrate via Astro islands (`client:visible` or `client:load`)
-- No other JS frameworks. No jQuery. No charting libraries.
-
-### CSS
-- CSS custom properties for theming. No Tailwind. No CSS-in-JS.
-- Scoped styles in `.astro` components where possible; shared styles in `src/styles/global.css`
-- All scroll animations use IntersectionObserver, fire once, respect `prefers-reduced-motion`
-
-### HTML
-- Semantic HTML. Accessible. Proper heading hierarchy.
-- Section dividers: section number (small uppercase mono) + horizontal rule, displayed as flex row
+Three active projects, all following the same thesis (surfacing hidden dependency structures):
+1. **Scholion** — mapping epistemic dependencies in scientific reasoning
+2. **Notice** — interoceptive awareness training (Apple Watch + iPhone)
+3. **Pando** — coordination infrastructure under AI acceleration (research phase)
 
 ## Common Tasks
-- **"Add a new post"**: Create `.md` in `src/content/posts/` with frontmatter matching the schema. It auto-appears on `/writing` and the homepage.
-- **"Update the Now page"**: Edit `src/pages/now.astro`
-- **"Add a project card to homepage"**: Add entry to the projects data in `src/pages/index.astro`
-- **"Update experience/resume"**: Edit `src/pages/about.astro`
 
-## Verification
-- Every page must render with `--bg-void` (#07080D) background. No white flashes on load.
-- CODEINK must render for the site name. If the font fails to load, the page is broken.
-- All scroll animations must respect `prefers-reduced-motion`.
-- Post URLs must be flat (root path, not nested under /writing/).
-- Run `npm run build` and confirm zero errors before committing.
+**Add a new post:**
+Create `.md` in `src/content/posts/` with the required frontmatter. It auto-appears on `/writing` and homepage recent posts.
 
-## Do Not
-- Use white (#FFFFFF) as a background color anywhere
-- Add framework dependencies (Vue, Svelte, etc.) to any Astro page
-- Use React outside of `src/components/` essay visualizations
-- Restructure or rewrite existing Scholion interactive pages — preserve their HTML/JS exactly
-- Add Tailwind, Bootstrap, or any CSS framework
-- Use the serif font (Cinzel) for metadata/labels, or the mono font (JetBrains) for prose
-- Create nested post URLs
+**Add a project card to homepage:**
+Add entry to the projects data in `src/pages/index.astro`. Use the `ProjectCard.astro` component.
 
-## Corrections
-<!-- Add rules here when Claude Code does something wrong. Format: -->
-<!-- - YYYY-MM-DD: [what went wrong] → [the rule to prevent it] -->
+**Update experience/about:**
+Edit `src/pages/about.astro`. Preserve section naming conventions (Path, Instruments, Marks, Lineage).
+
+**Add a React interactive to an essay page:**
+Create `.jsx` in `src/components/`. Import in the `.astro` page with `client:visible`. Do NOT add React to any non-essay page.
+
+## Verification Checklist
+
+Run through this after any change:
+
+- [ ] `npm run build` succeeds with zero errors
+- [ ] All pages render with `--bg: #FAF6F0` background. No pure white (#FFFFFF) backgrounds anywhere.
+- [ ] Hero name renders in Cinzel 400, uppercase, with wide tracking
+- [ ] Body prose renders in Cormorant Garamond, never in sans or mono
+- [ ] Mandala canvas renders in warm gold tones, not blue
+- [ ] Nav links work and point to correct anchors/pages
+- [ ] All scroll animations respect `prefers-reduced-motion`
+- [ ] Post appears in `/writing` index and homepage after adding to content collection
+- [ ] Flat URL structure: `thbrdy.dev/[slug]/` not `thbrdy.dev/writing/[slug]/`
+- [ ] No new JS dependencies added (check `package.json` diff)
+- [ ] Mobile: nav collapses, horizontal layouts stack, no horizontal scroll
+
+## Common Mistakes — Do Not Repeat
+
+- Do not use pure white (`#FFFFFF`) as a background anywhere. The background is `#FAF6F0`.
+- Do not use dark/void backgrounds (`#07080D`) for any page. The site is light-mode only. Dark surfaces are used ONLY inside code blocks and system diagram interiors.
+- Do not use electric blue (`#00C2FF`) anywhere. The accent color is dark gold (`#B8860B`).
+- Do not use Cinzel for anything other than the hero name.
+- Do not add framework dependencies (Vue, Svelte, etc.). React is the sole exception, scoped to essay interactive components.
+- Do not add Tailwind, Bootstrap, or any CSS framework.
+- Do not restructure the Scholion interactive pages during migration — preserve their existing HTML/JS verbatim until explicitly asked to refactor.
+- Do not use serif fonts for labels, metadata, or diagram text. Those are mono (JetBrains Mono) or sans (DM Sans).
+- Do not use sans/mono fonts for prose body text. Prose is always Cormorant Garamond.
+- Post URLs are flat. If you generate a route like `/writing/[slug]/`, it's wrong.
+- Do not add analytics, tracking, or third-party scripts without explicit approval.
+- Do not generate placeholder content ("Lorem ipsum", "Coming soon"). If content doesn't exist yet, leave the section out entirely.
+
+## Corrections Log
+
+<!-- Append rules here as mistakes are encountered. Format: date, what happened, the rule. -->
