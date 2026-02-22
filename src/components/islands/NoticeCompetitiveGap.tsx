@@ -28,39 +28,10 @@ function XIcon({ size = 14, color = "#CBBFB0" }: { size?: number; color?: string
 interface Category {
   name: string;
   examples: string;
-  has: string[];
-  missing: string[];
   color: string;
   x: number;
   y: number;
 }
-
-const categories: Category[] = [
-  {
-    name: "Meditation Apps",
-    examples: "Headspace, Calm, Waking Up",
-    has: ["Contemplative depth", "Guided practice"],
-    missing: ["Moment-of-capture logging", "Biometric integration", "Emotional granularity"],
-    color: PURPLE,
-    x: 15, y: 20,
-  },
-  {
-    name: "Mood Trackers",
-    examples: "How We Feel, Daylio, Bearable",
-    has: ["Emotion labeling", "Pattern tracking"],
-    missing: ["Biometric data", "Contemplative grounding", "AI reflection"],
-    color: GREEN,
-    x: 65, y: 20,
-  },
-  {
-    name: "Health Platforms",
-    examples: "Oura, WHOOP, Apple Health",
-    has: ["Biometric sensing", "Behavioral correlation"],
-    missing: ["Emotional granularity", "Contemplative depth", "Subjective-first design"],
-    color: BROWN,
-    x: 40, y: 65,
-  },
-];
 
 const capabilities = [
   "Biometric sensing",
@@ -77,11 +48,33 @@ function hasCap(cap: string, catName: string): boolean {
   return false;
 }
 
-// ─── Label positions ───
-const labelPositions: Array<Record<string, string>> = [
-  { left: "4%", top: "2%", textAlign: "left" },
-  { right: "4%", top: "2%", textAlign: "right" },
-  { left: "50%", bottom: "0%", textAlign: "center", transform: "translateX(-50%)" },
+// Circle centers — pushed close for ~25-30% pairwise overlap
+const categories: Category[] = [
+  {
+    name: "Meditation Apps",
+    examples: "Headspace, Calm, Waking Up",
+    color: PURPLE,
+    x: 33, y: 33,
+  },
+  {
+    name: "Mood Trackers",
+    examples: "How We Feel, Daylio, Bearable",
+    color: GREEN,
+    x: 67, y: 33,
+  },
+  {
+    name: "Health Platforms",
+    examples: "Oura, WHOOP, Apple Health",
+    color: BROWN,
+    x: 50, y: 64,
+  },
+];
+
+// Category labels — centered in the non-overlapping solo region of each circle
+const catLabelPositions = [
+  { left: "28%", top: "24%", textAlign: "center" as const, transform: "translateX(-50%)" },  // Meditation: nudge left from 33%
+  { left: "72%", top: "24%", textAlign: "center" as const, transform: "translateX(-50%)" },  // Mood: nudge right from 67%
+  { left: "50%", top: "70%", textAlign: "center" as const, transform: "translate(-50%, -50%)" },   // Health: 6% below circle center
 ];
 
 export function NoticeCompetitiveGap() {
@@ -97,29 +90,41 @@ export function NoticeCompetitiveGap() {
           text-align: center;
           margin-bottom: 32px;
         }
+        .notice-gap-venn {
+        }
         .notice-gap-grid {
           display: grid;
           grid-template-columns: 1fr 1fr 1fr 1fr;
           gap: 1px;
           border-radius: 12px;
           overflow: hidden;
-          max-width: 720px;
-          margin: 24px auto 0;
+          max-width: 500px;
+          margin: 48px auto 0;
         }
         @media (max-width: 640px) {
           .notice-gap-grid {
             grid-template-columns: 1fr 1fr;
           }
-          .notice-gap-grid-header-cap {
-            display: none;
-          }
         }
         @media (max-width: 420px) {
-          .notice-gap-grid {
-            grid-template-columns: 1fr 1fr;
-          }
           .notice-gap-venn {
             aspect-ratio: 1 / 1 !important;
+          }
+          .notice-gap-overlap-ext {
+            display: none !important;
+          }
+          .notice-gap-cat-label {
+            font-size: 11px !important;
+          }
+          .notice-gap-cat-examples {
+            display: none;
+          }
+          .notice-gap-enso {
+            width: 60px !important;
+            height: 60px !important;
+          }
+          .notice-gap-notice-desc {
+            display: none;
           }
         }
       `}</style>
@@ -149,8 +154,8 @@ export function NoticeCompetitiveGap() {
       <div className="notice-gap-venn" style={{
         position: "relative",
         width: "100%",
-        maxWidth: "720px",
-        margin: "0 auto",
+        maxWidth: "500px",
+        margin: "24px auto 0",
         aspectRatio: "4 / 3",
       }}>
         {/* Circles */}
@@ -160,46 +165,91 @@ export function NoticeCompetitiveGap() {
             left: `${cat.x}%`,
             top: `${cat.y}%`,
             transform: "translate(-50%, -50%)",
-            width: "52%",
+            width: "44%",
             aspectRatio: "1",
             borderRadius: "50%",
             border: `1.5px solid ${cat.color}40`,
-            background: `radial-gradient(circle at center, ${cat.color}08, ${cat.color}03)`,
+            background: `radial-gradient(circle at center, ${cat.color}0a, ${cat.color}04)`,
             opacity: inView ? 1 : 0,
             transition: `all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.2}s`,
           }} />
         ))}
 
-        {/* Labels */}
+        {/* Category labels — inside solo regions */}
         {categories.map((cat, i) => (
           <div key={`label-${cat.name}`} style={{
             position: "absolute",
-            ...labelPositions[i],
+            ...catLabelPositions[i],
             opacity: inView ? 1 : 0,
             transition: `opacity 0.6s ease ${0.4 + i * 0.15}s`,
-            maxWidth: "180px",
+            maxWidth: "140px",
           }}>
-            <p style={{
+            <p className="notice-gap-cat-label" style={{
               fontFamily: tokens.sans,
-              fontSize: "14px",
+              fontSize: "12px",
               fontWeight: 600,
               color: cat.color,
               marginBottom: "2px",
-              textAlign: labelPositions[i].textAlign as any,
+              textAlign: catLabelPositions[i].textAlign,
             }}>{cat.name}</p>
-            <p style={{
+            <p className="notice-gap-cat-examples" style={{
               fontFamily: tokens.sans,
-              fontSize: "11px",
+              fontSize: "10px",
               color: tokens.textMuted,
-              textAlign: labelPositions[i].textAlign as any,
+              textAlign: catLabelPositions[i].textAlign,
             }}>{cat.examples}</p>
           </div>
         ))}
 
-        {/* Notice badge at center */}
+        {/* External overlap labels — positioned outside circle boundaries */}
+        <div className="notice-gap-overlap-ext" style={{
+          position: "absolute",
+          left: "50%",
+          top: "-4%",
+          transform: "translateX(-50%)",
+          textAlign: "center",
+          fontFamily: tokens.sans,
+          fontSize: "10px",
+          color: tokens.textMuted,
+          opacity: inView ? 1 : 0,
+          transition: "opacity 0.6s ease 0.7s",
+          whiteSpace: "nowrap",
+        }}>
+          Subjective focus, no biometrics
+        </div>
+        <div className="notice-gap-overlap-ext" style={{
+          position: "absolute",
+          left: "4%",
+          top: "62%",
+          textAlign: "left",
+          fontFamily: tokens.sans,
+          fontSize: "10px",
+          color: tokens.textMuted,
+          opacity: inView ? 1 : 0,
+          transition: "opacity 0.6s ease 0.85s",
+          maxWidth: "80px",
+        }}>
+          Wellness intent, no granularity
+        </div>
+        <div className="notice-gap-overlap-ext" style={{
+          position: "absolute",
+          right: "4%",
+          top: "62%",
+          textAlign: "right",
+          fontFamily: tokens.sans,
+          fontSize: "10px",
+          color: tokens.textMuted,
+          opacity: inView ? 1 : 0,
+          transition: "opacity 0.6s ease 1s",
+          maxWidth: "80px",
+        }}>
+          Data + labeling, no depth
+        </div>
+
+        {/* Notice ensō badge at triple intersection */}
         <div style={{
           position: "absolute",
-          left: "40%",
+          left: "50%",
           top: "42%",
           transform: "translate(-50%, -50%)",
           opacity: inView ? 1 : 0,
@@ -207,32 +257,33 @@ export function NoticeCompetitiveGap() {
           textAlign: "center",
           zIndex: 2,
         }}>
-          <div style={{
-            width: "80px",
-            height: "80px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle at 40% 40%, #D4A043, #B8860B)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 8px",
-            boxShadow: "0 4px 24px rgba(184, 134, 11, 0.3)",
-          }}>
-            <span style={{
-              fontFamily: tokens.serif,
-              fontSize: "22px",
-              fontWeight: 500,
-              color: "#FFF8F0",
-              letterSpacing: "0.5px",
-            }}>Notice</span>
-          </div>
+          <img
+            className="notice-gap-enso"
+            src="/images/enso-transparent.png"
+            alt="Notice"
+            style={{
+              width: "70px",
+              height: "70px",
+              objectFit: "contain",
+              display: "block",
+              margin: "0 auto 6px",
+            }}
+          />
           <p style={{
+            fontFamily: tokens.serif,
+            fontSize: "18px",
+            fontWeight: 600,
+            color: "#2C2416",
+            margin: "0 auto 4px",
+            textAlign: "center",
+          }}>Notice</p>
+          <p className="notice-gap-notice-desc" style={{
             fontFamily: tokens.sans,
-            fontSize: "11px",
+            fontSize: "10px",
             color: tokens.textLight,
-            maxWidth: "140px",
+            maxWidth: "120px",
             lineHeight: 1.4,
-          }}>Contemplative depth + biometric sensing + emotional granularity</p>
+          }}>All three — plus AI reflection</p>
         </div>
       </div>
 
