@@ -44,7 +44,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 **Exit criteria:** `/writing` lists 4 essays. Each renders at `/writing/[slug]/`. Build passes (8 pages, zero errors). Interactive component locations marked with TODO comments in MDX.
 
-### Phase 4: Interactive Islands — In Progress
+### Phase 4: Interactive Islands ✅
 
 **Island infrastructure validated (Session 0, 2026-02-22):**
 - [x] `@astrojs/react` confirmed installed and configured
@@ -94,8 +94,24 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] No lucide-react — all 11 icon types are inline SVGs
 - [x] Build passes clean (8 pages, ~1s, zero errors)
 
-**Remaining — essay island porting (Session 4):**
-- [ ] Session 4: Scholion (`scholion.mdx`) — visuals TBD
+**Session 4 complete (2026-02-22): Scholion essay islands**
+- [x] `ScholionDependencyChain.tsx` — RSP 4-level dependency chain with red foundation node, arrow labels, staggered reveal
+- [x] `ScholionToulminDiagram.tsx` — Toulmin structure anatomy with AI safety example (designed from scratch), vertical flow layout with Claim dominant at top, inline qualifier/rebuttal modifiers, visible connection lines and labels
+- [x] `ScholionPositioningGrid.tsx` — 6×5 capability comparison table with colored cell states, Scholion row highlighted, legend footer
+- [x] `ScholionPipelineDiagram.tsx` — 4-stage extraction pipeline, dark background, schema output per stage, critical gap callout
+- [x] `ScholionValidationTimeline.tsx` — 3 nested claims with timeline progress line, green validated / red killed criteria cards
+- [x] `ScholionCredibilityCards.tsx` — 2×2 career highlights grid with staggered reveal
+- [x] MDX integration: SectionDividers (01–06), 2 PullQuotes, all 6 islands at correct positions, both TODOs removed
+
+**Sessions 4a–4b complete (2026-02-22): Toulmin diagram redesign + alignment fix**
+- [x] Toulmin diagram completely redesigned: Claim card full-width with 2px gold border, qualifier/rebuttal as inline modifiers inside Claim, vertical connector lines with "supports" and "on account of" labels, Data+Warrant side by side, Backing aligned under Warrant
+- [x] "on account of" connector and Backing card aligned via shared 2-column grid wrapper (DECISIONS.md #011)
+- [x] Build passes clean (8 pages, ~1s, zero errors)
+
+**Session 3f complete (2026-02-22): PullQuote bottom bar removal**
+- [x] Removed bottom accent bar from PullQuote shared component (top bar only)
+- [x] Eliminates double gold line artifact when PullQuote precedes SectionDivider
+- [x] All essays using PullQuote (AB, LC, Scholion) render correctly
 
 **Other remaining content:**
 - [ ] Pando essay (source file doesn't exist yet — `pando_research_report.md` is a research report, not an essay)
@@ -112,7 +128,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 in progress. Sessions 1–3 complete. AB essay has two islands + SectionDividers + PullQuote. Notice essay has four islands + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). LC essay has five islands + SectionDividers + PullQuote with steel blue accent color. PullQuote shared component redesigned (accent bars instead of border lines). Session 4 (Scholion) remains. Build produces 8 pages in ~1s.
+Phase 4 complete. All four essays have interactive islands. AB essay: 2 islands + SectionDividers + PullQuote. Notice essay: 4 islands + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). LC essay: 5 islands + SectionDividers + PullQuote with steel blue accent. Scholion essay: 6 islands (5 ported from reference HTML, 1 Toulmin anatomy designed from scratch) + SectionDividers (01–06) + 2 PullQuotes. PullQuote shared component uses accent bars. Gold accent for Scholion (default site accent). Build produces 8 pages in ~1.1s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds

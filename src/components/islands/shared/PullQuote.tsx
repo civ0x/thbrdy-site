@@ -40,18 +40,11 @@ export function PullQuote({ children }: PullQuoteProps) {
           color: tokens.text,
           maxWidth: "560px",
           margin: "0 auto",
+          paddingBottom: "8px",
         }}
       >
         {children}
       </p>
-      <div
-        style={{
-          width: "40px",
-          height: "2px",
-          background: tokens.accent,
-          margin: "28px auto 0",
-        }}
-      />
     </div>
   );
 }

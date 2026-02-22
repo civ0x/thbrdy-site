@@ -51,6 +51,17 @@
 **Decision:** PullQuote uses centered 40px gold accent bars (top and bottom) instead of full-width `borderTop`/`borderBottom`. Bottom margin reduced to 24px.
 **Rationale:** Full-width borders stacked visually with SectionDivider horizontal rules, creating double/triple line effects between sections. Short accent bars provide visual punctuation without competing with structural dividers.
 
+## 011: Toulmin diagram vertical flow with inline modifiers
+**Date:** 2026-02-22
+**Decision:** Redesign the Scholion Toulmin diagram from a spatial grid (6 equal-weight cards) to a vertical flow: dominant Claim card at top with qualifier/rebuttal as inline modifiers, visible connection lines with labels ("supports", "on account of"), Data+Warrant side by side below, Backing aligned under Warrant via a 2-column grid wrapper with empty spacer.
+**Rationale:** The original grid layout rendered 6 cards with equal visual weight and no visible connections — relationships were illegible. The Claim must be the center of gravity since everything else relates to it. Qualifier and Rebuttal are modifiers of the Claim, not independent entities — embedding them inside the Claim card reflects their logical role. Visible connector lines with labels make the inferential structure immediately graspable without prior Toulmin knowledge. Grid-based alignment (shared `backing-wrap` class) is more reliable than margin-based positioning for aligning the backing chain.
+**Constraint:** Connection lines use CSS divs, not SVG. Layout collapses to single column at ≤640px.
+
+## 012: PullQuote top bar only
+**Date:** 2026-02-22
+**Decision:** Remove the bottom accent bar from PullQuote. Keep only the top 40px gold bar.
+**Rationale:** When a SectionDivider follows immediately after a PullQuote (as in the LC essay between sections 02 and 03), the bottom accent bar stacks visually with the SectionDivider's horizontal rule, creating a double gold line artifact. The top bar provides the visual entry point; the SectionDivider below provides the exit. No bottom bar needed.
+
 ## 003: Cinzel 400 for hero display
 **Date:** 2025-02-21  
 **Decision:** Use Cinzel at weight 400 with letter-spacing: 0.12em, uppercase, for the hero name only.
