@@ -23,6 +23,12 @@
 **Decision:** Essay-specific islands use `[Prefix][ComponentName].tsx` naming (e.g., `ABConvergenceDiagram.tsx`). Prefixes: `AB`, `Notice`, `LC`, `Scholion`.
 **Rationale:** Flat directory with prefixes is simpler than nested essay subdirectories while keeping components discoverable. Prefix makes it immediately clear which essay owns a component.
 
+## 006: Injected `<style>` tags for island responsive layout
+**Date:** 2026-02-22
+**Decision:** Islands handle responsive breakpoints via injected `<style>` blocks with scoped class names, not via a `useMediaQuery` React hook.
+**Rationale:** CSS media queries apply before React hydrates, eliminating layout flash on first paint. No JS execution needed for responsive behavior. CSS transitions between breakpoints work naturally. Each component is self-contained — no shared responsive utility to maintain. Breakpoints: 640px (tablet), 420px (phone).
+**Alternatives considered:** `useMediaQuery` / `useBreakpoint` hook — would cause hydration mismatch if SSR viewport differs from client, requires JS for layout, and doesn't support CSS transitions between breakpoints.
+
 ## 003: Cinzel 400 for hero display
 **Date:** 2025-02-21  
 **Decision:** Use Cinzel at weight 400 with letter-spacing: 0.12em, uppercase, for the hero name only.

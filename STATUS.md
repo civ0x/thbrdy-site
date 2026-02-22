@@ -57,8 +57,14 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] CLAUDE.md updated with island architecture conventions
 - [x] Test artifacts removed
 
-**Remaining — essay island porting (Sessions 1–4):**
-- [ ] Session 1: Absolute Beginners++ (`ab-essay.mdx`) — ConvergenceDiagram, WrongFirstFlow, CouplingDiagram, etc.
+**Session 1 complete (2026-02-22): Absolute Beginners++ islands**
+- [x] Responsive pattern chosen: injected `<style>` tags with scoped class names (documented in CLAUDE.md + DECISIONS.md #006)
+- [x] `ABConvergenceDiagram.tsx` — 5-framework convergence diagram with desktop table + mobile card layout
+- [x] `ABWrongFirstFlow.tsx` — 4-step wrong-first process flow with staggered animation
+- [x] MDX updated: SectionDividers (01–05), PullQuote, both islands integrated at correct positions
+- [x] Build passes clean (8 pages, 923ms, zero errors)
+
+**Remaining — essay island porting (Sessions 2–4):**
 - [ ] Session 2: Notice (`notice.mdx`) — CompetitiveGap, and other visuals from `reference/notice-essay-visuals.jsx`
 - [ ] Session 3: Learned Compilation (`learned-compilation.mdx`) — visuals from `reference/learned-compilation-essay.jsx`
 - [ ] Session 4: Scholion (`scholion.mdx`) — visuals TBD
@@ -78,7 +84,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 in progress. Island infrastructure validated — shared utilities extracted, test island hydrated successfully via `client:visible` in MDX. Ready for essay-specific component porting (Sessions 1–4). Build produces 8 pages in ~930ms.
+Phase 4 in progress. Session 1 complete — AB essay has two islands (ABConvergenceDiagram, ABWrongFirstFlow) plus SectionDividers and PullQuote integrated. Responsive pattern established (injected `<style>` tags). Sessions 2–4 remain. Build produces 8 pages in ~923ms.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds

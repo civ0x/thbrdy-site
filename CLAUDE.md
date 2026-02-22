@@ -179,6 +179,50 @@ React islands are used exclusively for interactive essay visualizations. They ar
 | `SectionDivider.tsx` | Section number + label + horizontal rule |
 | `PullQuote.tsx` | Centered italic quote with scroll-triggered fade-in |
 
+### Responsive Pattern
+
+Islands use **injected `<style>` tags** with scoped class names for responsive handling. Each component renders a `<style>` block inside its root element, targeting class names unique to that component (e.g., `.ab-convergence-grid`). Media queries live in CSS where they belong.
+
+**Why not a `useMediaQuery` hook?**
+- CSS media queries apply before React hydrates — no layout flash on first paint
+- No JS execution needed for responsive behavior
+- CSS transitions between breakpoints work naturally
+- No shared utility to maintain
+
+**Usage pattern:**
+```tsx
+export function MyDiagram() {
+  const [ref, inView] = useInView(0.1);
+  return (
+    <div ref={ref} className="my-diagram">
+      <style>{`
+        .my-diagram-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+        }
+        @media (max-width: 640px) {
+          .my-diagram-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 420px) {
+          .my-diagram-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+      <div className="my-diagram-grid">...</div>
+    </div>
+  );
+}
+```
+
+**Rules:**
+- Class names must be component-scoped to avoid collisions (e.g., `ab-convergence-*`, `ab-wrongfirst-*`)
+- Keep the `<style>` block as the first child of the component root
+- Inline styles are still used for animation states (opacity, transform) that depend on `inView`
+- Media query breakpoints: `640px` (tablet), `420px` (phone)
+
 ## Content
 
 ### Essays

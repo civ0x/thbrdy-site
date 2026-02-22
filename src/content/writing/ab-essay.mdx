@@ -5,7 +5,14 @@ date: 2025-07-01
 tags: ["AI-Assisted Work", "Methodology", "Pedagogy", "Convergence"]
 ---
 
+import { SectionDivider } from '../../components/islands/shared/SectionDivider.tsx'
+import { PullQuote } from '../../components/islands/shared/PullQuote.tsx'
+import { ABConvergenceDiagram } from '../../components/islands/ABConvergenceDiagram.tsx'
+import { ABWrongFirstFlow } from '../../components/islands/ABWrongFirstFlow.tsx'
+
 ## Everyone's Teaching You About AI. Nobody's Teaching You How to Think.
+
+<SectionDivider client:visible number="01" label="The Pattern" />
 
 I spent a year watching people make decisions about AI. Not researchers or engineers — the people one layer out. Product managers evaluating vendor tools. Consultants advising clients on adoption. Founders deciding where AI fits in their stack. Team leads trying to figure out whether a new capability means they should restructure their workflow or ride out the hype cycle.
 
@@ -17,7 +24,7 @@ This isn't a criticism. It's the normal human condition. The same thing happens 
 
 I wanted to close that gap. So I started looking for methods — and found something I wasn't expecting.
 
----
+<SectionDivider client:visible number="02" label="The Convergence" />
 
 I went looking for one framework and found five. Then I realized they were all the same framework.
 
@@ -35,37 +42,37 @@ Five frameworks. Five unrelated domains. Eight decades of independent developmen
 
 All five describe the same three-layer structure: orient before you execute, execute in small complete verifiable loops, reflect to ratchet understanding forward.
 
-{/* TODO: Interactive — ConvergenceDiagram showing the five frameworks mapping to the same three-layer structure */}
+<ABConvergenceDiagram client:visible />
 
 I didn't expect the convergence. I was reading Pólya alongside Boyd because both were relevant to a problem I was working on, and the structural mapping was so clean it stopped me. I pulled in the Army doctrine because I'd trained under it — same skeleton. Then Bloom, which I knew from a different context. Then Gee, who shouldn't map at all (video games have nothing obvious in common with military training) — and maps perfectly. At some point the question flipped from "can I synthesize these?" to "why hasn't anyone noticed these are isomorphic?"
 
 The answer, I think, is domain walls. Pólya lives in mathematics education. Boyd lives in military strategy and business. Bloom lives in educational psychology. Gee lives in literacy studies and game design. The Army's doctrine lives in field manuals that academics don't read. Each framework is well-known inside its discipline and nearly invisible outside it. The convergence is only visible if you happen to be reading across all five — which almost nobody does, because there's no obvious reason to.
 
----
+<PullQuote client:visible>Method is the durable layer. Capabilities change. Tools change. The landscape under your feet shifts. But the structure of good thinking doesn't.</PullQuote>
 
-The convergence matters because of what it reveals: method is the durable layer. Capabilities change. Tools change. Domain knowledge goes stale. But the structure of good thinking — orient before you act, verify before you build, reflect before you move on — doesn't. Pólya's approach to unfamiliar math problems in 1945 and the right approach to an AI vendor evaluation in 2026 share deep structure, because the underlying cognitive challenge is the same: you're facing a situation you don't fully understand, and you need to figure out what you're dealing with before you start making decisions.
+<SectionDivider client:visible number="03" label="The Expertise Problem" />
 
-This has a specific implication for how AI is reshaping expertise. In stable domains, expertise is a massive advantage — your pattern library is calibrated, your intuitions track reality, your experience produces reliable shortcuts. But when the territory shifts faster than maps can update, expertise develops a structural liability: confident pattern-matching against a landscape that no longer exists. Not a character flaw. A feature of how expertise works. You get good at recognizing situations. Then the situations change.
+The convergence matters because of what it reveals about this particular moment. In stable domains, expertise is a massive advantage — your pattern library is calibrated, your intuitions track reality, your experience produces reliable shortcuts. But when the territory shifts faster than maps can update, expertise develops a structural liability: confident pattern-matching against a landscape that no longer exists. Not a character flaw. A feature of how expertise works. You get good at recognizing situations. Then the situations change.
 
 In AI, this has been visible for years. When large language models began demonstrating unexpected capabilities, the people most consistently wrong about what was possible were domain experts in NLP — not because they were less intelligent, but because they had strong priors trained on a paradigm that had just ended. The people most consistently right were often outsiders who tried the thing and observed what happened, unburdened by a model telling them it shouldn't work.
 
 This isn't an argument for ignorance over knowledge. The argument is narrower: in a fast-moving domain, the absence of stale priors is a genuine structural advantage — but only if you have a method for making sense of what you're seeing. Beginner's mind without method is confusion. Beginner's mind with method is openness plus traction.
 
----
+<SectionDivider client:visible number="04" label="The Product Problem" />
 
 The methodology is one thing. Turning it into something people actually use is a different problem — a product problem. Research that stays in synthesis form doesn't change behavior. I needed a delivery mechanism that would survive contact with how people actually learn.
 
-The key design decision was what I call wrong-first pedagogy. Every chapter opens with characters making the natural mistake — not a straw-man error, but the specific failure mode that a smart, motivated person falls into when relying on default behavior instead of method. Browsing apartment listings without defining what you're optimizing for. Evaluating an AI tool based on how impressive the demo is rather than whether it fits the actual problem. Measuring operational success without having defined what success means. Consuming AI content as a substitute for learning.
+The key design decision was what I call wrong-first pedagogy.
 
-{/* TODO: Interactive — WrongFirstFlow showing the wrong-first pedagogical sequence */}
+<ABWrongFirstFlow client:visible />
 
 Wrong-first works because recognition is a stronger learning signal than instruction. When you watch someone make the mistake you've made — from inside their reasoning, where it feels justified — and then see what changes when they orient first, the method earns its way in. You don't learn it as a rule imposed from outside. You learn it as the thing that would have prevented your own failure. That's Gee's identity principle in action: the method becomes part of how you think, not something you perform.
 
 The alternative — direct instruction, "here are the five steps, now apply them" — is how most methodology books work, and it's why most methodology books don't change behavior. You read them, you nod, you agree, you never use them. The spectator failure mode. I've watched it happen with people who were smarter and more experienced than the problem required. The fix isn't better frameworks. It's a better sequence: encounter the failure, feel its logic, then learn the move that resolves it.
 
----
+<SectionDivider client:visible number="05" label="The Open Question" />
 
-What I keep returning to — and what I can't yet prove — is whether this kind of structured methodology changes how someone approaches problems they haven't encountered yet. You can demonstrate a method. You can scaffold it with worksheets and reference cards. But the real test is whether someone who has practiced Orient → Execute → Reflect reaches for it on a novel problem, unprompted, without the book open.
+What I keep returning to — and what I can't yet prove — is whether this kind of structured methodology changes how someone approaches problems they haven't encountered yet. You can demonstrate a method. You can scaffold it with worksheets and reference cards. But the real test is whether someone who has practiced Orient &gt; Execute &gt; Reflect reaches for it on a novel problem, unprompted, without the book open.
 
 That's an identity shift, not a skill acquisition. The deepest learning doesn't produce someone who *uses* a method — it produces someone who *thinks from inside one*. The contemplative traditions have always understood this. So has every serious training culture. The question is whether a book-length intervention can catalyze it, or whether that kind of shift requires something more — practice environments, feedback loops, a community, a tool that meets you in the moment of decision.
 
