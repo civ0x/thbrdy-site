@@ -1,0 +1,94 @@
+---
+interface Props {
+  title: string;
+  eyebrow: string;
+  description: string;
+  tags: string[];
+  href: string;
+}
+
+const { title, eyebrow, description, tags, href } = Astro.props;
+---
+
+<a href={href} class="project-card">
+  <div class="project-card__eyebrow">{eyebrow}</div>
+  <h3 class="project-card__title">{title}</h3>
+  <p class="project-card__desc">{description}</p>
+  <div class="project-card__tags">
+    {tags.map(tag => <span class="project-card__tag">{tag}</span>)}
+  </div>
+  <span class="project-card__arrow">&rarr;</span>
+</a>
+
+<style>
+  .project-card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-top: 2px solid transparent;
+    border-image: linear-gradient(90deg, transparent, var(--accent), transparent) 1;
+    border-image-slice: 1 0 0 0;
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    position: relative;
+  }
+
+  .project-card:hover {
+    border-color: var(--accent-glow);
+    transform: translateY(-2px);
+  }
+
+  .project-card__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .project-card__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .project-card__desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--text-light);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .project-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .project-card__tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent-glow);
+    padding: 0.2rem 0.6rem;
+    border-radius: 2px;
+  }
+
+  .project-card__arrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+  }
+</style>

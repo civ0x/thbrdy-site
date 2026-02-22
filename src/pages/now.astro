@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Now — Thomas Brady" description="What I'm focused on right now.">
+  <section class="now">
+    <div class="section-divider">
+      <span class="section-number">Now</span>
+      <hr />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .now {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 8rem 2rem 6rem;
+  }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .section-divider hr {
+    flex: 1;
+    border: none;
+    border-top: 1px solid var(--border-mid);
+  }
+</style>

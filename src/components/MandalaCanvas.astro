@@ -1,0 +1,95 @@
+<canvas id="mandala-canvas"></canvas>
+
+<style>
+  #mandala-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReducedMotion) {
+    const canvas = document.getElementById('mandala-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h, scrollY = 0;
+
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    window.addEventListener('scroll', () => scrollY = window.pageYOffset);
+
+    function drawMandala(time) {
+      ctx.clearRect(0, 0, w, h);
+      const cx = w / 2;
+      const cy = h / 2 - scrollY * 0.3;
+      const baseRadius = Math.min(w, h) * 0.35;
+
+      // Outer rings
+      for (let ring = 0; ring < 4; ring++) {
+        const r = baseRadius + ring * 40;
+        const segments = 12 + ring * 4;
+        const rotation = time * 0.0001 * (ring % 2 === 0 ? 1 : -1);
+
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(184, 134, 11, ${0.04 - ring * 0.008})`;
+        ctx.lineWidth = 0.5;
+
+        for (let i = 0; i < segments; i++) {
+          const angle = (i / segments) * Math.PI * 2 + rotation;
+          const x = cx + Math.cos(angle) * r;
+          const y = cy + Math.sin(angle) * r;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Connecting lines to center
+        for (let i = 0; i < segments; i++) {
+          const angle = (i / segments) * Math.PI * 2 + rotation;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(angle) * (r - 30), cy + Math.sin(angle) * (r - 30));
+          ctx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+          ctx.strokeStyle = `rgba(184, 134, 11, ${0.03 - ring * 0.005})`;
+          ctx.lineWidth = 0.3;
+          ctx.stroke();
+        }
+      }
+
+      // Inner pulsing circle
+      const pulseR = 8 + Math.sin(time * 0.002) * 4;
+      ctx.beginPath();
+      ctx.arc(cx, cy, pulseR, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(184, 134, 11, ${0.1 + Math.sin(time * 0.002) * 0.05})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Floating particles
+      for (let i = 0; i < 20; i++) {
+        const angle = (i / 20) * Math.PI * 2 + time * 0.0003;
+        const dist = baseRadius * 0.5 + Math.sin(time * 0.001 + i) * 60;
+        const px = cx + Math.cos(angle) * dist;
+        const py = cy + Math.sin(angle) * dist;
+        const size = 1 + Math.sin(time * 0.003 + i * 0.5) * 0.5;
+
+        ctx.beginPath();
+        ctx.arc(px, py, size, 0, Math.PI * 2);
+        ctx.fillStyle = i % 3 === 0 ? 'rgba(184, 134, 11, 0.3)' : 'rgba(184, 134, 11, 0.15)';
+        ctx.fill();
+      }
+
+      requestAnimationFrame(drawMandala);
+    }
+    requestAnimationFrame(drawMandala);
+  }
+</script>
