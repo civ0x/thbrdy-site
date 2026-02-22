@@ -209,3 +209,9 @@ Run through this after any change:
 ## Corrections Log
 
 <!-- Append rules here as mistakes are encountered. Format: date, what happened, the rule. -->
+
+## Session Continuity
+
+- **STATUS.md** tracks the migration roadmap and current phase. Update it as steps complete.
+- When executing multi-step plans, check off completed steps in STATUS.md before moving to the next.
+- If starting a new session mid-phase, read STATUS.md first to orient.
