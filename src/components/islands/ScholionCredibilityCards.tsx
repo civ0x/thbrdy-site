@@ -4,19 +4,19 @@ import { useInView } from "./shared/useInView";
 const cards = [
   {
     label: "ML Compilation",
-    text: "Built the <strong>initial compiler pipeline for AWS Neuron SDK</strong>, the compilation stack for Trainium chips.",
+    text: "Drove <strong>AWS Neuron SDK</strong> from compiler research to production SDK for Trainium chips.",
   },
   {
     label: "Graph ML",
-    text: "Built <strong>Neptune ML</strong>, bringing graph machine learning to production on AWS.",
+    text: "Brought <strong>Neptune ML</strong> from research to production, establishing graph machine learning on AWS.",
   },
   {
     label: "AutoML",
-    text: "Worked on AutoML at <strong>H2O.ai</strong> with the team that built Driverless AI.",
+    text: "Product lead for AutoML at <strong>H2O.ai</strong> alongside the team that built Driverless AI.",
   },
   {
     label: "LLM Training",
-    text: "Led training for <strong>Amazon's first production LLM</strong> with Smola, Karypis, and Chilimbi.",
+    text: "Drove research strategy and commercialization for <strong>Amazon's first production LLM</strong>.",
   },
 ];
 
