@@ -35,6 +35,11 @@
 **Rationale:** The project identifier needs to appear above the `<h1>` title, which is rendered by the layout — not reachable from MDX content. Conditional rendering keeps other essays unaffected. The pattern can extend to other projects (Scholion, Pando) by adding additional conditions.
 **Constraint:** Project icons are in the layout only. MDX content should not duplicate them.
 
+## 008: Notice essay editorial revisions
+**Date:** 2026-02-22
+**Decision:** Depersonalize jhana retreat testimonial (remove specific community/person attribution). Expand Barrett paragraph to foreground frame-dependence as a design principle, linking to thbrdy.dev/softmax post.
+**Rationale:** The retreat reference should credit the practice, not specific individuals. The Barrett paragraph needed to connect constructed emotion theory to the broader frame-dependence thesis that underpins the product philosophy. The hyperlink to "The Frame-Dependent Mind" creates a cross-reference between essays.
+
 ## 003: Cinzel 400 for hero display
 **Date:** 2025-02-21  
 **Decision:** Use Cinzel at weight 400 with letter-spacing: 0.12em, uppercase, for the hero name only.

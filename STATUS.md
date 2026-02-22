@@ -101,7 +101,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 in progress. Sessions 1–2r complete. AB essay has two islands + SectionDividers + PullQuote. Notice essay has four islands (CompetitiveGap, InteractionFlow, ArchitectureDiagram, BuildTimeline) + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). Venn diagram refined across sessions 2f–2r (circle sizing, label positioning, ensō badge). Sessions 3–4 remain. Build produces 8 pages in ~1s.
+Phase 4 in progress. Sessions 1–2r complete. AB essay has two islands + SectionDividers + PullQuote. Notice essay has four islands (CompetitiveGap, InteractionFlow, ArchitectureDiagram, BuildTimeline) + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). Venn diagram refined across sessions 2f–2r (circle sizing, label positioning, ensō badge). Notice essay prose revised (2026-02-22): depersonalized retreat testimonial, expanded Barrett/frame-dependence paragraph with cross-link. Sessions 3–4 remain. Build produces 8 pages in ~1s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds
