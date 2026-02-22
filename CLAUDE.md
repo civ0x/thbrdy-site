@@ -30,14 +30,14 @@ src/
 │   └── *.jsx                   # React islands for essay interactives ONLY
 ├── pages/
 │   ├── index.astro             # Homepage
-│   ├── writing.astro           # Writing index
 │   ├── now.astro               # Now page
 │   ├── about.astro             # Resume/background
-│   ├── [...slug].astro         # Dynamic route for posts (flat URLs)
-│   └── projects/
-│       └── scholion/           # Scholion subpages
+│   └── writing/
+│       ├── index.astro         # Writing index
+│       └── [...slug].astro     # Dynamic route for essays (/writing/[slug]/)
 ├── content/
-│   └── posts/                  # Markdown posts with frontmatter
+│   ├── content.config.ts       # Content collection schema (Astro v5 location: src/content.config.ts)
+│   └── writing/                # MDX essays with frontmatter
 └── styles/
     └── global.css              # Design tokens + shared styles
 public/
@@ -140,19 +140,22 @@ Section dividers: section number (JetBrains Mono, small uppercase, --accent) + h
 
 ## Content
 
-### Posts
-- Location: `src/content/posts/*.md`
-- URLs are flat: `thbrdy.dev/[slug]/` NOT `thbrdy.dev/writing/[slug]/`
-- The `/writing` index lists all posts
+### Essays
+- Location: `src/content/writing/*.mdx`
+- URLs: `thbrdy.dev/writing/[slug]/`
+- The `/writing` index lists all non-draft essays
 - Frontmatter schema:
   ```yaml
   title: string (required)
   date: date (required)
   description: string (required)
   tags: string[] (optional)
-  connected_project: string (optional — "scholion", "notice", etc.)
+  draft: boolean (optional, default false)
+  order: number (optional)
+  connected_project: string (optional — "Scholion", "Notice", etc.)
   ```
 - Reading time is computed, not manually set
+- Essays use MDX format to support embedded React interactive components
 
 ### Projects
 
@@ -163,8 +166,8 @@ Three active projects, all following the same thesis (surfacing hidden dependenc
 
 ## Common Tasks
 
-**Add a new post:**
-Create `.md` in `src/content/posts/` with the required frontmatter. It auto-appears on `/writing` and homepage recent posts.
+**Add a new essay:**
+Create `.mdx` in `src/content/writing/` with the required frontmatter. It auto-appears on `/writing` index.
 
 **Add a project card to homepage:**
 Add entry to the projects data in `src/pages/index.astro`. Use the `ProjectCard.astro` component.
@@ -186,8 +189,8 @@ Run through this after any change:
 - [ ] Mandala canvas renders in warm gold tones, not blue
 - [ ] Nav links work and point to correct anchors/pages
 - [ ] All scroll animations respect `prefers-reduced-motion`
-- [ ] Post appears in `/writing` index and homepage after adding to content collection
-- [ ] Flat URL structure: `thbrdy.dev/[slug]/` not `thbrdy.dev/writing/[slug]/`
+- [ ] Essay appears in `/writing` index after adding to content collection
+- [ ] Essay URL structure: `thbrdy.dev/writing/[slug]/`
 - [ ] No new JS dependencies added (check `package.json` diff)
 - [ ] Mobile: nav collapses, horizontal layouts stack, no horizontal scroll
 
@@ -202,7 +205,7 @@ Run through this after any change:
 - Do not restructure the Scholion interactive pages during migration — preserve their existing HTML/JS verbatim until explicitly asked to refactor.
 - Do not use serif fonts for labels, metadata, or diagram text. Those are mono (JetBrains Mono) or sans (DM Sans).
 - Do not use sans/mono fonts for prose body text. Prose is always Cormorant Garamond.
-- Post URLs are flat. If you generate a route like `/writing/[slug]/`, it's wrong.
+- Essay URLs are nested under `/writing/`. If you generate a flat route like `/[slug]/`, it's wrong.
 - Do not add analytics, tracking, or third-party scripts without explicit approval.
 - Do not generate placeholder content ("Lorem ipsum", "Coming soon"). If content doesn't exist yet, leave the section out entirely.
 
