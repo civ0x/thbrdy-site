@@ -1,6 +1,6 @@
 # thbrdy.dev — Migration Status
 
-Last updated: 2026-02-22
+Last updated: 2026-02-23
 
 ## Migration Roadmap
 
@@ -113,6 +113,23 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] Eliminates double gold line artifact when PullQuote precedes SectionDivider
 - [x] All essays using PullQuote (AB, LC, Scholion) render correctly
 
+**VoD essay islands created (2026-02-23):**
+- [x] `VoDLegibilityGap.tsx` — Two-column research/product vocabulary with SVG bridge reveal, mobile stacked pair cards
+- [x] `VoDSequentialFunnel.tsx` — Side-by-side sequential vs diamond dependency graph, ghost edges showing hidden connections
+- [x] `VoDMaturitySwitch.tsx` — Gradient maturity bar with switching point, risk callouts, zone cards (essay's key diagram)
+- [x] `VoDCouplingMechanism.tsx` — Central document card with cardinal domain positions, SVG constraint edges, interpretation cards
+- [x] `VoDCaseComparison.tsx` — Dual horizontal timelines (AWS/AZ) with structural parallels, 6× badges
+- [x] `VoDTradingZone.tsx` — Scatter quadrant with org positions, trajectory arrows, risk zones, trading zone highlight
+- [x] Build passes clean (9 pages, ~1.2s, zero errors)
+- [x] MDX essay file creation + island integration (`valley-of-death.mdx` with all 6 islands, 7 SectionDividers, 2 PullQuotes)
+
+**Co-regulation essay islands + publish (2026-02-23):**
+- [x] `CoRegEvidenceMap.tsx` — Three-tier evidence gradient (Well-Established/Promising but Limited/Missing) with green/gold/red color coding, research node cards with decreasing visual weight, sparse bottom row, staggered scroll animation
+- [x] `CoRegPhaseGate.tsx` — 4-phase vertical pipeline with 3 go/kill gate nodes, phase weight decreasing (opacity + dashed borders), green/red split gate cards, responsive stacking
+- [x] MDX integration: imports added, EvidenceMap placed in section 02, PhaseGate placed in section 04
+- [x] Essay published (`draft: false`)
+- [x] Build passes clean (9 pages, ~1s, zero errors)
+
 **Other remaining content:**
 - [ ] Pando essay (source file doesn't exist yet — `pando_research_report.md` is a research report, not an essay)
 - [ ] `/now` page content (currently a stub)
@@ -128,7 +145,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 complete. Open Graph + Twitter Card meta tags live on all pages (default OG image at `public/images/og-default.png`, canonical URLs, `og:type` = `article` on essays). All four essays have interactive islands. AB essay: 2 islands + SectionDividers + PullQuote. Notice essay: 4 islands + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). LC essay: 5 islands + SectionDividers + PullQuote with steel blue accent. Scholion essay: 6 islands (5 ported from reference HTML, 1 Toulmin anatomy designed from scratch) + SectionDividers (01–06) + 2 PullQuotes. PullQuote shared component uses accent bars. Gold accent for Scholion (default site accent). Build produces 8 pages in ~1.1s.
+Phase 4 complete. Open Graph + Twitter Card meta tags live on all pages (default OG image at `public/images/og-default.png`, canonical URLs, `og:type` = `article` on essays). Six published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands, fully integrated into MDX. Build produces 10 pages in ~1.2s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds
