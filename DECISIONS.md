@@ -74,6 +74,12 @@
 **Rationale:** Inscriptional serif at light weight has lapidary quality without heaviness — "stone made light." Pairs naturally with Cormorant Garamond (prose) since both are classically rooted. Replaces CODEINK, which was too brush-stroke/graffiti for the site's actual character.
 **Constraint:** Cinzel is scoped exclusively to the hero name. Not for section headings or any other use.
 
+## 015: Use `<div>` instead of `<p>` for island elements with custom margins
+**Date:** 2026-02-23
+**Decision:** Island components that need custom margins on text-like elements (annotations, captions, etc.) should use `<div>` instead of `<p>` to avoid specificity conflicts with PostLayout prose styles.
+**Rationale:** `PostLayout.astro` applies `.post__content :global(p) { margin: 0 0 1.25rem }` to all paragraph elements inside essay content. This has higher specificity than bare class selectors in island injected `<style>` tags, silently overriding component margins. Discovered when `VoDLegibilityGap`'s annotation margin had no visible effect despite correct CSS. Switching from `<p>` to `<div>` sidesteps the specificity conflict entirely.
+**Constraint:** Only applies to elements that need non-default margins. Standard `<p>` tags inside islands that are fine with the 1.25rem bottom margin can remain as `<p>`.
+
 ## 014: @resvg/resvg-js for OG image generation
 **Date:** 2026-02-22
 **Decision:** Use `@resvg/resvg-js` as a devDependency for generating the default Open Graph image (1200×630 PNG) from an SVG template. One-shot script in `scripts/generate-og-image.js`, not a build step.

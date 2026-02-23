@@ -173,6 +173,7 @@ React islands are used exclusively for interactive essay visualizations. They ar
 - `useInView` hook lives in `shared/useInView.ts` — handles IntersectionObserver + `prefers-reduced-motion`
 - No animation libraries — all transitions use CSS `transition` property
 - No icon libraries (lucide-react, etc.) — build icons from HTML/CSS/SVG inline
+- **`<p>` tags inside islands inherit prose margins.** `PostLayout.astro` applies `margin: 0 0 1.25rem` to all `<p>` elements inside `.post__content` via `:global(p)`. This overrides island component styles due to higher specificity. When an island element needs custom margins (annotations, captions, etc.), use a `<div>` instead of `<p>` to avoid the conflict.
 
 ### Naming Convention
 
@@ -307,6 +308,7 @@ Run through this after any change:
 ## Corrections Log
 
 <!-- Append rules here as mistakes are encountered. Format: date, what happened, the rule. -->
+- **2026-02-23:** VoDLegibilityGap annotation margin had no effect because `PostLayout.astro`'s `.post__content :global(p)` overrode the island's `<p>` margin. **Rule:** Use `<div>` instead of `<p>` for island elements that need custom margins.
 
 ## Session Continuity
 

@@ -123,6 +123,13 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] Build passes clean (9 pages, ~1.2s, zero errors)
 - [x] MDX essay file creation + island integration (`valley-of-death.mdx` with all 6 islands, 7 SectionDividers, 2 PullQuotes)
 
+**VoD LegibilityGap fix (2026-02-23):**
+- [x] Replaced SVG bridge overlay with CSS Grid layout — bridges are now regular grid cells between node columns, eliminating all coordinate/scaling issues
+- [x] Fixed node text alignment (center-aligned), node height consistency (`min-height: 54px`), connector centering
+- [x] All four bridges visible and vertically centered on node pairs at any viewport width
+- [x] Fixed annotation margin override: `PostLayout.astro`'s `:global(p)` was overriding island `<p>` margins; changed annotation to `<div>` (DECISIONS.md #015, CLAUDE.md updated)
+- [x] Build passes clean (10 pages, ~1.2s, zero errors)
+
 **Co-regulation essay islands + publish (2026-02-23):**
 - [x] `CoRegEvidenceMap.tsx` — Three-tier evidence gradient (Well-Established/Promising but Limited/Missing) with green/gold/red color coding, research node cards with decreasing visual weight, sparse bottom row, staggered scroll animation
 - [x] `CoRegPhaseGate.tsx` — 4-phase vertical pipeline with 3 go/kill gate nodes, phase weight decreasing (opacity + dashed borders), green/red split gate cards, responsive stacking
