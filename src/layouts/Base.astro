@@ -7,12 +7,19 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
+  type?: string;
 }
 
 const {
   title = 'Thomas Brady — techno-vajrapāṇi',
-  description = 'Making invisible structures visible and navigable.'
+  description = 'Making invisible structures visible and navigable.',
+  image = '/images/og-default.png',
+  type = 'website',
 } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://thbrdy.dev');
+const ogImageURL = new URL(image, Astro.site ?? 'https://thbrdy.dev');
 ---
 
 <!DOCTYPE html>
@@ -22,6 +29,26 @@ const {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
   <meta name="description" content={description} />
+
+  <!-- Canonical -->
+  <link rel="canonical" href={canonicalURL.href} />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalURL.href} />
+  <meta property="og:image" content={ogImageURL.href} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:type" content={type} />
+  <meta property="og:site_name" content="Thomas Brady" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImageURL.href} />
+
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />

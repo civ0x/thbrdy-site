@@ -121,14 +121,14 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ### Phase 5: Polish (not yet scoped)
 - [ ] Self-host fonts (eliminate Google Fonts render-blocking request)
-- [ ] Open Graph / social meta tags
+- [x] Open Graph / social meta tags
 - [ ] RSS feed
 - [ ] Lighthouse audit + performance pass
 - [ ] Potential about page condensation (full CV may be too long — judge after seeing it rendered)
 
 ## Current State
 
-Phase 4 complete. All four essays have interactive islands. AB essay: 2 islands + SectionDividers + PullQuote. Notice essay: 4 islands + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). LC essay: 5 islands + SectionDividers + PullQuote with steel blue accent. Scholion essay: 6 islands (5 ported from reference HTML, 1 Toulmin anatomy designed from scratch) + SectionDividers (01–06) + 2 PullQuotes. PullQuote shared component uses accent bars. Gold accent for Scholion (default site accent). Build produces 8 pages in ~1.1s.
+Phase 4 complete. Open Graph + Twitter Card meta tags live on all pages (default OG image at `public/images/og-default.png`, canonical URLs, `og:type` = `article` on essays). All four essays have interactive islands. AB essay: 2 islands + SectionDividers + PullQuote. Notice essay: 4 islands + SectionDividers + ensō header; two deferred (SnapDepth, EmotionTaxonomy). LC essay: 5 islands + SectionDividers + PullQuote with steel blue accent. Scholion essay: 6 islands (5 ported from reference HTML, 1 Toulmin anatomy designed from scratch) + SectionDividers (01–06) + 2 PullQuotes. PullQuote shared component uses accent bars. Gold accent for Scholion (default site accent). Build produces 8 pages in ~1.1s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds

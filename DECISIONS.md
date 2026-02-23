@@ -73,3 +73,9 @@
 **Decision:** Use Cinzel at weight 400 with letter-spacing: 0.12em, uppercase, for the hero name only.
 **Rationale:** Inscriptional serif at light weight has lapidary quality without heaviness — "stone made light." Pairs naturally with Cormorant Garamond (prose) since both are classically rooted. Replaces CODEINK, which was too brush-stroke/graffiti for the site's actual character.
 **Constraint:** Cinzel is scoped exclusively to the hero name. Not for section headings or any other use.
+
+## 014: @resvg/resvg-js for OG image generation
+**Date:** 2026-02-22
+**Decision:** Use `@resvg/resvg-js` as a devDependency for generating the default Open Graph image (1200×630 PNG) from an SVG template. One-shot script in `scripts/generate-og-image.js`, not a build step.
+**Rationale:** Alternatives (Puppeteer, Playwright) require a full headless browser — heavy dependency, slow execution, non-deterministic rendering. `@resvg/resvg-js` is a Rust-based SVG renderer compiled to WASM: deterministic output, fast execution, small footprint (~5MB devDependency), no browser required. The OG image is static (same for all pages), so a one-shot generation script is simpler and more reliable than build-time generation.
+**Constraint:** `@resvg/resvg-js` is devDependency only — zero runtime impact. The generated PNG ships as a static asset in `public/images/`. System fonts used in the SVG (Georgia, Courier New) since embedding web fonts into resvg adds complexity with no meaningful visual difference at OG preview sizes.
