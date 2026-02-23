@@ -62,10 +62,10 @@
 **Decision:** Remove the bottom accent bar from PullQuote. Keep only the top 40px gold bar.
 **Rationale:** When a SectionDivider follows immediately after a PullQuote (as in the LC essay between sections 02 and 03), the bottom accent bar stacks visually with the SectionDivider's horizontal rule, creating a double gold line artifact. The top bar provides the visual entry point; the SectionDivider below provides the exit. No bottom bar needed.
 
-## 013: Vishvavajra favicon
+## 013: Single dorje favicon
 **Date:** 2026-02-22
-**Decision:** Replace the missing `favicon.svg` with a hand-authored vishvavajra (double dorje) — two vajras crossed at 90° through a shared central hub. Add a 32×32 PNG fallback.
-**Rationale:** The single dorje already appears in the hero section as a site identity mark. The vishvavajra extends this to the browser tab, reinforcing the vajrapāṇi identity across all touchpoints. SVG-first with PNG fallback covers all browsers. The icon uses the same stroke-and-circle vocabulary as the hero dorje (round caps, filled tip circles, center hub) and the site accent gold (`#B8860B`).
+**Decision:** Use the hero section's single dorje (vajra) as the favicon, with hardcoded gold colors and a 32×32 PNG fallback. SVG-first, PNG fallback for older browsers.
+**Rationale:** The single dorje is already the site's identity mark in the hero section. Reusing it as the favicon keeps the identity consistent. The same geometry from the hero SVG (`viewBox="0 0 40 40"`) is used with `stroke-width="2"` (up from 1.5) for legibility at 16×16 display size. Colors hardcoded to `#B8860B` since the favicon can't inherit CSS custom properties. Initially tried a vishvavajra (double dorje) but it was too dense at favicon scale.
 **Constraint:** Hand-authored SVG, no generation libraries. No new runtime dependencies (PNG generated via one-time `npx sharp-cli`).
 
 ## 003: Cinzel 400 for hero display
