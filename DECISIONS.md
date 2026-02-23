@@ -62,6 +62,12 @@
 **Decision:** Remove the bottom accent bar from PullQuote. Keep only the top 40px gold bar.
 **Rationale:** When a SectionDivider follows immediately after a PullQuote (as in the LC essay between sections 02 and 03), the bottom accent bar stacks visually with the SectionDivider's horizontal rule, creating a double gold line artifact. The top bar provides the visual entry point; the SectionDivider below provides the exit. No bottom bar needed.
 
+## 013: Vishvavajra favicon
+**Date:** 2026-02-22
+**Decision:** Replace the missing `favicon.svg` with a hand-authored vishvavajra (double dorje) — two vajras crossed at 90° through a shared central hub. Add a 32×32 PNG fallback.
+**Rationale:** The single dorje already appears in the hero section as a site identity mark. The vishvavajra extends this to the browser tab, reinforcing the vajrapāṇi identity across all touchpoints. SVG-first with PNG fallback covers all browsers. The icon uses the same stroke-and-circle vocabulary as the hero dorje (round caps, filled tip circles, center hub) and the site accent gold (`#B8860B`).
+**Constraint:** Hand-authored SVG, no generation libraries. No new runtime dependencies (PNG generated via one-time `npx sharp-cli`).
+
 ## 003: Cinzel 400 for hero display
 **Date:** 2025-02-21  
 **Decision:** Use Cinzel at weight 400 with letter-spacing: 0.12em, uppercase, for the hero name only.
