@@ -1,0 +1,77 @@
+# Scholion Annotation Schema v0.1
+# Canonical template for claim-dependency extraction
+#
+# Each extraction file contains metadata about the source document
+# followed by an ordered list of claims. Claims reference each other
+# by claim_id to form a dependency graph.
+
+# --- Document Metadata ---
+source:
+  paper_id: ""          # Short identifier, e.g., "chen2025"
+  title: ""
+  authors: []           # List of author surnames
+  year: 0
+  doi: ""
+  pmid: ""              # If applicable
+  source_type: ""       # systematic_review | empirical | theoretical | meta_analysis | thesis_chapter
+  domain: ""            # e.g., clinical_medicine, ai_safety, interpretability
+
+extraction:
+  annotator: ""         # Who performed this extraction
+  date: ""              # YYYY-MM-DD
+  section: ""           # Which section/argument block was extracted
+  scope_note: ""        # Why this section was chosen, what it covers
+
+# --- Claims ---
+# Each claim is one node in the dependency graph.
+# The list order roughly follows the argument's logical flow.
+
+claims:
+  - claim_id: ""                # Hierarchical: [paper_short].[section].[n]
+    claim_text: ""              # Verbatim or near-verbatim from source
+    atomic_proposition: ""      # Single falsifiable restatement
+
+    # Toulmin structure
+    warrant: ""                 # Reasoning connecting evidence to claim
+    warrant_type: ""            # explicit | implicit | domain_convention
+    backing: ""                 # Framework/methodology authorizing the warrant
+    qualifier: ""               # Conditions/scope under which claim holds
+    rebuttal: ""                # Conditions under which claim would fail
+
+    # Dependency graph
+    depends_on: []              # List of claim_ids this claim requires
+    dependency_type: ""         # causal | conditional | purposive | contrastive | conjunctive
+    #                           # Note: dependency_type describes the relationship TO
+    #                           # the claims in depends_on. If a claim has multiple
+    #                           # dependencies of different types, split into separate
+    #                           # dependency entries or document in notes.
+
+    # Status and assessment
+    external_anchor: ""         # DOI, PMID, dataset, or descriptive reference
+    crux: false                 # Is this load-bearing? Would its failure collapse downstream structure?
+    status: "IN"                # IN | OUT | UNDETERMINED
+
+    notes: ""                   # Annotator judgment calls, ambiguities, edge cases
+
+# --- Known Schema Limitations (Phase 0) ---
+# These problems were identified in the methodology docs and are acknowledged
+# but not fully resolved in v0.1. They should be tracked through Phase 1:
+#
+# 1. Non-atomic claims: Some source sentences resist clean decomposition.
+#    Current approach: split aggressively, note the original in claim_text.
+#
+# 2. Negative dependencies: Limitations function as constraints, not support.
+#    Current approach: use contrastive dependency_type + note.
+#
+# 3. Circular evaluation: A supports B which supports A.
+#    Current approach: flag in notes, do not create circular depends_on.
+#
+# 4. Weighted support: Evidence has degrees, but status is binary IN/OUT.
+#    Current approach: use qualifier field for confidence nuance, defer
+#    continuous scoring to Phase 1 evaluation (see deferred decision in roadmap).
+#
+# 5. Hidden counterfactuals: Discussion sections contain implicit "if not X."
+#    Current approach: extract as explicit rebuttal fields where detectable.
+#
+# 6. Taxonomy misfit: The five dependency types won't cover every case.
+#    Current approach: use closest type + document misfit in notes.
