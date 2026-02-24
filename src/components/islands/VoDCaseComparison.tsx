@@ -1,70 +1,101 @@
-import { useState } from "react";
 import { tokens } from "./shared/tokens";
 import { useInView } from "./shared/useInView";
 
-interface TimelineStage {
+interface Stage {
   label: string;
-  shortLabel: string;
   desc: string;
+  isFinal?: boolean;
 }
 
-interface Timeline {
-  id: string;
-  title: string;
-  color: string;
-  colorDim: string;
-  stages: TimelineStage[];
-  result: string;
-  resultDetail: string;
-}
-
-const timelines: Timeline[] = [
-  {
-    id: "aws",
-    title: "AWS AI Lab → Neptune ML",
-    color: "var(--teal)",
-    colorDim: "var(--teal-dim)",
-    stages: [
-      { label: "Research Artifact", shortLabel: "Research", desc: "GNN/DGL — strong academic results, no productization path" },
-      { label: "PR/FAQ Translation", shortLabel: "PR/FAQ", desc: "Converted to product language: ML predictions on graph data in Neptune" },
-      { label: "Business Review", shortLabel: "Biz Review", desc: "Structured visibility through leadership review cadence" },
-      { label: "Shipped Feature", shortLabel: "Shipped", desc: "Neptune ML — production feature, publicly documented" },
-    ],
-    result: "6×",
-    resultDetail: "increase in transition rate",
-  },
-  {
-    id: "az",
-    title: "AstraZeneca → 5R Framework",
-    color: "var(--green)",
-    colorDim: "var(--green-dim)",
-    stages: [
-      { label: "Research Candidate", shortLabel: "Candidate", desc: "Drug candidate with preclinical promise" },
-      { label: "5R Joint Assessment", shortLabel: "5R Assessment", desc: "Right Target, Right Tissue, Right Safety, Right Patient, Right Commercial" },
-      { label: "Portfolio Review", shortLabel: "Portfolio", desc: "Joint scientific-clinical-commercial evaluation" },
-      { label: "Approved Drug", shortLabel: "Approved", desc: "Phase III completion and regulatory approval" },
-    ],
-    result: "6×",
-    resultDetail: "4% → 23% success rate",
-  },
+const awsStages: Stage[] = [
+  { label: "Research Artifact", desc: "GNN/DGL — strong academic results, no productization path" },
+  { label: "PR/FAQ Translation", desc: "Converted research language → product language" },
+  { label: "Business Review", desc: "Structured visibility through leadership cadence" },
+  { label: "Shipped Feature", desc: "Neptune ML — production, publicly documented", isFinal: true },
 ];
 
-interface Parallel {
-  stageIdx: number;
-  label: string;
-}
+const azStages: Stage[] = [
+  { label: "Research Candidate", desc: "Drug candidate with preclinical promise" },
+  { label: "5R Joint Assessment", desc: "Right Target, Tissue, Safety, Patient, Commercial" },
+  { label: "Portfolio Review", desc: "Joint scientific-clinical-commercial evaluation" },
+  { label: "Approved Drug", desc: "Phase III completion, regulatory approval", isFinal: true },
+];
 
-const parallels: Parallel[] = [
-  { stageIdx: 0, label: "Maturity Gate" },
-  { stageIdx: 1, label: "Boundary Object" },
-  { stageIdx: 2, label: "Trading Zone" },
+const parallels = [
+  { left: "Research Artifact", right: "Research Candidate", mechanism: "Maturity Gate" },
+  { left: "PR/FAQ", right: "5R Assessment", mechanism: "Boundary Object" },
+  { left: "Business Review", right: "Portfolio Review", mechanism: "Trading Zone" },
 ];
 
 const ease = "cubic-bezier(0.25, 0.46, 0.45, 0.94)";
 
+function CasePipeline({
+  domain,
+  name,
+  color,
+  colorDim,
+  stages,
+  headerClass,
+  nameClass,
+  inView,
+  baseDelay,
+}: {
+  domain: string;
+  name: string;
+  color: string;
+  colorDim: string;
+  stages: Stage[];
+  headerClass: string;
+  nameClass: string;
+  inView: boolean;
+  baseDelay: number;
+}) {
+  return (
+    <div className="vod-case-pipeline">
+      <div
+        className={`vod-case-case-header ${headerClass}`}
+        style={{
+          opacity: inView ? 1 : 0,
+          transform: inView ? "translateY(0)" : "translateY(12px)",
+          transition: `opacity 0.5s ${ease} ${baseDelay}s, transform 0.5s ${ease} ${baseDelay}s`,
+        }}
+      >
+        <div className="vod-case-domain">{domain}</div>
+        <div className={`vod-case-case-name ${nameClass}`}>{name}</div>
+      </div>
+      {stages.map((stage, i) => (
+        <div key={i}>
+          {i > 0 && (
+            <div
+              className="vod-case-stage-arrow"
+              style={{
+                opacity: inView ? 1 : 0,
+                transition: `opacity 0.4s ${ease} ${baseDelay + 0.1 + i * 0.12}s`,
+              }}
+            >
+              ↓
+            </div>
+          )}
+          <div
+            className="vod-case-stage"
+            style={{
+              borderLeft: stage.isFinal ? `3px solid ${color}` : "3px solid transparent",
+              opacity: inView ? 1 : 0,
+              transform: inView ? "translateY(0)" : "translateY(12px)",
+              transition: `opacity 0.5s ${ease} ${baseDelay + 0.1 + i * 0.12}s, transform 0.5s ${ease} ${baseDelay + 0.1 + i * 0.12}s`,
+            }}
+          >
+            <div className="vod-case-stage-label">{stage.label}</div>
+            <div className="vod-case-stage-desc">{stage.desc}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function VoDCaseComparison() {
   const [ref, inView] = useInView(0.15);
-  const [hoveredStage, setHoveredStage] = useState<{ timeline: number; stage: number } | null>(null);
 
   return (
     <div ref={ref} className="vod-case-root">
@@ -93,155 +124,159 @@ export default function VoDCaseComparison() {
           color: ${tokens.text};
           margin: 0;
         }
-        .vod-case-timelines {
+        .vod-case-convergence {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          margin-bottom: 2.5rem;
+        }
+        .vod-case-convergence-value {
+          font-family: ${tokens.sans};
+          font-size: 4rem;
+          font-weight: 700;
+          color: ${tokens.accent};
+          line-height: 1;
+        }
+        .vod-case-convergence-label {
+          font-family: ${tokens.sans};
+          font-size: 0.875rem;
+          color: ${tokens.textMuted};
+          line-height: 1.4;
+          max-width: 200px;
+        }
+        .vod-case-cases {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+          margin-bottom: 2rem;
+        }
+        .vod-case-pipeline {
           display: flex;
           flex-direction: column;
-          gap: 0;
-        }
-        .vod-case-timeline-title {
-          font-family: ${tokens.sans};
-          font-size: 0.8125rem;
-          font-weight: 600;
-          margin: 0 0 8px;
-        }
-        .vod-case-row {
-          display: flex;
-          align-items: stretch;
           gap: 8px;
         }
-        .vod-case-stages {
+        .vod-case-case-header {
+          padding: 12px 16px;
+          border-radius: 8px;
           display: flex;
-          flex: 1;
-          gap: 4px;
-          align-items: stretch;
+          flex-direction: column;
+          gap: 2px;
         }
-        .vod-case-stage-wrap {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          gap: 4px;
+        .vod-case-case-header--aws {
+          background: var(--teal-dim);
+          border-left: 3px solid var(--teal);
         }
+        .vod-case-case-header--az {
+          background: var(--green-dim);
+          border-left: 3px solid var(--green);
+        }
+        .vod-case-domain {
+          font-family: ${tokens.mono};
+          font-size: 0.55rem;
+          font-weight: 500;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: ${tokens.textMuted};
+        }
+        .vod-case-case-name {
+          font-family: ${tokens.sans};
+          font-size: 0.875rem;
+          font-weight: 700;
+        }
+        .vod-case-case-name--aws { color: var(--teal); }
+        .vod-case-case-name--az { color: var(--green); }
         .vod-case-stage {
-          flex: 1;
-          padding: 10px 10px;
+          padding: 10px 16px;
           border-radius: 6px;
-          cursor: pointer;
-          box-sizing: border-box;
-          min-height: 52px;
-          display: flex;
-          align-items: center;
+          background: ${tokens.bgWarm};
+          transition: background 0.2s ease;
+        }
+        .vod-case-stage:hover {
+          background: ${tokens.bgCard};
         }
         .vod-case-stage-label {
           font-family: ${tokens.sans};
-          font-size: 0.75rem;
+          font-size: 0.8125rem;
           font-weight: 600;
-          margin: 0;
+          color: ${tokens.text};
         }
-        .vod-case-arrow {
-          flex-shrink: 0;
+        .vod-case-stage-desc {
+          font-family: ${tokens.sans};
+          font-size: 0.6875rem;
+          color: ${tokens.textMuted};
+          line-height: 1.4;
+          margin-top: 2px;
+        }
+        .vod-case-stage-arrow {
           display: flex;
-          align-items: center;
+          justify-content: center;
+          padding: 2px 0;
+          color: ${tokens.textFaint};
+          font-size: 0.75rem;
         }
-        .vod-case-badge {
-          width: 80px;
-          flex-shrink: 0;
-          border-radius: 10px;
+        .vod-case-parallels {
+          margin-bottom: 2rem;
+        }
+        .vod-case-parallel {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          gap: 12px;
+          align-items: center;
+          padding: 8px 0;
+          border-bottom: 1px solid ${tokens.border};
+        }
+        .vod-case-parallel:last-child {
+          border-bottom: none;
+        }
+        .vod-case-parallel-left {
+          font-family: ${tokens.sans};
+          font-size: 0.75rem;
+          font-weight: 500;
+          text-align: right;
+          color: var(--teal);
+        }
+        .vod-case-parallel-right {
+          font-family: ${tokens.sans};
+          font-size: 0.75rem;
+          font-weight: 500;
+          text-align: left;
+          color: var(--green);
+        }
+        .vod-case-parallel-bridge {
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
-          padding: 8px 4px;
-          box-sizing: border-box;
+          gap: 2px;
         }
-        .vod-case-badge-value {
-          font-family: ${tokens.sans};
-          font-size: 2rem;
-          font-weight: 700;
-          margin: 0;
-          line-height: 1;
-        }
-        .vod-case-badge-detail {
-          font-family: ${tokens.sans};
-          font-size: 0.6rem;
-          color: ${tokens.textMuted};
-          margin: 4px 0 0;
-          text-align: center;
-          line-height: 1.2;
-        }
-        .vod-case-parallels {
-          display: flex;
-          justify-content: flex-start;
-          gap: 4px;
-          padding: 0;
-          margin: 0;
-          height: 50px;
-          align-items: center;
-          flex: 1;
-        }
-        .vod-case-parallel-item {
-          flex: 1;
-          text-align: center;
+        .vod-case-parallel-bridge-icon {
+          width: 24px;
+          height: 1px;
+          background: ${tokens.borderMid};
           position: relative;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
         }
-        .vod-case-parallel-line {
+        .vod-case-parallel-bridge-icon::before,
+        .vod-case-parallel-bridge-icon::after {
+          content: '';
           position: absolute;
-          left: 50%;
-          top: 0;
-          bottom: 0;
-          width: 1px;
-          transform: translateX(-50%);
+          top: -2px;
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: ${tokens.borderMid};
         }
-        .vod-case-parallel-label {
+        .vod-case-parallel-bridge-icon::before { left: -2px; }
+        .vod-case-parallel-bridge-icon::after { right: -2px; }
+        .vod-case-parallel-mechanism {
           font-family: ${tokens.mono};
           font-size: 0.55rem;
           font-weight: 500;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: ${tokens.textMuted};
-          background: ${tokens.bg};
-          padding: 2px 6px;
-          position: relative;
-          z-index: 1;
-        }
-        .vod-case-parallel-spacer {
-          width: 80px;
-          flex-shrink: 0;
-        }
-        .vod-case-detail {
-          margin-top: 1rem;
-          padding: 12px 16px;
-          border-radius: 6px;
-          min-height: 40px;
-          display: flex;
-          align-items: center;
-        }
-        .vod-case-detail--active {
-          background: ${tokens.bgWarm};
-          border-left: 3px solid ${tokens.accent};
-        }
-        .vod-case-detail--placeholder {
-          background: transparent;
-          border-left: 3px solid ${tokens.border};
-        }
-        .vod-case-detail-text {
-          font-family: ${tokens.serif};
-          font-size: 0.875rem;
-          color: ${tokens.textMid};
-          margin: 0;
-          line-height: 1.5;
-        }
-        .vod-case-detail-placeholder {
-          font-family: ${tokens.sans};
-          font-size: 0.75rem;
-          color: ${tokens.textFaint};
-          margin: 0;
+          color: ${tokens.accent};
+          white-space: nowrap;
         }
         .vod-case-callout {
-          margin-top: 1.5rem;
           padding: 14px 18px;
           background: ${tokens.accentDim};
           border-left: 3px solid ${tokens.accent};
@@ -249,47 +284,22 @@ export default function VoDCaseComparison() {
         }
         .vod-case-callout-text {
           font-family: ${tokens.serif};
-          font-size: 0.875rem;
+          font-size: 0.95rem;
           color: ${tokens.textMid};
-          margin: 0;
-          line-height: 1.5;
+          line-height: 1.6;
         }
         .vod-case-mobile-parallels {
           display: none;
         }
-        @media (max-width: 640px) {
-          .vod-case-stage-label {
-            font-size: 0.6875rem;
+        @media (max-width: 560px) {
+          .vod-case-cases {
+            grid-template-columns: 1fr;
+            gap: 32px;
           }
-          .vod-case-badge {
-            width: 70px;
-          }
-          .vod-case-badge-value {
-            font-size: 1.75rem;
-          }
-        }
-        @media (max-width: 420px) {
-          .vod-case-row {
-            flex-direction: column;
-          }
-          .vod-case-stages {
-            flex-direction: column;
-            gap: 6px;
-          }
-          .vod-case-stage-wrap {
-            flex-direction: column;
-            align-items: stretch;
-          }
-          .vod-case-arrow {
-            display: none;
-          }
-          .vod-case-badge {
-            width: 100%;
+          .vod-case-convergence-value {
+            font-size: 3rem;
           }
           .vod-case-parallels {
-            display: none;
-          }
-          .vod-case-parallel-spacer {
             display: none;
           }
           .vod-case-mobile-parallels {
@@ -298,7 +308,7 @@ export default function VoDCaseComparison() {
             background: ${tokens.bgWarm};
             border: 1px solid ${tokens.border};
             border-radius: 8px;
-            margin: 12px 0;
+            margin-bottom: 2rem;
           }
           .vod-case-mobile-parallels-title {
             font-family: ${tokens.mono};
@@ -307,173 +317,137 @@ export default function VoDCaseComparison() {
             letter-spacing: 0.15em;
             text-transform: uppercase;
             color: ${tokens.textMuted};
-            margin: 0 0 10px;
+            margin-bottom: 10px;
           }
           .vod-case-mobile-parallel-row {
             margin-bottom: 8px;
+          }
+          .vod-case-mobile-parallel-row:last-child {
+            margin-bottom: 0;
           }
           .vod-case-mobile-parallel-pair {
             font-family: ${tokens.sans};
             font-size: 0.75rem;
             font-weight: 600;
             color: ${tokens.text};
-            margin: 0;
           }
           .vod-case-mobile-parallel-label {
             font-family: ${tokens.mono};
             font-size: 0.6rem;
             color: ${tokens.textMuted};
-            margin: 2px 0 0;
+            margin-top: 2px;
           }
         }
       `}</style>
 
-      <div className="vod-case-header"
+      {/* Header */}
+      <div
+        className="vod-case-header"
         style={{
           opacity: inView ? 1 : 0,
           transform: inView ? "translateY(0)" : "translateY(12px)",
           transition: `opacity 0.6s ${ease}, transform 0.6s ${ease}`,
         }}
       >
-        <p className="vod-case-eyebrow">Cross-Domain Evidence</p>
+        <div className="vod-case-eyebrow">Cross-Domain Evidence</div>
         <h3 className="vod-case-title">Same mechanism. Same magnitude.</h3>
       </div>
 
-      <div className="vod-case-timelines">
-        {timelines.map((tl, tlIdx) => (
-          <div key={tl.id}>
-            <p className="vod-case-timeline-title"
-              style={{
-                color: tl.color,
-                opacity: inView ? 1 : 0,
-                transition: `opacity 0.5s ${ease} ${tlIdx * 0.3}s`,
-              }}
-            >{tl.title}</p>
-            <div className="vod-case-row">
-              <div className="vod-case-stages">
-                {tl.stages.map((stage, sIdx) => (
-                  <div key={sIdx} className="vod-case-stage-wrap">
-                    <div className="vod-case-stage"
-                      style={{
-                        background: tl.colorDim,
-                        border: `1.5px solid color-mix(in srgb, ${tl.color} 30%, transparent)`,
-                        opacity: inView ? 1 : 0,
-                        transform: inView ? "translateY(0)" : "translateY(12px)",
-                        transition: `opacity 0.6s ${ease} ${tlIdx * 0.3 + sIdx * 0.12}s, transform 0.6s ${ease} ${tlIdx * 0.3 + sIdx * 0.12}s`,
-                      }}
-                      onMouseEnter={() => setHoveredStage({ timeline: tlIdx, stage: sIdx })}
-                      onMouseLeave={() => setHoveredStage(null)}
-                    >
-                      <p className="vod-case-stage-label" style={{ color: tl.color }}>
-                        <span className="vod-case-stage-full">{stage.label}</span>
-                      </p>
-                    </div>
-                    {sIdx < tl.stages.length - 1 && (
-                      <div className="vod-case-arrow"
-                        style={{
-                          opacity: inView ? 1 : 0,
-                          transition: `opacity 0.4s ${ease} ${tlIdx * 0.3 + sIdx * 0.12 + 0.2}s`,
-                        }}
-                      >
-                        <svg width="12" height="10" viewBox="0 0 12 10">
-                          <line x1="0" y1="5" x2="8" y2="5" stroke={tl.color} strokeWidth="1" opacity="0.5" />
-                          <polygon points="8,2 12,5 8,8" fill={tl.color} opacity="0.5" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="vod-case-badge"
-                style={{
-                  background: `color-mix(in srgb, ${tl.color} 10%, transparent)`,
-                  border: `2px solid ${tl.color}`,
-                  opacity: inView ? 1 : 0,
-                  transform: inView ? "scale(1)" : "scale(0.9)",
-                  transition: `opacity 0.6s ${ease} ${1.2 + tlIdx * 0.15}s, transform 0.5s ${ease} ${1.2 + tlIdx * 0.15}s`,
-                }}
-              >
-                <p className="vod-case-badge-value" style={{ color: tl.color }}>{tl.result}</p>
-                <p className="vod-case-badge-detail">{tl.resultDetail}</p>
-              </div>
-            </div>
-
-            {/* Structural parallels between the two timelines */}
-            {tlIdx === 0 && (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <div className="vod-case-parallels"
-                  style={{
-                    opacity: inView ? 1 : 0,
-                    transition: `opacity 0.6s ${ease} 0.9s`,
-                  }}
-                >
-                  {tl.stages.map((stage, sIdx) => {
-                    const parallel = parallels.find(p => p.stageIdx === sIdx);
-                    return (
-                      <div key={sIdx} className="vod-case-parallel-item">
-                        {parallel && (
-                          <>
-                            <svg className="vod-case-parallel-line" width="1" height="100%">
-                              <line x1="0" y1="0" x2="0" y2="100%" stroke={tokens.textFaint} strokeWidth="1" strokeDasharray="4 4" />
-                            </svg>
-                            <span className="vod-case-parallel-label">{parallel.label}</span>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="vod-case-parallel-spacer" />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Mobile structural parallels card */}
-      <div className="vod-case-mobile-parallels"
+      {/* Hero 6× convergence */}
+      <div
+        className="vod-case-convergence"
         style={{
           opacity: inView ? 1 : 0,
-          transition: `opacity 0.6s ${ease} 0.9s`,
+          transform: inView ? "translateY(0)" : "translateY(16px)",
+          transition: `opacity 0.6s ${ease} 0s, transform 0.6s ${ease} 0s`,
         }}
       >
-        <p className="vod-case-mobile-parallels-title">Structural Parallels</p>
-        {parallels.map((p) => (
-          <div key={p.stageIdx} className="vod-case-mobile-parallel-row">
-            <p className="vod-case-mobile-parallel-pair">
-              {timelines[0].stages[p.stageIdx].shortLabel} ↔ {timelines[1].stages[p.stageIdx].shortLabel}
-            </p>
-            <p className="vod-case-mobile-parallel-label">→ {p.label}</p>
-          </div>
-        ))}
+        <span className="vod-case-convergence-value">6×</span>
+        <span className="vod-case-convergence-label">
+          improvement in transition rate, independently achieved across two radically different domains
+        </span>
       </div>
 
-      {/* Hover detail */}
-      <div className={`vod-case-detail ${hoveredStage ? "vod-case-detail--active" : "vod-case-detail--placeholder"}`}
-        style={{
-          opacity: inView ? 1 : 0,
-          transition: `opacity 0.4s ${ease} 1.0s`,
-        }}
-      >
-        {hoveredStage ? (
-          <p className="vod-case-detail-text">
-            {timelines[hoveredStage.timeline].stages[hoveredStage.stage].desc}
-          </p>
-        ) : (
-          <p className="vod-case-detail-placeholder">Hover a stage to see details</p>
-        )}
+      {/* Two-column case layout */}
+      <div className="vod-case-cases">
+        <CasePipeline
+          domain="AI Research"
+          name="AWS AI Lab → Neptune ML"
+          color="var(--teal)"
+          colorDim="var(--teal-dim)"
+          stages={awsStages}
+          headerClass="vod-case-case-header--aws"
+          nameClass="vod-case-case-name--aws"
+          inView={inView}
+          baseDelay={0.2}
+        />
+        <CasePipeline
+          domain="Pharma"
+          name="AstraZeneca → 5R Framework"
+          color="var(--green)"
+          colorDim="var(--green-dim)"
+          stages={azStages}
+          headerClass="vod-case-case-header--az"
+          nameClass="vod-case-case-name--az"
+          inView={inView}
+          baseDelay={0.3}
+        />
       </div>
 
-      <div className="vod-case-callout"
+      {/* Structural parallels — desktop */}
+      <div
+        className="vod-case-parallels"
         style={{
           opacity: inView ? 1 : 0,
           transform: inView ? "translateY(0)" : "translateY(8px)",
-          transition: `opacity 0.6s ${ease} 1.5s, transform 0.6s ${ease} 1.5s`,
+          transition: `opacity 0.6s ${ease} 1.0s, transform 0.6s ${ease} 1.0s`,
         }}
       >
-        <p className="vod-case-callout-text">
-          Different domains. Same mechanism. Same magnitude of improvement.
-        </p>
+        {parallels.map((p, i) => (
+          <div key={i} className="vod-case-parallel">
+            <span className="vod-case-parallel-left">{p.left}</span>
+            <div className="vod-case-parallel-bridge">
+              <div className="vod-case-parallel-bridge-icon" />
+              <span className="vod-case-parallel-mechanism">{p.mechanism}</span>
+            </div>
+            <span className="vod-case-parallel-right">{p.right}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Structural parallels — mobile */}
+      <div
+        className="vod-case-mobile-parallels"
+        style={{
+          opacity: inView ? 1 : 0,
+          transition: `opacity 0.6s ${ease} 1.0s`,
+        }}
+      >
+        <div className="vod-case-mobile-parallels-title">Structural Parallels</div>
+        {parallels.map((p, i) => (
+          <div key={i} className="vod-case-mobile-parallel-row">
+            <div className="vod-case-mobile-parallel-pair">
+              {p.left} ↔ {p.right}
+            </div>
+            <div className="vod-case-mobile-parallel-label">→ {p.mechanism}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Callout */}
+      <div
+        className="vod-case-callout"
+        style={{
+          opacity: inView ? 1 : 0,
+          transform: inView ? "translateY(0)" : "translateY(8px)",
+          transition: `opacity 0.6s ${ease} 1.4s, transform 0.6s ${ease} 1.4s`,
+        }}
+      >
+        <div className="vod-case-callout-text">
+          Different domains. Different vocabularies. Structurally identical interventions.
+          The convergence on 6× suggests this may be the approximate ceiling for organizational
+          intervention against coupled-question failure.
+        </div>
       </div>
     </div>
   );
