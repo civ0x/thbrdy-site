@@ -256,11 +256,11 @@ references:
   - key: beard-funding-paradox
     pattern: "Beard and colleagues"
     section: intro
-    title: "The Global Electric Power Industry and the Funding Paradox"
-    authors: "T. Randolph Beard et al."
-    year: ~
-    venue: ~
-    url: ~
+    title: "Key Technical Challenges for the Electric Power Industry and Climate Change"
+    authors: "Lisa M. Beard, Judith Cardell, Ian Dobson, Floyd Galvan, David Hawkins et al."
+    year: 2010
+    venue: "Engineering: Faculty Publications, Smith College"
+    url: "https://scholarworks.smith.edu/egr_facpubs/23/"
     summary: >
       Argues that government funding of basic research paradoxically creates
       the valley of death by inflating early-stage output beyond what private
@@ -332,11 +332,11 @@ references:
   - key: strategos-analysis
     pattern: "Strategos analysis"
     section: "01"
-    title: ~
-    authors: "Strategos (Gary Hamel's consulting firm)"
+    title: "Taking Your Stage-Gate to the Next Level"
+    authors: "Strategos"
     year: ~
-    venue: ~
-    url: ~
+    venue: "Strategos Blog"
+    url: "https://strategos.com/taking-your-stage-gate-to-the-next-level/"
     summary: >
       Analysis concluding that stage-gate's controls "tend to weed out the true
       outliers — those game-changing innovations." The risk-reduction logic that
@@ -388,11 +388,11 @@ references:
   - key: supply-chain-meta
     pattern: "meta-analysis comparing sequential planning"
     section: "02"
-    title: ~
+    title: "Meta-analysis of the Relationship Between Supply Chain Integration Dimensions and Firm Performance"
     authors: ~
     year: ~
-    venue: ~
-    url: ~
+    venue: "ResearchGate"
+    url: "https://www.researchgate.net/publication/289069237_Meta_analysis_of_the_relationship_between_supply_chain_integration_dimensions_and_firm_performance"
     summary: >
       Meta-analysis finding an average 11% cost reduction from integrated
       supply chain planning versus sequential planning — not from better
@@ -407,9 +407,9 @@ references:
     section: "02"
     title: ~
     authors: "Chatterjee et al."
-    year: ~
-    venue: ~
-    url: ~
+    year: 2023
+    venue: "Technovation"
+    url: "https://www.sciencedirect.com/science/article/pii/S0166497223001694"
     summary: >
       Found that commercial viability explains 39% of innovation success
       variance, and organizational performance improves 71% when companies
@@ -616,11 +616,11 @@ references:
   - key: fraunhofer-patents
     pattern: "Fraunhofer presence boosts patent output"
     section: "07"
-    title: ~
-    authors: ~
-    year: ~
-    venue: ~
-    url: ~
+    title: "How Publicly Funded Research Creates Technological Progress: The Effects of the Fraunhofer-Gesellschaft"
+    authors: "Martin Watzinger & Monika Schnitzer"
+    year: 2019
+    venue: "ZEW Discussion Paper No. 19-006"
+    url: "https://ideas.repec.org/p/zbw/zewdip/19006.html"
     summary: >
       Econometric studies finding that the presence of a Fraunhofer institute
       boosts patent output of local firms by at least 13%. The effect operates
