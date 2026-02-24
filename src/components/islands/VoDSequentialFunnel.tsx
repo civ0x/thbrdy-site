@@ -1,46 +1,62 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { tokens } from "./shared/tokens";
 import { useInView } from "./shared/useInView";
 
-interface EvalNode {
+interface NodeData {
   id: string;
   label: string;
-  shortLabel: string;
+  short: string;
+  seq: string;
+  actual: string;
 }
 
-const nodes: EvalNode[] = [
-  { id: "research", label: "Research Review", shortLabel: "Research" },
-  { id: "market", label: "Market Assessment", shortLabel: "Market" },
-  { id: "engineering", label: "Engineering Feasibility", shortLabel: "Engineering" },
-  { id: "executive", label: "Executive Approval", shortLabel: "Executive" },
-];
-
-interface Dependency {
+interface EdgeData {
   from: string;
   to: string;
   label: string;
+  sequential: boolean;
 }
 
-const dependencies: Dependency[] = [
-  { from: "research", to: "market", label: "What counts as 'good enough' depends on what the market requires" },
-  { from: "research", to: "engineering", label: "Technical approach constrains build cost" },
-  { from: "research", to: "executive", label: "Research risk shapes investment appetite" },
-  { from: "market", to: "engineering", label: "Target market determines performance requirements" },
-  { from: "market", to: "executive", label: "Market size justifies resource allocation" },
-  { from: "engineering", to: "executive", label: "Build complexity determines timeline and cost" },
+const nodes: NodeData[] = [
+  {
+    id: "research",
+    label: "Research Review",
+    short: "Research",
+    seq: "Evaluates technical novelty and scientific rigor in isolation. Passes a confidence score forward — but has no visibility into what the market needs or what engineering can actually build.",
+    actual: "Technical capability that simultaneously constrains what markets become addressable, what architectures are feasible, and what investment risk the executive is underwriting. Every other evaluation depends on this one.",
+  },
+  {
+    id: "market",
+    label: "Market Assessment",
+    short: "Market",
+    seq: "Receives a \"research-approved\" candidate and assesses market size and timing. Cannot push back on the research framing — only decides whether the opportunity is big enough to continue.",
+    actual: "Market reality shapes what \"good enough\" means for research, sets performance targets for engineering, and determines whether the business case justifies executive investment. It constrains three other evaluations, not just the one downstream.",
+  },
+  {
+    id: "engineering",
+    label: "Engineering Feasibility",
+    short: "Engineering",
+    seq: "Estimates build cost and timeline for whatever research and market have already approved. Can flag infeasibility but cannot reshape the research approach or reframe the market target.",
+    actual: "Build complexity feeds back into research approach (some architectures make certain research directions impractical) and directly determines the cost structure executives evaluate. Engineering is a constraint on research, not just a recipient of it.",
+  },
+  {
+    id: "executive",
+    label: "Executive Approval",
+    short: "Executive",
+    seq: "Final go/no-go based on the package that survived three prior gates. Sees only what sequential filtering preserved — the original research risk, market uncertainty, and engineering trade-offs have been compressed into a summary.",
+    actual: "Investment appetite is shaped directly by research risk, market size, and build complexity — three independent inputs, not a single filtered package. The executive evaluation also constrains what research gets funded next, closing the loop.",
+  },
 ];
 
-const ease = "cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+const edges: EdgeData[] = [
+  { from: "research", to: "market", label: "What counts as \"good enough\" depends on what the market requires", sequential: true },
+  { from: "market", to: "engineering", label: "Target market determines performance requirements", sequential: true },
+  { from: "engineering", to: "executive", label: "Build complexity determines timeline and cost", sequential: true },
+  { from: "research", to: "engineering", label: "Technical approach constrains build cost", sequential: false },
+  { from: "research", to: "executive", label: "Research risk shapes investment appetite", sequential: false },
+  { from: "market", to: "executive", label: "Market size justifies resource allocation", sequential: false },
+];
 
-// Diamond positions (percentage within a square container)
-const diamondPos: Record<string, { x: number; y: number }> = {
-  research: { x: 50, y: 8 },
-  market: { x: 8, y: 50 },
-  engineering: { x: 92, y: 50 },
-  executive: { x: 50, y: 92 },
-};
-
-// Edge colors cycling through semantic tokens
 const edgeColors: Record<string, string> = {
   "research-market": "var(--teal)",
   "research-engineering": "var(--green)",
@@ -50,27 +66,113 @@ const edgeColors: Record<string, string> = {
   "engineering-executive": "var(--blue)",
 };
 
-// Ghost edges: non-adjacent pairs in the sequential chain
-const ghostEdges = [
-  { from: 0, to: 2 },
-  { from: 0, to: 3 },
-  { from: 1, to: 3 },
+const seqPositions: Record<string, { x: number; y: number }> = {
+  research: { x: 50, y: 8 },
+  market: { x: 50, y: 33 },
+  engineering: { x: 50, y: 58 },
+  executive: { x: 50, y: 83 },
+};
+
+const actualPositions: Record<string, { x: number; y: number }> = {
+  research: { x: 50, y: 8 },
+  market: { x: 12, y: 50 },
+  engineering: { x: 88, y: 50 },
+  executive: { x: 50, y: 88 },
+};
+
+const gatePositions = [
+  { x: 50, y: 20.5 },
+  { x: 50, y: 45.5 },
+  { x: 50, y: 70.5 },
 ];
+
+const ease = "cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+const SVG_W = 680;
+const SVG_H = 510;
+
+function pctToSvg(pctX: number, pctY: number) {
+  return { x: (pctX / 100) * SVG_W, y: (pctY / 100) * SVG_H };
+}
+
+const nonSeqEdges = edges.filter((e) => !e.sequential);
 
 export default function VoDSequentialFunnel() {
   const [ref, inView] = useInView(0.15);
-  const [hoveredEdge, setHoveredEdge] = useState<number | null>(null);
+  const [isActual, setIsActual] = useState(false);
+  const [hoveredEdgeIdx, setHoveredEdgeIdx] = useState<number | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const doToggle = useCallback(() => {
+    setIsActual((prev) => !prev);
+    setHoveredEdgeIdx(null);
+  }, []);
+
+  // Click-outside clears node selection
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setSelectedNodeId(null);
+      }
+    }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
+  const positions = isActual ? actualPositions : seqPositions;
+
+  function getEdgeCoords(edge: EdgeData) {
+    const from = pctToSvg(positions[edge.from].x, positions[edge.from].y);
+    const to = pctToSvg(positions[edge.to].x, positions[edge.to].y);
+    if (isActual || edge.sequential) {
+      return { x1: from.x, y1: from.y, x2: to.x, y2: to.y, opacity: 0.5 };
+    }
+    const mx = (from.x + to.x) / 2;
+    const my = (from.y + to.y) / 2;
+    return { x1: mx, y1: my, x2: mx, y2: my, opacity: 0 };
+  }
+
+  function getEdgeStyle(i: number, edge: EdgeData) {
+    const isVisible = isActual || edge.sequential;
+    if (selectedNodeId) {
+      const connected = edge.from === selectedNodeId || edge.to === selectedNodeId;
+      if (isVisible) {
+        return {
+          opacity: connected ? 0.8 : 0.15,
+          strokeWidth: connected ? 2.5 : 1,
+        };
+      }
+      return { opacity: 0, strokeWidth: 1.5 };
+    }
+    if (hoveredEdgeIdx === i) {
+      return { opacity: 1, strokeWidth: 3 };
+    }
+    if (hoveredEdgeIdx !== null && isVisible) {
+      return { opacity: 0.25, strokeWidth: 1.5 };
+    }
+    const coords = getEdgeCoords(edge);
+    return { opacity: coords.opacity, strokeWidth: 1.5 };
+  }
+
+  const selectedNode = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : null;
 
   return (
-    <div ref={ref} className="vod-funnel-root">
+    <div
+      ref={(el) => {
+        // Merge refs: useInView ref + rootRef
+        (ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
+        rootRef.current = el;
+      }}
+      className="vod-funnel-root"
+    >
       <style>{`
         .vod-funnel-root {
-          max-width: 740px;
+          max-width: 680px;
           margin: 2.5rem auto;
         }
         .vod-funnel-header {
           text-align: center;
-          margin-bottom: 2rem;
+          margin-bottom: 2.5rem;
         }
         .vod-funnel-eyebrow {
           font-family: ${tokens.mono};
@@ -88,369 +190,533 @@ export default function VoDSequentialFunnel() {
           color: ${tokens.text};
           margin: 0;
         }
-        .vod-funnel-panels {
+        .vod-funnel-toggle-wrap {
           display: flex;
-          gap: 60px;
           justify-content: center;
-        }
-        .vod-funnel-panel {
-          flex: 1;
-          max-width: 320px;
-        }
-        .vod-funnel-panel-label {
-          font-family: ${tokens.mono};
-          font-size: 0.6rem;
-          font-weight: 500;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          color: ${tokens.textMuted};
-          margin-bottom: 1rem;
-          text-align: center;
-        }
-        .vod-funnel-seq-list {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          position: relative;
-        }
-        .vod-funnel-seq-node {
-          width: 100%;
-          padding: 12px 16px;
-          background: ${tokens.bgWarm};
-          border: 1px solid ${tokens.borderMid};
-          border-radius: 6px;
-          box-sizing: border-box;
-        }
-        .vod-funnel-seq-node-label {
-          font-family: ${tokens.sans};
-          font-size: 0.8125rem;
-          font-weight: 600;
-          color: ${tokens.text};
-          margin: 0;
-        }
-        .vod-funnel-seq-arrow {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          height: 32px;
-          justify-content: center;
-          position: relative;
-        }
-        .vod-funnel-seq-arrow-line {
-          width: 1px;
-          height: 20px;
-          background: ${tokens.borderMid};
-        }
-        .vod-funnel-seq-gate {
-          width: 5px;
-          height: 5px;
-          background: ${tokens.textFaint};
-          transform: rotate(45deg);
-          margin: 2px 0;
-        }
-        .vod-funnel-diamond {
-          position: relative;
-          aspect-ratio: 1;
-          width: 100%;
-        }
-        .vod-funnel-diamond-node {
-          position: absolute;
-          padding: 8px 12px;
-          background: ${tokens.bgWarm};
-          border: 1px solid ${tokens.borderMid};
-          border-radius: 6px;
-          text-align: center;
-          z-index: 1;
-        }
-        .vod-funnel-diamond-label {
-          font-family: ${tokens.sans};
-          font-size: 0.6875rem;
-          font-weight: 600;
-          color: ${tokens.text};
-          margin: 0;
-          white-space: nowrap;
-        }
-        .vod-funnel-diamond-svg {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
-        .vod-funnel-detail {
-          margin-top: 1.5rem;
-          padding: 12px 16px;
-          border-radius: 6px;
-          min-height: 48px;
-          display: flex;
+          margin-bottom: 2rem;
+          gap: 12px;
           align-items: center;
         }
-        .vod-funnel-detail--active {
-          background: ${tokens.bgWarm};
-          border-left: 3px solid ${tokens.accent};
-        }
-        .vod-funnel-detail--placeholder {
-          background: transparent;
-          border-left: 3px solid ${tokens.border};
-        }
-        .vod-funnel-detail-text {
-          font-family: ${tokens.serif};
-          font-size: 0.875rem;
-          color: ${tokens.textMid};
-          margin: 0;
-          line-height: 1.5;
-        }
-        .vod-funnel-detail-placeholder {
+        .vod-funnel-toggle-label {
           font-family: ${tokens.sans};
           font-size: 0.75rem;
-          color: ${tokens.textFaint};
-          margin: 0;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: ${tokens.textMuted};
+          transition: color 0.4s ease;
+          cursor: pointer;
+          user-select: none;
         }
-        .vod-funnel-callout {
-          margin-top: 2rem;
-          padding: 14px 18px;
-          background: ${tokens.accentDim};
-          border-left: 3px solid ${tokens.accent};
-          border-radius: 0 6px 6px 0;
+        .vod-funnel-toggle-label--active {
+          color: ${tokens.accent};
         }
-        .vod-funnel-callout-text {
-          font-family: ${tokens.serif};
-          font-size: 0.875rem;
-          color: ${tokens.textMid};
-          margin: 0;
-          line-height: 1.5;
+        .vod-funnel-toggle-track {
+          width: 52px;
+          height: 28px;
+          border-radius: 14px;
+          background: ${tokens.bgCard};
+          border: 1px solid var(--border-mid);
+          position: relative;
+          cursor: pointer;
+          transition: background 0.3s ease;
         }
-        .vod-funnel-ghost-svg {
+        .vod-funnel-toggle-track:hover {
+          background: ${tokens.bgWarm};
+        }
+        .vod-funnel-toggle-thumb {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: ${tokens.accent};
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          transition: transform 0.4s ${ease};
+          box-shadow: 0 1px 4px rgba(44, 36, 22, 0.15);
+        }
+        .vod-funnel-toggle-thumb--right {
+          transform: translateX(24px);
+        }
+        .vod-funnel-diagram {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 4 / 3;
+          margin-bottom: 1.5rem;
+        }
+        .vod-funnel-svg {
           position: absolute;
           top: 0;
           left: 0;
           width: 100%;
           height: 100%;
           pointer-events: none;
+          z-index: 0;
         }
-        .vod-funnel-mobile-deps {
-          display: none;
+        .vod-funnel-edge {
+          transition: all 0.8s ${ease};
+        }
+        .vod-funnel-node {
+          position: absolute;
+          padding: 12px 18px;
+          background: var(--bg);
+          border: 1.5px solid var(--border-mid);
+          border-radius: 8px;
+          z-index: 2;
+          transition: all 0.8s ${ease};
+          text-align: center;
+          box-shadow: 0 1px 6px rgba(44, 36, 22, 0.04);
+          cursor: pointer;
+          transform: translate(-50%, -50%);
+        }
+        .vod-funnel-node:hover {
+          border-color: ${tokens.accent};
+          box-shadow: 0 2px 12px rgba(184, 134, 11, 0.08);
+        }
+        .vod-funnel-node--selected {
+          border-color: ${tokens.accent};
+          box-shadow: 0 2px 16px rgba(184, 134, 11, 0.12);
+          background: ${tokens.bgWarm};
+        }
+        .vod-funnel-node-label {
+          font-family: ${tokens.sans};
+          font-size: 0.8125rem;
+          font-weight: 600;
+          color: ${tokens.text};
+          white-space: nowrap;
+        }
+        .vod-funnel-gate {
+          position: absolute;
+          z-index: 3;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+          transform: translate(-50%, -50%);
+          transition: opacity 0.6s ${ease};
+          pointer-events: none;
+        }
+        .vod-funnel-gate-diamond {
+          width: 6px;
+          height: 6px;
+          background: ${tokens.textFaint};
+          transform: rotate(45deg);
+        }
+        .vod-funnel-gate-label {
+          font-family: ${tokens.mono};
+          font-size: 0.5rem;
+          font-weight: 500;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: ${tokens.textFaint};
+          white-space: nowrap;
+        }
+        .vod-funnel-edge-count {
+          text-align: center;
+          margin-bottom: 1.5rem;
+        }
+        .vod-funnel-edge-count-inner {
+          display: inline-flex;
+          align-items: baseline;
+          gap: 8px;
+        }
+        .vod-funnel-edge-count-number {
+          font-family: ${tokens.sans};
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: ${tokens.accent};
+          line-height: 1;
+          transition: opacity 0.3s ease;
+        }
+        .vod-funnel-edge-count-label {
+          font-family: ${tokens.sans};
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: ${tokens.textMuted};
+        }
+        .vod-funnel-edge-count-sub {
+          font-family: ${tokens.serif};
+          font-size: 0.9rem;
+          color: ${tokens.textLight};
+          font-style: italic;
+          margin-top: 4px;
+        }
+        .vod-funnel-lost-edges {
+          margin-bottom: 2rem;
+          transition: opacity 0.6s ease 0.3s, max-height 0.6s ease;
+          overflow: hidden;
+        }
+        .vod-funnel-lost-edges--visible {
+          opacity: 1;
+          max-height: 200px;
+        }
+        .vod-funnel-lost-edges--hidden {
+          opacity: 0;
+          max-height: 0;
+          margin-bottom: 0;
+        }
+        .vod-funnel-lost-edges-title {
+          font-family: ${tokens.mono};
+          font-size: 0.6rem;
+          font-weight: 500;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          color: var(--red, #A63D2F);
+          margin-bottom: 8px;
+          text-align: center;
+        }
+        .vod-funnel-lost-edge-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          justify-content: center;
+        }
+        .vod-funnel-lost-edge-chip {
+          font-family: ${tokens.sans};
+          font-size: 0.6875rem;
+          font-weight: 500;
+          color: ${tokens.textMuted};
+          background: ${tokens.bgWarm};
+          border: 1px solid ${tokens.border};
+          border-radius: 4px;
+          padding: 4px 10px;
+          text-decoration: line-through;
+          text-decoration-color: rgba(166, 61, 47, 0.4);
+        }
+        .vod-funnel-hover-detail {
+          margin-top: 1.5rem;
+          padding: 12px 16px;
+          border-radius: 6px;
+          min-height: 48px;
+          display: flex;
+          align-items: center;
+          transition: all 0.3s ease;
+        }
+        .vod-funnel-hover-detail--active {
+          background: ${tokens.bgWarm};
+          border-left: 3px solid ${tokens.accent};
+        }
+        .vod-funnel-hover-detail--empty {
+          background: transparent;
+          border-left: 3px solid ${tokens.border};
+        }
+        .vod-funnel-hover-detail-text {
+          font-family: ${tokens.serif};
+          font-size: 0.875rem;
+          color: ${tokens.textMid};
+          line-height: 1.5;
+        }
+        .vod-funnel-hover-detail-placeholder {
+          font-family: ${tokens.sans};
+          font-size: 0.75rem;
+          color: ${tokens.textFaint};
+        }
+        .vod-funnel-node-explain {
+          margin-top: 1rem;
+          padding: 14px 18px;
+          border-radius: 8px;
+          background: ${tokens.bgWarm};
+          border-left: 3px solid ${tokens.accent};
+          transition: opacity 0.3s ease, max-height 0.4s ease;
+          overflow: hidden;
+        }
+        .vod-funnel-node-explain--visible {
+          opacity: 1;
+          max-height: 300px;
+        }
+        .vod-funnel-node-explain--hidden {
+          opacity: 0;
+          max-height: 0;
+          padding: 0 18px;
+          margin-top: 0;
+          border-left-color: transparent;
+        }
+        .vod-funnel-node-explain-header {
+          display: flex;
+          align-items: baseline;
+          gap: 8px;
+          margin-bottom: 6px;
+        }
+        .vod-funnel-node-explain-name {
+          font-family: ${tokens.sans};
+          font-size: 0.8125rem;
+          font-weight: 700;
+          color: ${tokens.text};
+        }
+        .vod-funnel-node-explain-mode {
+          font-family: ${tokens.mono};
+          font-size: 0.55rem;
+          font-weight: 500;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: ${tokens.accent};
+          background: var(--accent-dim);
+          padding: 2px 6px;
+          border-radius: 3px;
+        }
+        .vod-funnel-node-explain-text {
+          font-family: ${tokens.serif};
+          font-size: 0.9rem;
+          color: ${tokens.textMid};
+          line-height: 1.6;
+          margin: 0;
+        }
+        .vod-funnel-callout {
+          margin-top: 1.5rem;
+          padding: 16px 20px;
+          background: var(--accent-dim);
+          border-left: 3px solid ${tokens.accent};
+          border-radius: 0 8px 8px 0;
+        }
+        .vod-funnel-callout-text {
+          font-family: ${tokens.serif};
+          font-size: 0.95rem;
+          color: ${tokens.textMid};
+          line-height: 1.6;
+          margin: 0;
         }
         @media (max-width: 640px) {
-          .vod-funnel-panels {
-            flex-direction: column;
-            gap: 2rem;
-            align-items: center;
-          }
-          .vod-funnel-panel {
-            max-width: 400px;
-            width: 100%;
-          }
+          .vod-funnel-node-label { font-size: 0.75rem; }
+          .vod-funnel-node { padding: 8px 12px; }
+          .vod-funnel-edge-count-number { font-size: 2rem; }
         }
         @media (max-width: 420px) {
-          .vod-funnel-diamond {
-            display: none;
-          }
-          .vod-funnel-mobile-deps {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-          }
-          .vod-funnel-dep-card {
-            padding: 10px 14px;
-            background: ${tokens.bgWarm};
-            border: 1px solid ${tokens.border};
-            border-radius: 6px;
-          }
-          .vod-funnel-dep-pair {
-            font-family: ${tokens.sans};
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: ${tokens.text};
-            margin: 0 0 4px;
-          }
-          .vod-funnel-dep-label {
-            font-family: ${tokens.sans};
-            font-size: 0.6875rem;
-            color: ${tokens.textMuted};
-            margin: 0;
+          .vod-funnel-diagram { aspect-ratio: 1; }
+          .vod-funnel-node-label { font-size: 0.6875rem; }
+          .vod-funnel-node { padding: 6px 10px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .vod-funnel-node,
+          .vod-funnel-edge,
+          .vod-funnel-toggle-thumb,
+          .vod-funnel-gate,
+          .vod-funnel-lost-edges {
+            transition-duration: 0.01s !important;
           }
         }
       `}</style>
 
-      <div className="vod-funnel-header"
+      <div
+        className="vod-funnel-header"
         style={{
           opacity: inView ? 1 : 0,
           transform: inView ? "translateY(0)" : "translateY(12px)",
           transition: `opacity 0.6s ${ease}, transform 0.6s ${ease}`,
         }}
       >
-        <p className="vod-funnel-eyebrow">Information Loss</p>
+        <div className="vod-funnel-eyebrow">Information Loss</div>
         <h3 className="vod-funnel-title">What sequential evaluation can't see.</h3>
       </div>
 
-      <div className="vod-funnel-panels">
-        {/* Left Panel — Sequential */}
-        <div className="vod-funnel-panel">
-          <div className="vod-funnel-panel-label"
-            style={{
-              opacity: inView ? 1 : 0,
-              transition: `opacity 0.4s ${ease} 0s`,
-            }}
-          >Sequential Evaluation (Standard)</div>
-          <div className="vod-funnel-seq-list">
-            {/* Ghost edge SVG layer */}
-            <svg className="vod-funnel-ghost-svg" viewBox="0 0 320 380" preserveAspectRatio="none">
-              {ghostEdges.map((g, i) => {
-                const y1 = g.from * 88 + 24;
-                const y2 = g.to * 88 + 24;
-                const offsetX = 290 + i * 10;
-                return (
-                  <path
-                    key={i}
-                    d={`M 280 ${y1} Q ${offsetX} ${(y1 + y2) / 2}, 280 ${y2}`}
-                    fill="none"
-                    stroke={tokens.accent}
-                    strokeWidth={1}
-                    strokeDasharray="4 4"
-                    opacity={inView ? 0.08 : 0}
-                    style={{ transition: `opacity 0.6s ${ease} ${1.6 + i * 0.1}s` }}
-                  />
-                );
-              })}
-            </svg>
-            {nodes.map((node, i) => (
-              <div key={node.id}>
-                <div className="vod-funnel-seq-node"
-                  style={{
-                    opacity: inView ? 1 : 0,
-                    transform: inView ? "translateY(0)" : "translateY(12px)",
-                    transition: `opacity 0.6s ${ease} ${i * 0.12}s, transform 0.6s ${ease} ${i * 0.12}s`,
-                  }}
-                >
-                  <p className="vod-funnel-seq-node-label">{node.label}</p>
-                </div>
-                {i < nodes.length - 1 && (
-                  <div className="vod-funnel-seq-arrow"
-                    style={{
-                      opacity: inView ? 1 : 0,
-                      transition: `opacity 0.4s ${ease} ${i * 0.12 + 0.3}s`,
-                    }}
-                  >
-                    <div className="vod-funnel-seq-arrow-line" />
-                    <div className="vod-funnel-seq-gate" />
-                    <svg width="8" height="6" viewBox="0 0 8 6" style={{ marginTop: 1 }}>
-                      <polygon points="4,6 0,0 8,0" fill={tokens.borderMid} />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+      {/* Toggle */}
+      <div
+        className="vod-funnel-toggle-wrap"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          opacity: inView ? 1 : 0,
+          transition: `opacity 0.6s ${ease} 0.2s`,
+        }}
+      >
+        <span
+          className={`vod-funnel-toggle-label ${!isActual ? "vod-funnel-toggle-label--active" : ""}`}
+          onClick={() => { if (isActual) doToggle(); }}
+        >
+          Sequential
+        </span>
+        <div
+          className="vod-funnel-toggle-track"
+          role="switch"
+          aria-checked={isActual}
+          tabIndex={0}
+          onClick={doToggle}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              doToggle();
+            }
+          }}
+        >
+          <div className={`vod-funnel-toggle-thumb ${isActual ? "vod-funnel-toggle-thumb--right" : ""}`} />
         </div>
+        <span
+          className={`vod-funnel-toggle-label ${isActual ? "vod-funnel-toggle-label--active" : ""}`}
+          onClick={() => { if (!isActual) doToggle(); }}
+        >
+          Actual
+        </span>
+      </div>
 
-        {/* Right Panel — Diamond Dependencies */}
-        <div className="vod-funnel-panel">
-          <div className="vod-funnel-panel-label"
-            style={{
-              opacity: inView ? 1 : 0,
-              transition: `opacity 0.4s ${ease} 0.6s`,
-            }}
-          >Actual Dependencies</div>
+      {/* Diagram area */}
+      <div
+        className="vod-funnel-diagram"
+        style={{
+          opacity: inView ? 1 : 0,
+          transition: `opacity 0.6s ${ease} 0.3s`,
+        }}
+      >
+        {/* SVG edge layer */}
+        <svg className="vod-funnel-svg" viewBox={`0 0 ${SVG_W} ${SVG_H}`}>
+          {edges.map((edge, i) => {
+            const coords = getEdgeCoords(edge);
+            const style = getEdgeStyle(i, edge);
+            const key = `${edge.from}-${edge.to}`;
+            const isVisible = isActual || edge.sequential;
+            return (
+              <g key={key}>
+                {/* Visible line */}
+                <line
+                  className="vod-funnel-edge"
+                  x1={coords.x1}
+                  y1={coords.y1}
+                  x2={coords.x2}
+                  y2={coords.y2}
+                  stroke={edgeColors[key] || "var(--border-mid)"}
+                  strokeWidth={style.strokeWidth}
+                  opacity={style.opacity}
+                  style={{ pointerEvents: "none" }}
+                />
+                {/* Fat invisible hit target */}
+                <line
+                  x1={coords.x1}
+                  y1={coords.y1}
+                  x2={coords.x2}
+                  y2={coords.y2}
+                  stroke="transparent"
+                  strokeWidth={18}
+                  style={{
+                    pointerEvents: isVisible ? "stroke" : "none",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={() => {
+                    setHoveredEdgeIdx(i);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredEdgeIdx(null);
+                  }}
+                />
+              </g>
+            );
+          })}
+        </svg>
 
-          {/* Diamond layout (desktop/tablet) */}
-          <div className="vod-funnel-diamond"
+        {/* Nodes */}
+        {nodes.map((node) => {
+          const pos = positions[node.id];
+          return (
+            <div
+              key={node.id}
+              className={`vod-funnel-node ${selectedNodeId === node.id ? "vod-funnel-node--selected" : ""}`}
+              style={{
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedNodeId((prev) => (prev === node.id ? null : node.id));
+              }}
+            >
+              <span className="vod-funnel-node-label">{node.label}</span>
+            </div>
+          );
+        })}
+
+        {/* Gate markers */}
+        {gatePositions.map((pos, i) => (
+          <div
+            key={i}
+            className="vod-funnel-gate"
             style={{
-              opacity: inView ? 1 : 0,
-              transition: `opacity 0.6s ${ease} 0.6s`,
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+              opacity: isActual ? 0 : 1,
             }}
           >
-            <svg className="vod-funnel-diamond-svg" viewBox="0 0 100 100">
-              {dependencies.map((dep, i) => {
-                const from = diamondPos[dep.from];
-                const to = diamondPos[dep.to];
-                const key = `${dep.from}-${dep.to}`;
-                const color = edgeColors[key] || tokens.borderMid;
-                const isHovered = hoveredEdge === i;
-                return (
-                  <line
-                    key={i}
-                    x1={from.x} y1={from.y}
-                    x2={to.x} y2={to.y}
-                    stroke={color}
-                    strokeWidth={isHovered ? 2.5 : 1.5}
-                    opacity={inView ? (isHovered ? 1 : 0.5) : 0}
-                    style={{
-                      transition: `opacity 0.5s ${ease} ${1.0 + i * 0.1}s, stroke-width 0.2s`,
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={() => setHoveredEdge(i)}
-                    onMouseLeave={() => setHoveredEdge(null)}
-                  />
-                );
-              })}
-            </svg>
-            {nodes.map((node) => {
-              const pos = diamondPos[node.id];
-              const isTop = pos.y < 25;
-              const isBottom = pos.y > 75;
-              return (
-                <div key={node.id} className="vod-funnel-diamond-node"
-                  style={{
-                    left: `${pos.x}%`,
-                    top: `${pos.y}%`,
-                    transform: `translate(-50%, -50%)`,
-                    opacity: inView ? 1 : 0,
-                    transition: `opacity 0.5s ${ease} 0.7s`,
-                  }}
-                >
-                  <p className="vod-funnel-diamond-label">{node.shortLabel}</p>
-                </div>
-              );
-            })}
+            <div className="vod-funnel-gate-diamond" />
+            <span className="vod-funnel-gate-label">Gate {i + 1}</span>
           </div>
+        ))}
+      </div>
 
-          {/* Mobile dependency list */}
-          <div className="vod-funnel-mobile-deps">
-            {dependencies.map((dep, i) => {
-              const fromNode = nodes.find(n => n.id === dep.from)!;
-              const toNode = nodes.find(n => n.id === dep.to)!;
-              return (
-                <div key={i} className="vod-funnel-dep-card"
-                  style={{
-                    opacity: inView ? 1 : 0,
-                    transform: inView ? "translateY(0)" : "translateY(8px)",
-                    transition: `opacity 0.5s ${ease} ${0.6 + i * 0.08}s, transform 0.5s ${ease} ${0.6 + i * 0.08}s`,
-                  }}
-                >
-                  <p className="vod-funnel-dep-pair">{fromNode.shortLabel} ↔ {toNode.shortLabel}</p>
-                  <p className="vod-funnel-dep-label">{dep.label}</p>
-                </div>
-              );
-            })}
-          </div>
+      {/* Edge count */}
+      <div
+        className="vod-funnel-edge-count"
+        style={{
+          opacity: inView ? 1 : 0,
+          transition: `opacity 0.6s ${ease} 0.4s`,
+        }}
+      >
+        <div className="vod-funnel-edge-count-inner">
+          <span className="vod-funnel-edge-count-number">{isActual ? 6 : 3}</span>
+          <span className="vod-funnel-edge-count-label">
+            {isActual ? "bidirectional dependencies" : "visible connections"}
+          </span>
+        </div>
+        <div className="vod-funnel-edge-count-sub">
+          {isActual
+            ? "All dependencies visible — the full constraint structure"
+            : "3 dependencies hidden by sequential ordering"}
+        </div>
+      </div>
+
+      {/* Lost edges panel */}
+      <div
+        className={`vod-funnel-lost-edges ${isActual ? "vod-funnel-lost-edges--hidden" : "vod-funnel-lost-edges--visible"}`}
+      >
+        <div className="vod-funnel-lost-edges-title">Lost in sequential evaluation</div>
+        <div className="vod-funnel-lost-edge-list">
+          {nonSeqEdges.map((edge) => {
+            const fromNode = nodes.find((n) => n.id === edge.from)!;
+            const toNode = nodes.find((n) => n.id === edge.to)!;
+            return (
+              <span key={`${edge.from}-${edge.to}`} className="vod-funnel-lost-edge-chip">
+                {fromNode.short} ↔ {toNode.short}
+              </span>
+            );
+          })}
         </div>
       </div>
 
       {/* Hover detail */}
-      <div className={`vod-funnel-detail ${hoveredEdge !== null ? "vod-funnel-detail--active" : "vod-funnel-detail--placeholder"}`}
-        style={{
-          opacity: inView ? 1 : 0,
-          transition: `opacity 0.4s ${ease} 1.4s`,
-        }}
+      <div
+        className={`vod-funnel-hover-detail ${hoveredEdgeIdx !== null ? "vod-funnel-hover-detail--active" : "vod-funnel-hover-detail--empty"}`}
       >
-        {hoveredEdge !== null ? (
-          <p className="vod-funnel-detail-text">{dependencies[hoveredEdge].label}</p>
+        {hoveredEdgeIdx !== null ? (
+          <span className="vod-funnel-hover-detail-text">{edges[hoveredEdgeIdx].label}</span>
         ) : (
-          <p className="vod-funnel-detail-placeholder">Hover an edge to see the bidirectional constraint</p>
+          <span className="vod-funnel-hover-detail-placeholder">
+            {isActual
+              ? "Hover an edge to see the bidirectional constraint"
+              : "Toggle to see how sequential ordering hides dependencies"}
+          </span>
         )}
       </div>
 
-      <div className="vod-funnel-callout"
-        style={{
-          opacity: inView ? 1 : 0,
-          transform: inView ? "translateY(0)" : "translateY(8px)",
-          transition: `opacity 0.6s ${ease} 2.0s, transform 0.6s ${ease} 2.0s`,
-        }}
+      {/* Node explanation panel */}
+      <div
+        className={`vod-funnel-node-explain ${selectedNode ? "vod-funnel-node-explain--visible" : "vod-funnel-node-explain--hidden"}`}
       >
-        <p className="vod-funnel-callout-text">
-          Sequential evaluation sees 3 forward connections. The actual structure has 6 bidirectional dependencies.
-        </p>
+        {selectedNode && (
+          <>
+            <div className="vod-funnel-node-explain-header">
+              <span className="vod-funnel-node-explain-name">{selectedNode.label}</span>
+              <span className="vod-funnel-node-explain-mode">
+                {isActual ? "Actual view" : "Sequential view"}
+              </span>
+            </div>
+            <div className="vod-funnel-node-explain-text">
+              {isActual ? selectedNode.actual : selectedNode.seq}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Callout */}
+      <div className="vod-funnel-callout">
+        <div className="vod-funnel-callout-text">
+          Sequential evaluation sees <strong>{isActual ? "6" : "3"}</strong> forward connections.
+          The actual structure has <strong>6</strong> bidirectional dependencies.
+          {isActual ? " — nothing is hidden." : " — half the information is invisible."}
+        </div>
       </div>
     </div>
   );
