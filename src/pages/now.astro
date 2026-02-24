@@ -8,6 +8,31 @@ import Base from '../layouts/Base.astro';
       <span class="section-number">Now</span>
       <hr />
     </div>
+
+    <p class="last-updated">Updated 24 February 2026</p>
+
+    <article class="now-entry">
+      <time class="entry-date" datetime="2026-02-24">Week of 24 Feb</time>
+      <h2 class="entry-title">Rebuilding "What Is Code?"</h2>
+      <p>
+        I'm rebuilding Paul Ford's landmark 2015 Bloomberg essay
+        <a href="https://www.bloomberg.com/graphics/2015-paul-ford-what-is-code/" target="_blank" rel="noopener">"What Is Code?"</a>
+        — the 38,000-word interactive piece that mass-explained software to a business audience and remains one of the best things ever published on the web.
+        Bloomberg open-sourced the original codebase (jQuery, D3&nbsp;v3, Backbone.js, Grunt),
+        and I'm doing a faithful modernization using Astro islands, GSAP ScrollTrigger, D3&nbsp;v7, and Web Components
+        — preserving the original's 18 interactive modules (circuit simulators, keyboard visualizers, DOM explorers, animated guide characters)
+        while replacing every piece of 2015-era tooling with its contemporary equivalent.
+      </p>
+      <p>
+        The interesting addition: an "explorable source layer" that makes the rebuild recursive.
+        Readers can pop open any interactive, see the annotated source behind it, and tweak parameters in real-time
+        — learning what code is by manipulating the code that renders the essay they're reading.
+        It turns a faithful homage into a new pedagogical argument about code itself.
+      </p>
+      <p>
+        It's a portfolio piece, a community tribute, and a reusable framework for interactive longform writing.
+      </p>
+    </article>
   </section>
 </Base>
 
@@ -39,5 +64,68 @@ import Base from '../layouts/Base.astro';
     flex: 1;
     border: none;
     border-top: 1px solid var(--border-mid);
+  }
+
+  /* "Updated ..." line beneath the header */
+  .last-updated {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0;
+  }
+
+  /* Each dated entry */
+  .now-entry {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .now-entry:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .entry-date {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .entry-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 1.25rem;
+    line-height: 1.3;
+  }
+
+  .now-entry p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    line-height: 1.75;
+    color: var(--text-mid);
+    margin: 0 0 1.25rem;
+  }
+
+  .now-entry p:last-child {
+    margin-bottom: 0;
+  }
+
+  .now-entry a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-glow);
+    transition: border-color 0.2s ease;
+  }
+
+  .now-entry a:hover {
+    border-bottom-color: var(--accent);
   }
 </style>

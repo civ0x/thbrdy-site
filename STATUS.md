@@ -149,7 +149,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 **Other remaining content:**
 - [ ] Pando essay (source file doesn't exist yet — `pando_research_report.md` is a research report, not an essay)
-- [ ] `/now` page content (currently a stub)
+- [x] `/now` page content — first entry ("What Is Code?" rebuild), weekly-update convention established
 
 **Exit criteria:** All essays render with interactive components hydrated. All nav links resolve. Build passes clean.
 
@@ -162,7 +162,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 complete. Open Graph + Twitter Card meta tags live on all pages (default OG image at `public/images/og-default.png`, canonical URLs, `og:type` = `article` on essays). Six published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands, fully integrated into MDX; essay revised with patronage/LLM case study, PR/FAQ protocol clarification, and expanded Fraunhofer discussion. VoDCaseComparison and VoDMaturitySwitch updated to include the patronage failure case. Build produces 10 pages in ~2s.
+Phase 4 complete. Open Graph + Twitter Card meta tags live on all pages (default OG image at `public/images/og-default.png`, canonical URLs, `og:type` = `article` on essays). Six published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands, fully integrated into MDX; essay revised with patronage/LLM case study, PR/FAQ protocol clarification, and expanded Fraunhofer discussion. VoDCaseComparison and VoDMaturitySwitch updated to include the patronage failure case. `/now` page populated with first dated entry ("What Is Code?" rebuild) and weekly-update convention (newest-first `<article>` blocks, "Week of" date labels, separator lines between entries). Build produces 10 pages in ~1.2s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds
