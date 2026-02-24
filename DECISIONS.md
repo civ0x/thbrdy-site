@@ -80,6 +80,17 @@
 **Rationale:** `PostLayout.astro` applies `.post__content :global(p) { margin: 0 0 1.25rem }` to all paragraph elements inside essay content. This has higher specificity than bare class selectors in island injected `<style>` tags, silently overriding component margins. Discovered when `VoDLegibilityGap`'s annotation margin had no visible effect despite correct CSS. Switching from `<p>` to `<div>` sidesteps the specificity conflict entirely.
 **Constraint:** Only applies to elements that need non-default margins. Standard `<p>` tags inside islands that are fine with the 1.25rem bottom margin can remain as `<p>`.
 
+## 016: VoD Case Comparison three-column layout with failure case
+**Date:** 2026-02-24
+**Decision:** Expand VoDCaseComparison from a two-column success comparison (Neptune ML / AstraZeneca) to a three-column layout: success (teal) / failure (red) / success (green). The patronage/LLM case uses the same four-stage pipeline but with "Opportunity Starved" as the final stage, styled in red. The parallels section uses a four-column table (mechanism + three cases) instead of the original bridge-icon layout.
+**Rationale:** The essay revision added the Amazon LLM patronage case between Neptune ML and AstraZeneca in Section 05. This case is the essay's most important evidence — the mechanism operating correctly and producing the wrong answer. The diagram needed to show it. Placing the failure case between two successes creates a visual sandwich that makes the contrast immediate. The red semantic color distinguishes the failure without explanation.
+**Constraint:** Descriptions shortened across all three columns to prevent text wrapping in the three-column layout. Mobile breakpoint raised from 560px to 720px to stack earlier.
+
+## 017: UTC timezone for date formatting in PostLayout
+**Date:** 2026-02-24
+**Decision:** Add `timeZone: 'UTC'` to the `toLocaleDateString` call in PostLayout.astro.
+**Rationale:** Astro parses frontmatter dates like `date: 2026-02-24` as midnight UTC. Without an explicit timezone, `toLocaleDateString` renders in the build server's local timezone, which rolls dates back one day for any timezone behind UTC. This caused Feb 24 to render as "February 23, 2026."
+
 ## 014: @resvg/resvg-js for OG image generation
 **Date:** 2026-02-22
 **Decision:** Use `@resvg/resvg-js` as a devDependency for generating the default Open Graph image (1200×630 PNG) from an SVG template. One-shot script in `scripts/generate-og-image.js`, not a build step.

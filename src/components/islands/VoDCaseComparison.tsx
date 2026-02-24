@@ -5,26 +5,34 @@ interface Stage {
   label: string;
   desc: string;
   isFinal?: boolean;
+  isFailed?: boolean;
 }
 
 const awsStages: Stage[] = [
-  { label: "Research Artifact", desc: "GNN/DGL — strong academic results, no productization path" },
-  { label: "PR/FAQ Translation", desc: "Converted research language → product language" },
-  { label: "Business Review", desc: "Structured visibility through leadership cadence" },
-  { label: "Shipped Feature", desc: "Neptune ML — production, publicly documented", isFinal: true },
+  { label: "Research Artifact", desc: "GNN/DGL — strong results, no product path" },
+  { label: "PR/FAQ Translation", desc: "Research → product language" },
+  { label: "Business Review", desc: "Visibility via leadership cadence" },
+  { label: "Shipped Feature", desc: "Neptune ML — production", isFinal: true },
+];
+
+const patronageStages: Stage[] = [
+  { label: "Research Artifact", desc: "Scaling laws understood, 100B roadmap" },
+  { label: "PR/FAQ Translation", desc: "Built for search, ads, voice" },
+  { label: "Planning Review", desc: "SageMaker ($500M+ ARR) prioritized" },
+  { label: "Opportunity Starved", desc: "30 HC, $15M — paradigm shift filtered", isFinal: true, isFailed: true },
 ];
 
 const azStages: Stage[] = [
-  { label: "Research Candidate", desc: "Drug candidate with preclinical promise" },
-  { label: "5R Joint Assessment", desc: "Right Target, Tissue, Safety, Patient, Commercial" },
-  { label: "Portfolio Review", desc: "Joint scientific-clinical-commercial evaluation" },
-  { label: "Approved Drug", desc: "Phase III completion, regulatory approval", isFinal: true },
+  { label: "Research Candidate", desc: "Preclinical promise" },
+  { label: "5R Joint Assessment", desc: "Target, Tissue, Safety, Patient, Commercial" },
+  { label: "Portfolio Review", desc: "Joint scientific-commercial evaluation" },
+  { label: "Approved Drug", desc: "Phase III → regulatory approval", isFinal: true },
 ];
 
 const parallels = [
-  { left: "Research Artifact", right: "Research Candidate", mechanism: "Maturity Gate" },
-  { left: "PR/FAQ", right: "5R Assessment", mechanism: "Boundary Object" },
-  { left: "Business Review", right: "Portfolio Review", mechanism: "Trading Zone" },
+  { mechanism: "Maturity Gate", aws: "Research Artifact", patronage: "Research Artifact", az: "Research Candidate" },
+  { mechanism: "Boundary Object", aws: "PR/FAQ", patronage: "PR/FAQ (worked)", az: "5R Assessment" },
+  { mechanism: "Trading Zone", aws: "Business Review", patronage: "Planning Review (filtered)", az: "Portfolio Review" },
 ];
 
 const ease = "cubic-bezier(0.25, 0.46, 0.45, 0.94)";
@@ -33,22 +41,22 @@ function CasePipeline({
   domain,
   name,
   color,
-  colorDim,
   stages,
   headerClass,
   nameClass,
   inView,
   baseDelay,
+  failedCase,
 }: {
   domain: string;
   name: string;
   color: string;
-  colorDim: string;
   stages: Stage[];
   headerClass: string;
   nameClass: string;
   inView: boolean;
   baseDelay: number;
+  failedCase?: boolean;
 }) {
   return (
     <div className="vod-case-pipeline">
@@ -71,21 +79,29 @@ function CasePipeline({
               style={{
                 opacity: inView ? 1 : 0,
                 transition: `opacity 0.4s ${ease} ${baseDelay + 0.1 + i * 0.12}s`,
+                color: stage.isFailed ? "var(--red)" : undefined,
               }}
             >
               ↓
             </div>
           )}
           <div
-            className="vod-case-stage"
+            className={`vod-case-stage ${stage.isFailed ? "vod-case-stage--failed" : ""}`}
             style={{
-              borderLeft: stage.isFinal ? `3px solid ${color}` : "3px solid transparent",
+              borderLeft: stage.isFinal
+                ? `3px solid ${stage.isFailed ? "var(--red)" : color}`
+                : "3px solid transparent",
               opacity: inView ? 1 : 0,
               transform: inView ? "translateY(0)" : "translateY(12px)",
               transition: `opacity 0.5s ${ease} ${baseDelay + 0.1 + i * 0.12}s, transform 0.5s ${ease} ${baseDelay + 0.1 + i * 0.12}s`,
             }}
           >
-            <div className="vod-case-stage-label">{stage.label}</div>
+            <div
+              className="vod-case-stage-label"
+              style={{ color: stage.isFailed ? "var(--red)" : undefined }}
+            >
+              {stage.label}
+            </div>
             <div className="vod-case-stage-desc">{stage.desc}</div>
           </div>
         </div>
@@ -101,7 +117,7 @@ export default function VoDCaseComparison() {
     <div ref={ref} className="vod-case-root">
       <style>{`
         .vod-case-root {
-          max-width: 720px;
+          max-width: 900px;
           margin: 2.5rem auto;
         }
         .vod-case-header {
@@ -143,12 +159,12 @@ export default function VoDCaseComparison() {
           font-size: 0.875rem;
           color: ${tokens.textMuted};
           line-height: 1.4;
-          max-width: 200px;
+          max-width: 220px;
         }
         .vod-case-cases {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 24px;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 16px;
           margin-bottom: 2rem;
         }
         .vod-case-pipeline {
@@ -157,7 +173,7 @@ export default function VoDCaseComparison() {
           gap: 8px;
         }
         .vod-case-case-header {
-          padding: 12px 16px;
+          padding: 12px 14px;
           border-radius: 8px;
           display: flex;
           flex-direction: column;
@@ -166,6 +182,10 @@ export default function VoDCaseComparison() {
         .vod-case-case-header--aws {
           background: var(--teal-dim);
           border-left: 3px solid var(--teal);
+        }
+        .vod-case-case-header--patronage {
+          background: var(--red-dim);
+          border-left: 3px solid var(--red);
         }
         .vod-case-case-header--az {
           background: var(--green-dim);
@@ -181,13 +201,14 @@ export default function VoDCaseComparison() {
         }
         .vod-case-case-name {
           font-family: ${tokens.sans};
-          font-size: 0.875rem;
+          font-size: 0.8rem;
           font-weight: 700;
         }
         .vod-case-case-name--aws { color: var(--teal); }
+        .vod-case-case-name--patronage { color: var(--red); }
         .vod-case-case-name--az { color: var(--green); }
         .vod-case-stage {
-          padding: 10px 16px;
+          padding: 10px 14px;
           border-radius: 6px;
           background: ${tokens.bgWarm};
           transition: background 0.2s ease;
@@ -195,15 +216,21 @@ export default function VoDCaseComparison() {
         .vod-case-stage:hover {
           background: ${tokens.bgCard};
         }
+        .vod-case-stage--failed {
+          background: var(--red-dim);
+        }
+        .vod-case-stage--failed:hover {
+          background: var(--red-dim);
+        }
         .vod-case-stage-label {
           font-family: ${tokens.sans};
-          font-size: 0.8125rem;
+          font-size: 0.75rem;
           font-weight: 600;
           color: ${tokens.text};
         }
         .vod-case-stage-desc {
           font-family: ${tokens.sans};
-          font-size: 0.6875rem;
+          font-size: 0.625rem;
           color: ${tokens.textMuted};
           line-height: 1.4;
           margin-top: 2px;
@@ -218,10 +245,37 @@ export default function VoDCaseComparison() {
         .vod-case-parallels {
           margin-bottom: 2rem;
         }
+        .vod-case-parallels-header {
+          display: grid;
+          grid-template-columns: 100px 1fr 1fr 1fr;
+          gap: 8px;
+          padding: 8px 0;
+          border-bottom: 2px solid ${tokens.borderMid};
+          margin-bottom: 4px;
+        }
+        .vod-case-parallels-header-mechanism {
+          font-family: ${tokens.mono};
+          font-size: 0.55rem;
+          font-weight: 500;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: ${tokens.textMuted};
+        }
+        .vod-case-parallels-header-domain {
+          font-family: ${tokens.mono};
+          font-size: 0.55rem;
+          font-weight: 500;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          text-align: center;
+        }
+        .vod-case-parallels-header-domain--aws { color: var(--teal); }
+        .vod-case-parallels-header-domain--patronage { color: var(--red); }
+        .vod-case-parallels-header-domain--az { color: var(--green); }
         .vod-case-parallel {
           display: grid;
-          grid-template-columns: 1fr auto 1fr;
-          gap: 12px;
+          grid-template-columns: 100px 1fr 1fr 1fr;
+          gap: 8px;
           align-items: center;
           padding: 8px 0;
           border-bottom: 1px solid ${tokens.border};
@@ -229,53 +283,23 @@ export default function VoDCaseComparison() {
         .vod-case-parallel:last-child {
           border-bottom: none;
         }
-        .vod-case-parallel-left {
-          font-family: ${tokens.sans};
-          font-size: 0.75rem;
-          font-weight: 500;
-          text-align: right;
-          color: var(--teal);
-        }
-        .vod-case-parallel-right {
-          font-family: ${tokens.sans};
-          font-size: 0.75rem;
-          font-weight: 500;
-          text-align: left;
-          color: var(--green);
-        }
-        .vod-case-parallel-bridge {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 2px;
-        }
-        .vod-case-parallel-bridge-icon {
-          width: 24px;
-          height: 1px;
-          background: ${tokens.borderMid};
-          position: relative;
-        }
-        .vod-case-parallel-bridge-icon::before,
-        .vod-case-parallel-bridge-icon::after {
-          content: '';
-          position: absolute;
-          top: -2px;
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background: ${tokens.borderMid};
-        }
-        .vod-case-parallel-bridge-icon::before { left: -2px; }
-        .vod-case-parallel-bridge-icon::after { right: -2px; }
         .vod-case-parallel-mechanism {
           font-family: ${tokens.mono};
-          font-size: 0.55rem;
+          font-size: 0.6rem;
           font-weight: 500;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
           color: ${tokens.accent};
-          white-space: nowrap;
         }
+        .vod-case-parallel-cell {
+          font-family: ${tokens.sans};
+          font-size: 0.7rem;
+          font-weight: 500;
+          text-align: center;
+        }
+        .vod-case-parallel-cell--aws { color: var(--teal); }
+        .vod-case-parallel-cell--patronage { color: var(--red); }
+        .vod-case-parallel-cell--az { color: var(--green); }
         .vod-case-callout {
           padding: 14px 18px;
           background: ${tokens.accentDim};
@@ -291,10 +315,10 @@ export default function VoDCaseComparison() {
         .vod-case-mobile-parallels {
           display: none;
         }
-        @media (max-width: 560px) {
+        @media (max-width: 720px) {
           .vod-case-cases {
             grid-template-columns: 1fr;
-            gap: 32px;
+            gap: 28px;
           }
           .vod-case-convergence-value {
             font-size: 3rem;
@@ -320,22 +344,37 @@ export default function VoDCaseComparison() {
             margin-bottom: 10px;
           }
           .vod-case-mobile-parallel-row {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
           }
           .vod-case-mobile-parallel-row:last-child {
             margin-bottom: 0;
           }
-          .vod-case-mobile-parallel-pair {
-            font-family: ${tokens.sans};
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: ${tokens.text};
-          }
-          .vod-case-mobile-parallel-label {
+          .vod-case-mobile-parallel-mechanism {
             font-family: ${tokens.mono};
-            font-size: 0.6rem;
-            color: ${tokens.textMuted};
-            margin-top: 2px;
+            font-size: 0.55rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: ${tokens.accent};
+            margin-bottom: 4px;
+          }
+          .vod-case-mobile-parallel-items {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+          }
+          .vod-case-mobile-parallel-item {
+            font-family: ${tokens.sans};
+            font-size: 0.7rem;
+            font-weight: 500;
+          }
+          .vod-case-mobile-parallel-item--aws { color: var(--teal); }
+          .vod-case-mobile-parallel-item--patronage { color: var(--red); }
+          .vod-case-mobile-parallel-item--az { color: var(--green); }
+        }
+        @media (max-width: 420px) {
+          .vod-case-case-name {
+            font-size: 0.75rem;
           }
         }
       `}</style>
@@ -350,7 +389,7 @@ export default function VoDCaseComparison() {
         }}
       >
         <div className="vod-case-eyebrow">Cross-Domain Evidence</div>
-        <h3 className="vod-case-title">Same mechanism. Same magnitude.</h3>
+        <h3 className="vod-case-title">Same mechanism. Same magnitude. One blind spot.</h3>
       </div>
 
       {/* Hero 6× convergence */}
@@ -364,17 +403,16 @@ export default function VoDCaseComparison() {
       >
         <span className="vod-case-convergence-value">6×</span>
         <span className="vod-case-convergence-label">
-          improvement in transition rate, independently achieved across two radically different domains
+          improvement in transition rate — when the evaluative frame could see the opportunity
         </span>
       </div>
 
-      {/* Two-column case layout */}
+      {/* Three-column case layout */}
       <div className="vod-case-cases">
         <CasePipeline
           domain="AI Research"
-          name="AWS AI Lab → Neptune ML"
+          name="AWS AI → Neptune ML"
           color="var(--teal)"
-          colorDim="var(--teal-dim)"
           stages={awsStages}
           headerClass="vod-case-case-header--aws"
           nameClass="vod-case-case-name--aws"
@@ -382,15 +420,25 @@ export default function VoDCaseComparison() {
           baseDelay={0.2}
         />
         <CasePipeline
+          domain="AI Research"
+          name="AWS AI → LLMs"
+          color="var(--red)"
+          stages={patronageStages}
+          headerClass="vod-case-case-header--patronage"
+          nameClass="vod-case-case-name--patronage"
+          inView={inView}
+          baseDelay={0.3}
+          failedCase
+        />
+        <CasePipeline
           domain="Pharma"
-          name="AstraZeneca → 5R Framework"
+          name="AstraZeneca → 5R"
           color="var(--green)"
-          colorDim="var(--green-dim)"
           stages={azStages}
           headerClass="vod-case-case-header--az"
           nameClass="vod-case-case-name--az"
           inView={inView}
-          baseDelay={0.3}
+          baseDelay={0.4}
         />
       </div>
 
@@ -403,14 +451,18 @@ export default function VoDCaseComparison() {
           transition: `opacity 0.6s ${ease} 1.0s, transform 0.6s ${ease} 1.0s`,
         }}
       >
+        <div className="vod-case-parallels-header">
+          <span className="vod-case-parallels-header-mechanism">Mechanism</span>
+          <span className="vod-case-parallels-header-domain vod-case-parallels-header-domain--aws">Neptune ML</span>
+          <span className="vod-case-parallels-header-domain vod-case-parallels-header-domain--patronage">LLM / Patronage</span>
+          <span className="vod-case-parallels-header-domain vod-case-parallels-header-domain--az">AstraZeneca</span>
+        </div>
         {parallels.map((p, i) => (
           <div key={i} className="vod-case-parallel">
-            <span className="vod-case-parallel-left">{p.left}</span>
-            <div className="vod-case-parallel-bridge">
-              <div className="vod-case-parallel-bridge-icon" />
-              <span className="vod-case-parallel-mechanism">{p.mechanism}</span>
-            </div>
-            <span className="vod-case-parallel-right">{p.right}</span>
+            <span className="vod-case-parallel-mechanism">{p.mechanism}</span>
+            <span className="vod-case-parallel-cell vod-case-parallel-cell--aws">{p.aws}</span>
+            <span className="vod-case-parallel-cell vod-case-parallel-cell--patronage">{p.patronage}</span>
+            <span className="vod-case-parallel-cell vod-case-parallel-cell--az">{p.az}</span>
           </div>
         ))}
       </div>
@@ -426,10 +478,12 @@ export default function VoDCaseComparison() {
         <div className="vod-case-mobile-parallels-title">Structural Parallels</div>
         {parallels.map((p, i) => (
           <div key={i} className="vod-case-mobile-parallel-row">
-            <div className="vod-case-mobile-parallel-pair">
-              {p.left} ↔ {p.right}
+            <div className="vod-case-mobile-parallel-mechanism">{p.mechanism}</div>
+            <div className="vod-case-mobile-parallel-items">
+              <div className="vod-case-mobile-parallel-item vod-case-mobile-parallel-item--aws">{p.aws}</div>
+              <div className="vod-case-mobile-parallel-item vod-case-mobile-parallel-item--patronage">{p.patronage}</div>
+              <div className="vod-case-mobile-parallel-item vod-case-mobile-parallel-item--az">{p.az}</div>
             </div>
-            <div className="vod-case-mobile-parallel-label">→ {p.mechanism}</div>
           </div>
         ))}
       </div>
@@ -444,9 +498,9 @@ export default function VoDCaseComparison() {
         }}
       >
         <div className="vod-case-callout-text">
-          Different domains. Different vocabularies. Structurally identical interventions.
-          The convergence on 6× suggests this may be the approximate ceiling for organizational
-          intervention against coupled-question failure.
+          Two successes, one failure — all using the same three-stage mechanism. The 6× improvement
+          holds when the evaluative frame can see the opportunity. When it can't, the mechanism
+          operates correctly and produces the wrong answer.
         </div>
       </div>
     </div>

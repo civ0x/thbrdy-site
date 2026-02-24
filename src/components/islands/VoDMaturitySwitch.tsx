@@ -22,6 +22,15 @@ const cases: CaseStudy[] = [
       "Expectations outran capability by decades. Symbolic AI couldn't deliver on promises, triggering a funding collapse that set the field back a generation. The research needed protection from premature commercial pressure — but that's obvious at this maturity level.",
   },
   {
+    id: "amazon-llm",
+    name: "Amazon LLM Effort",
+    short: "Amazon LLM",
+    position: 30,
+    correct: "protect",
+    narrative:
+      "Scaling laws and the transformer architecture were well-understood, with a roadmap to 100-billion-parameter models. But a patronage funding model forced the team to build products for service GMs — training 500-million-parameter models distilled to 70 million while the frontier was at 175 billion. At maturity comparable to deep learning in 2012, the correct action was to protect and invest at scale, not force premature integration through patronage. The funding structure couldn't express 'invest in capability that no current customer can evaluate.'",
+  },
+  {
     id: "deeplearn",
     name: "Deep Learning 2012",
     short: "Deep Learning",
@@ -276,7 +285,7 @@ export default function VoDMaturitySwitch() {
 
   // Score color class
   const scoreColor =
-    score >= 9
+    score >= 10
       ? "var(--green)"
       : score >= bestPossible
         ? "var(--accent)"
@@ -313,16 +322,17 @@ export default function VoDMaturitySwitch() {
     calloutHtml =
       "The best possible score is <strong>" +
       bestPossible +
-      " out of 9</strong>. " +
-      "Deep learning integrated successfully at maturity 35 while cleantech at 38 was destroyed by premature integration. " +
+      " out of 10</strong>. " +
+      "Amazon\u2019s LLM effort at 30 needed protection \u2014 just five points below deep learning\u2019s successful integration at 35. " +
+      "Cleantech at 38 was destroyed where deep learning succeeded. " +
       "FAIR\u2019s world models at 48 needed integration while Watson Health at 52 needed more protection. " +
-      "The switching point depends on domain-specific factors \u2014 reliability requirements, capital intensity, market tolerance \u2014 " +
+      "The switching point depends on domain-specific factors \u2014 reliability requirements, capital intensity, scale investment \u2014 " +
       "that a maturity metric alone cannot capture.";
   } else {
     calloutHtml =
       "You\u2019re at <strong>" +
       score +
-      " out of 9</strong>. " +
+      " out of 10</strong>. " +
       "The maximum achievable is <strong>" +
       bestPossible +
       "</strong> \u2014 " +
@@ -731,7 +741,7 @@ export default function VoDMaturitySwitch() {
           When to protect. When to integrate.
         </h3>
         <div className="vod-maturity-subtitle">
-          Drag the threshold to find the switching point. Try to get all nine
+          Drag the threshold to find the switching point. Try to get all ten
           right.
         </div>
       </div>
@@ -852,7 +862,7 @@ export default function VoDMaturitySwitch() {
           >
             {score}
           </span>
-          <span className="vod-maturity-score-total">/ 9</span>
+          <span className="vod-maturity-score-total">/ 10</span>
           <span className="vod-maturity-score-label">
             correctly classified
           </span>

@@ -1,6 +1,6 @@
 # thbrdy.dev — Migration Status
 
-Last updated: 2026-02-23
+Last updated: 2026-02-24
 
 ## Migration Roadmap
 
@@ -123,6 +123,16 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] Build passes clean (9 pages, ~1.2s, zero errors)
 - [x] MDX essay file creation + island integration (`valley-of-death.mdx` with all 6 islands, 7 SectionDividers, 2 PullQuotes)
 
+**VoD essay revision — patronage case, PR/FAQ protocol, diagram updates (2026-02-24):**
+- [x] Revision 1: Clarified PR/FAQ as cross-functional protocol vs. single-author artifact (Section 04), with two degraded forms
+- [x] Revision 2: Added Amazon LLM patronage funding case study to Section 05 — 30 HC, $15M compute, patronage model shaping science, Anthropic investment hedge named explicitly
+- [x] Revision 3: Expanded Fraunhofer 30/70 discussion (Section 07), added research engineer qualification (Section 06)
+- [x] `VoDCaseComparison.tsx` updated: three-column layout (Neptune ML success / LLM patronage failure / AstraZeneca success), red failure column, updated parallels table and callout
+- [x] `VoDMaturitySwitch.tsx` updated: added Amazon LLM case at position 30 (protect), total cases 9→10, best possible 7→8
+- [x] Fixed UTC timezone bug in `PostLayout.astro` date formatting (dates were rendering one day behind)
+- [x] Essay date updated to 2026-02-24
+- [x] Build passes clean (10 pages, ~2s, zero errors)
+
 **VoD LegibilityGap fix (2026-02-23):**
 - [x] Replaced SVG bridge overlay with CSS Grid layout — bridges are now regular grid cells between node columns, eliminating all coordinate/scaling issues
 - [x] Fixed node text alignment (center-aligned), node height consistency (`min-height: 54px`), connector centering
@@ -152,7 +162,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 complete. Open Graph + Twitter Card meta tags live on all pages (default OG image at `public/images/og-default.png`, canonical URLs, `og:type` = `article` on essays). Six published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands, fully integrated into MDX. Build produces 10 pages in ~1.2s.
+Phase 4 complete. Open Graph + Twitter Card meta tags live on all pages (default OG image at `public/images/og-default.png`, canonical URLs, `og:type` = `article` on essays). Six published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands, fully integrated into MDX; essay revised with patronage/LLM case study, PR/FAQ protocol clarification, and expanded Fraunhofer discussion. VoDCaseComparison and VoDMaturitySwitch updated to include the patronage failure case. Build produces 10 pages in ~2s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds
