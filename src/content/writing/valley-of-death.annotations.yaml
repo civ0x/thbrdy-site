@@ -237,11 +237,11 @@ references:
   - key: ferguson-2014
     pattern: "Ferguson's 2014 analysis"
     section: intro
-    title: "Creating Something from Nothing: Resource Construction through Entrepreneurial Bricolage"
+    title: "A Policy Framed Analysis of the Valley of Death in U.S. University Technology Transfer"
     authors: "Richard Ferguson"
     year: 2014
-    venue: "Research Policy"
-    url: ~
+    venue: "Doctoral Dissertation, University of Southern Mississippi"
+    url: "https://aquila.usm.edu/dissertations/261/"
     summary: >
       Empirical analysis finding the valley-of-death funding gap perception
       "inconsistent with empirical evidence." Argues that the gap narrative
@@ -278,7 +278,7 @@ references:
     authors: "European Association of Research and Technology Organisations"
     year: ~
     venue: "EARTO Recommendations"
-    url: ~
+    url: "https://www.earto.eu/wp-content/uploads/The_TRL_Scale_as_a_R_I_Policy_Tool_-_EARTO_Recommendations_-_Final.pdf"
     summary: >
       Analysis of European technology transfer programs finding that even where
       governments increased financing for the valley-of-death phase, "the
@@ -295,8 +295,8 @@ references:
     title: "Technology Readiness Levels: Shortcomings and Improvement Opportunities"
     authors: "Alison Olechowski et al."
     year: 2020
-    venue: "Systems Engineering"
-    url: ~
+    venue: "Systems Engineering, Vol. 23(4), pp. 395–408"
+    url: "https://incose.onlinelibrary.wiley.com/doi/abs/10.1002/sys.21533"
     summary: >
       Empirical study surveying practitioners across seven organizations.
       Identified fifteen critical shortcomings of TRL. Top-ranked problems were
@@ -316,8 +316,8 @@ references:
     title: "Stage-Gate Systems: A New Tool for Managing New Products"
     authors: "Robert G. Cooper"
     year: 1990
-    venue: "Business Horizons"
-    url: ~
+    venue: "Business Horizons, Vol. 33(3), pp. 44–54"
+    url: "https://ideas.repec.org/a/eee/bushor/v33y1990i3p44-54.html"
     summary: >
       Original articulation of the stage-gate methodology for product
       development. Projects pass through stages separated by management review
@@ -369,11 +369,11 @@ references:
   - key: mlsys-2023
     pattern: "2023 MLSys paper"
     section: "02"
-    title: ~
-    authors: ~
+    title: "Transcending Runtime-Memory Tradeoffs in Checkpointing by being Fusion Aware"
+    authors: "Horace He & Shangdi Yu"
     year: 2023
-    venue: "MLSys"
-    url: ~
+    venue: "MLSys 2023"
+    url: "https://proceedings.mlsys.org/paper_files/paper/2023/file/8a27bb69950c0b46cdb36d10e5514cc8-Paper-mlsys2023.pdf"
     summary: >
       Demonstrated that making compiler checkpointing decisions aware of
       downstream fusion opportunities improves throughput by 12% and enables
@@ -447,8 +447,8 @@ references:
     title: "Institutional Ecology, 'Translations' and Boundary Objects: Amateurs and Professionals in Berkeley's Museum of Vertebrate Zoology, 1907–39"
     authors: "Susan Leigh Star & James R. Griesemer"
     year: 1989
-    venue: "Social Studies of Science"
-    url: ~
+    venue: "Social Studies of Science, Vol. 19, pp. 387–420"
+    url: "https://journals.sagepub.com/doi/10.1177/030631289019003001"
     summary: >
       Introduces the concept of "boundary objects" — artifacts that maintain
       coherent identity across communities while being interpreted differently
@@ -468,7 +468,7 @@ references:
     authors: "Hirotaka Takeuchi & Ikujiro Nonaka"
     year: 1986
     venue: "Harvard Business Review"
-    url: ~
+    url: "https://hbr.org/1986/01/the-new-new-product-development-game"
     summary: >
       Foundational critique of sequential "relay race" product development.
       Argues for overlapping, cross-functional "rugby" approaches where
@@ -483,11 +483,11 @@ references:
   - key: gao-darpa
     pattern: "GAO study"
     section: "04"
-    title: ~
+    title: "Key Factors Drive Transition of Technologies, but Better Training and Data Dissemination Can Increase Success"
     authors: "Government Accountability Office"
-    year: ~
-    venue: "GAO Report"
-    url: ~
+    year: 2015
+    venue: "GAO-16-5"
+    url: "https://www.gao.gov/products/gao-16-5"
     summary: >
       Analysis of DARPA program outcomes finding that demand for the technology
       — not funding or organizational structure — was the primary predictor of
@@ -501,11 +501,11 @@ references:
   - key: morgan-astrazeneca
     pattern: "Morgan et al."
     section: sources
-    title: ~
-    authors: "Morgan et al."
-    year: ~
-    venue: ~
-    url: ~
+    title: "Impact of a Five-Dimensional Framework on R&D Productivity at AstraZeneca"
+    authors: "Paul Morgan et al."
+    year: 2018
+    venue: "Nature Reviews Drug Discovery, Vol. 17, pp. 167–181"
+    url: "https://www.nature.com/articles/nrd.2017.244"
     summary: >
       Published success-rate data for AstraZeneca's 5R Framework implementation.
       Documented the improvement from 4% to 23% drug development success rates
@@ -522,8 +522,8 @@ references:
     title: "Diagnosing the Decline in Pharmaceutical R&D Efficiency"
     authors: "Jack W. Scannell et al."
     year: 2012
-    venue: "Nature Reviews Drug Discovery"
-    url: ~
+    venue: "Nature Reviews Drug Discovery, Vol. 11(3), pp. 191–200"
+    url: "https://www.nature.com/articles/nrd3681"
     summary: >
       Documents "Eroom's Law" — the observation that drug discovery costs
       roughly double every nine years despite technological improvements.
@@ -559,11 +559,11 @@ references:
   - key: watzinger-bell-breakup
     pattern: "Watzinger & Schnitzer"
     section: sources
-    title: ~
+    title: "The Breakup of the Bell System and its Impact on US Innovation"
     authors: "Martin Watzinger & Monika Schnitzer"
-    year: ~
-    venue: ~
-    url: ~
+    year: 2022
+    venue: "CEPR Discussion Paper No. 17635"
+    url: "https://www.monika-schnitzer.com/uploads/4/9/4/1/49415675/watzinger_schnitzer_breakup_of_bell.pdf"
     summary: >
       Econometric study finding that the 1984 Bell System breakup increased
       overall innovation, even though it reduced Bell Labs' research output.
@@ -579,11 +579,11 @@ references:
   - key: uc-berkeley-pasteur-2024
     pattern: "UC Berkeley finding"
     section: "06"
-    title: ~
-    authors: ~
+    title: "The Rise of Pasteur's Quadrant Researchers"
+    authors: "Lee Fleming et al."
     year: 2024
     venue: "Science"
-    url: ~
+    url: "https://www.science.org/doi/10.1126/science.adx3736"
     summary: >
       Study of "Pasteur's Quadrant" researchers — people who both publish
       papers and file patents. Found they produce work that is more novel and
@@ -598,11 +598,11 @@ references:
   - key: markham-2002
     pattern: "Markham"
     section: sources
-    title: ~
+    title: "Moving Technology from Lab to Market"
     authors: "Stephen K. Markham"
     year: 2002
-    venue: "Research-Technology Management"
-    url: ~
+    venue: "Research-Technology Management, Vol. 45(6), pp. 31–42"
+    url: "https://doi.org/10.1080/08956308.2002.11671518"
     summary: >
       Early empirical analysis of the valley of death in technology transfer.
       Identified organizational and communication barriers as primary obstacles,

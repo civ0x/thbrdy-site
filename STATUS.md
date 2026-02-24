@@ -147,6 +147,15 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] Essay published (`draft: false`)
 - [x] Build passes clean (9 pages, ~1s, zero errors)
 
+**Annotation system (2026-02-24):**
+- [x] `Annotation.tsx` shared island component — three modes (term/reference/link), desktop hover popovers, mobile bottom-sheet, viewport-aware positioning, keyboard accessible, reduced-motion aware
+- [x] `remark-annotations.mjs` remark plugin — resolves `[[mode:key|text]]` markers in MDX against companion YAML at build time, auto-injects Annotation import
+- [x] `valley-of-death.annotations.yaml` companion file — 17 term definitions, 20 reference summaries, 1 enriched link
+- [x] 38 annotation markers placed in `valley-of-death.mdx` (first substantive use of each term/reference)
+- [x] `js-yaml` added as devDependency (build-time only, no runtime impact)
+- [x] `astro.config.mjs` updated to register remark plugin
+- [x] Build passes clean (10 pages, ~1.2s, zero errors)
+
 **Other remaining content:**
 - [ ] Pando essay (source file doesn't exist yet — `pando_research_report.md` is a research report, not an essay)
 - [x] `/now` page content — first entry ("What Is Code?" rebuild), weekly-update convention established
@@ -156,13 +165,14 @@ Sequential — do NOT parallelize. Use Plan mode.
 ### Phase 5: Polish (not yet scoped)
 - [ ] Self-host fonts (eliminate Google Fonts render-blocking request)
 - [x] Open Graph / social meta tags
+- [x] Inline annotation system (VoD essay; infrastructure reusable for other essays)
 - [ ] RSS feed
 - [ ] Lighthouse audit + performance pass
 - [ ] Potential about page condensation (full CV may be too long — judge after seeing it rendered)
 
 ## Current State
 
-Phase 4 complete. Open Graph + Twitter Card meta tags live on all pages (default OG image at `public/images/og-default.png`, canonical URLs, `og:type` = `article` on essays). Six published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands, fully integrated into MDX; essay revised with patronage/LLM case study, PR/FAQ protocol clarification, and expanded Fraunhofer discussion. VoDCaseComparison and VoDMaturitySwitch updated to include the patronage failure case. `/now` page populated with first dated entry ("What Is Code?" rebuild) and weekly-update convention (newest-first `<article>` blocks, "Week of" date labels, separator lines between entries). Build produces 10 pages in ~1.2s.
+Phase 4 complete, Phase 5 in progress. Open Graph + Twitter Card meta tags live on all pages (default OG image at `public/images/og-default.png`, canonical URLs, `og:type` = `article` on essays). Six published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands + 38 inline annotations (17 term definitions, 20 reference summaries, 1 enriched link); essay revised with patronage/LLM case study, PR/FAQ protocol clarification, and expanded Fraunhofer discussion. Annotation system infrastructure (`Annotation.tsx`, `remark-annotations.mjs`, companion YAML pattern) is reusable for other essays — add a `[slug].annotations.yaml` and markers to any MDX. `/now` page populated with first dated entry ("What Is Code?" rebuild) and weekly-update convention (newest-first `<article>` blocks, "Week of" date labels, separator lines between entries). Build produces 10 pages in ~1.2s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds
