@@ -1,0 +1,203 @@
+# Scholion Schema Failure Log — Chen et al. (2025) Extractions
+# Covers both chen2025-mortality-predictors.yaml and chen2025-symptom-chronology.yaml
+# Documents cases where schema v0.1 couldn't adequately represent the argument structure
+#
+# Date: 2026-02-24
+# Annotator: claude-opus-4-6 + thomas-brady
+
+failures:
+
+  # --- Failure 1: Weighted support / epistemic strength ---
+
+  - id: "SF-001"
+    schema_limitation: "#4 — Weighted support"
+    severity: high
+    encountered_in: "chen2025.chronology.5, chronology.6"
+    description: >
+      The Kaplan-Meier survival findings (p=0.543, p=0.228) are negative
+      results in an underpowered study (11 events). The binary IN/OUT/
+      UNDETERMINED status cannot represent "technically IN but epistemically
+      weak." These claims are not contested (OUT) or unknown (UNDETERMINED)
+      — they are published findings from a peer-reviewed systematic review.
+      But treating them as straightforwardly IN misrepresents their
+      evidential weight. The absence-of-evidence vs. evidence-of-absence
+      problem is pervasive in medical literature and likely in any domain
+      with statistical null findings.
+
+    what_the_schema_does: >
+      Assigns status: IN. Uses qualifier and rebuttal fields to note low
+      power and wide CIs. The nuance lives in free text, not in a
+      machine-queryable field.
+
+    what_would_be_better: >
+      A confidence or evidential_weight field alongside status. Options:
+      (a) continuous score (0.0–1.0), (b) ordinal scale (high/medium/low),
+      (c) keep binary IN/OUT but add a separate "evidence_quality" field
+      that captures study design, sample size, effect precision. The
+      session prompt template includes a "confidence" field — this is a
+      genuine improvement over schema.yaml that should be incorporated.
+
+    resolution: "Deferred to Phase 1. The session prompt's confidence field should be added to schema.yaml."
+
+  # --- Failure 2: Annotator-synthesized claims ---
+
+  - id: "SF-002"
+    schema_limitation: "Not previously identified — new failure mode"
+    severity: medium
+    encountered_in: "chen2025.chronology.9"
+    description: >
+      The Balthazar-survival tension (chronology.9) is not a claim the
+      authors make. It's a structural observation that emerges from
+      juxtaposing two sets of findings: Balthazar associations (Figure 2)
+      and survival analysis (Figure 3). The paper doesn't address this
+      tension directly. The schema has no way to distinguish between
+      author-asserted claims and annotator-synthesized structural
+      observations.
+
+    what_the_schema_does: >
+      Treats it as a regular claim with UNDETERMINED status and a note
+      explaining it's annotator-synthesized. The claim_text field quotes
+      both the Balthazar findings and the survival findings, which is
+      technically a composite of two different text spans, not a verbatim
+      claim.
+
+    what_would_be_better: >
+      A "claim_source" field: author_explicit | author_implicit |
+      annotator_synthesized. This preserves the traceability requirement
+      (CLAUDE.md: "do not hallucinate claims") while acknowledging that
+      the schema's value often comes precisely from surfacing what the
+      authors didn't say. The warrant_type field (explicit/implicit/
+      domain_convention) partly addresses this for warrants but not for
+      claims themselves.
+
+    resolution: "Propose for Phase 1 schema revision. Needs convention before second annotator begins work."
+
+  # --- Failure 3: Cross-study comparison reasoning ---
+
+  - id: "SF-003"
+    schema_limitation: "#6 — Taxonomy misfit"
+    severity: medium
+    encountered_in: "chen2025.chronology.8, chronology.10"
+    description: >
+      The paper's central conclusion about COVID-19-induced AP being
+      distinct from concurrent AP relies on comparing findings ACROSS
+      studies — the null findings in this study vs. the positive findings
+      in Dirweesh et al., Inamdar et al., etc. This cross-study
+      inferential pattern doesn't map cleanly to any of the five
+      dependency types. It was coded as "purposive" (the external findings
+      serve the argument's goal) and "conjunctive" (the synthesis requires
+      both internal nulls and external positives), but neither captures
+      the actual logic: "our results differ from theirs, therefore the
+      methodological difference (etiological exclusion) explains the
+      divergence."
+
+    what_the_schema_does: >
+      Uses purposive for chronology.10 and conjunctive for chronology.8.
+      The actual cross-study comparison logic is described in warrant and
+      notes fields.
+
+    what_would_be_better: >
+      Either a sixth dependency type ("comparative" — A and B produce
+      different results under different conditions, supporting the claim
+      that the differing condition is the relevant variable) or a
+      structured "cross-study_inference" field that captures the reasoning
+      pattern: "Study X found Y under conditions C1, we found Z under
+      conditions C2, therefore the difference between C1 and C2 explains
+      the difference between Y and Z."
+
+    resolution: "Track frequency in Phase 1. If cross-study comparison is common, add comparative dependency type."
+
+  # --- Failure 4: Session prompt template divergence ---
+
+  - id: "SF-004"
+    schema_limitation: "Template evolution — not a schema failure per se"
+    severity: low
+    encountered_in: "All claims in both extractions"
+    description: >
+      The session prompt (session-scholion-phase0-extraction.md) proposes
+      a template with several fields not in schema.yaml: confidence
+      (high/medium/low), boundary (scope), glue_words, crux.flip_test,
+      crux.crux_of, crux.load_bearing, and external_anchors split by
+      foundational/contextual. The extractions used schema.yaml for
+      consistency with the existing mortality extraction. Some of these
+      additional fields would have been genuinely useful.
+
+    what_the_schema_does: >
+      Uses the 14-field schema from schema.yaml. Missing fields are
+      partially compensated by free-text notes and qualifier content.
+
+    what_would_be_better: >
+      Merge the best of both templates for Phase 1:
+      - ADD: confidence (ordinal), boundary (scope string),
+        crux.flip_test (string), external_anchor_type (foundational |
+        contextual)
+      - KEEP: schema.yaml's flat structure (simpler than session prompt's
+        nesting for manual annotation)
+      - DEFER: crux.crux_of and crux.load_bearing (require graph-level
+        analysis, not per-claim annotation)
+      - DROP: glue_words (useful for learning but redundant once
+        dependency_type is assigned; annotator skill, not schema field)
+
+    resolution: "Schema revision proposal for Phase 1. Log as DEC-004."
+
+  # --- Failure 5: Confounding by indication ---
+
+  - id: "SF-005"
+    schema_limitation: "#2 — Negative dependencies"
+    severity: medium
+    encountered_in: "chen2025.mortality.4, chen2025.mortality.8"
+    description: >
+      Surgical intervention as a "mortality predictor" is a textbook case
+      of confounding by indication: surgery doesn't cause death; severe
+      disease causes both surgery and death. The schema captures this via
+      the warrant field ("Clinical reasoning about confounding by
+      indication") but has no structured way to flag that the observed
+      statistical association is not the causal relationship the paper
+      implies. The dependency_type is "conditional" but the actual
+      relationship is "spurious association due to confounding" — which
+      is not one of the five types.
+
+    what_the_schema_does: >
+      Uses warrant and rebuttal fields to explain the confounding. Notes
+      field adds clinical reasoning. The status remains IN because the
+      statistical association is real — it's the causal interpretation
+      that's suspect.
+
+    what_would_be_better: >
+      A "causal_interpretation" field (causal | associative | confounded |
+      reverse_causation) that flags the epistemological status of the
+      relationship independently of statistical significance. Or, more
+      minimally, a "caveat_type" field that marks common inferential
+      hazards. This may be domain-specific to empirical/statistical
+      research and less relevant for theoretical arguments.
+
+    resolution: "Track in Phase 1 across domains. If it's specific to medical/statistical papers, handle in domain-specific annotation guidelines rather than core schema."
+
+  # --- Failure 6: Multi-span claim text ---
+
+  - id: "SF-006"
+    schema_limitation: "#1 — Non-atomic claims"
+    severity: low
+    encountered_in: "chen2025.chronology.9, chen2025.mortality.9"
+    description: >
+      Synthesis claims (mortality.9, chronology.8, chronology.9) often
+      draw from multiple non-contiguous sections of the paper. The
+      claim_text field expects a verbatim excerpt, but synthesis claims
+      assemble reasoning from different pages. For chronology.9
+      (Balthazar-survival tension), the claim_text had to concatenate
+      text from Figure 2 analysis and Figure 3 analysis with "[...]"
+      ellipsis, which breaks the traceability requirement.
+
+    what_the_schema_does: >
+      Concatenates excerpts with "[...]" or paraphrases. claim_text
+      becomes a semi-verbatim composite rather than a true verbatim
+      extract.
+
+    what_would_be_better: >
+      Allow claim_text to be a list of source spans with page/section
+      references, rather than a single string. Each span is verbatim;
+      the synthesis is the annotator's act of connecting them. This
+      preserves traceability while acknowledging that synthesis claims
+      are structurally different from single-sentence assertions.
+
+    resolution: "Minor schema refinement. Consider for Phase 1."

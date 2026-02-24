@@ -1,9 +1,24 @@
-# Scholion Annotation Schema v0.1
+# Scholion Annotation Schema v0.2
 # Canonical template for claim-dependency extraction
 #
 # Each extraction file contains metadata about the source document
 # followed by an ordered list of claims. Claims reference each other
 # by claim_id to form a dependency graph.
+#
+# Changelog:
+#   v0.1 → v0.2 (2026-02-24):
+#     Added three fields per claim (see DEC-004, SF-001, SF-002, SF-004):
+#     - confidence (high|medium|low): Addresses SF-001 (weighted support).
+#       The binary IN/OUT/UNDETERMINED status cannot represent epistemic
+#       strength. This field captures author-expressed or annotator-assessed
+#       certainty alongside status.
+#     - external_anchor_type (foundational|contextual): Addresses SF-004.
+#       Distinguishes anchors whose failure would collapse the claim
+#       (foundational) from background/definitional anchors (contextual).
+#     - claim_source (author_explicit|author_implicit|annotator_synthesized):
+#       Addresses SF-002. Distinguishes author-asserted claims from annotator-
+#       synthesized structural observations (e.g., chronology.9).
+#     Total fields per claim: 17 (was 14).
 
 # --- Document Metadata ---
 source:
@@ -51,6 +66,18 @@ claims:
     crux: false                 # Is this load-bearing? Would its failure collapse downstream structure?
     status: "IN"                # IN | OUT | UNDETERMINED
 
+    confidence: ""              # high | medium | low — author's expressed or annotator-assessed certainty
+                                # high: strong statistical backing (tight CIs, large effects, well-powered)
+                                # medium: significant but imprecise (wide CIs, small n)
+                                # low: null findings in underpowered analyses, or annotator-synthesized
+    external_anchor_type: ""    # foundational | contextual
+                                # foundational: claim fails if anchor is wrong
+                                # contextual: background/definition, claim survives without it
+    claim_source: ""            # author_explicit | author_implicit | annotator_synthesized
+                                # author_explicit: direct textual support, warrant stated in source
+                                # author_implicit: proposition or warrant reconstructed by annotator
+                                # annotator_synthesized: structural observation not made by authors
+
     notes: ""                   # Annotator judgment calls, ambiguities, edge cases
 
 # --- Known Schema Limitations (Phase 0) ---
@@ -67,11 +94,20 @@ claims:
 #    Current approach: flag in notes, do not create circular depends_on.
 #
 # 4. Weighted support: Evidence has degrees, but status is binary IN/OUT.
-#    Current approach: use qualifier field for confidence nuance, defer
-#    continuous scoring to Phase 1 evaluation (see deferred decision in roadmap).
+#    PARTIALLY ADDRESSED in v0.2: added `confidence` field (high/medium/low)
+#    alongside status. This captures ordinal epistemic strength without
+#    committing to continuous scoring. Continuous scoring deferred to Phase 1.
 #
 # 5. Hidden counterfactuals: Discussion sections contain implicit "if not X."
 #    Current approach: extract as explicit rebuttal fields where detectable.
 #
 # 6. Taxonomy misfit: The five dependency types won't cover every case.
 #    Current approach: use closest type + document misfit in notes.
+#
+# Additionally addressed in v0.2:
+# 7. Annotator-synthesized claims lacked provenance tracking.
+#    ADDRESSED: added `claim_source` field (SF-002). Distinguishes author-
+#    asserted from annotator-synthesized structural observations.
+# 8. External anchors lacked invalidation-propagation semantics.
+#    ADDRESSED: added `external_anchor_type` field (SF-004). Distinguishes
+#    foundational anchors (claim collapses without them) from contextual ones.
