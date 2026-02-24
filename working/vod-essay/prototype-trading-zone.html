@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoDTradingZone — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF6F0;
+    --bg-warm: #F4EFE7;
+    --bg-card: #EFEBE4;
+    --border: rgba(44, 36, 22, 0.1);
+    --border-mid: rgba(44, 36, 22, 0.18);
+    --text: #2C2416;
+    --text-mid: #4A3D30;
+    --text-light: #6B5D4F;
+    --text-muted: #9B8E80;
+    --text-faint: #C4B8AA;
+    --accent: #B8860B;
+    --accent-dim: rgba(184, 134, 11, 0.08);
+    --accent-glow: rgba(184, 134, 11, 0.15);
+    --red: #A63D2F;
+    --red-dim: rgba(166, 61, 47, 0.08);
+    --green: #4A7A4A;
+    --blue: #2A5A8A;
+    --teal: #2A7A6A;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--text);
+    padding: 60px 20px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* ─── Header ─── */
+  .header { text-align: center; margin-bottom: 2.5rem; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.5rem;
+  }
+  .title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 400; color: var(--text);
+  }
+
+  /* ─── Redesign: Not a scatter plot. A spectrum with positions. ─── */
+  /* The key insight is that these orgs sit on a single meaningful axis:
+     research autonomy ↔ product integration. The second axis (product integration)
+     is really just the inverse. So instead of a 2D quadrant, use a 1D spectrum
+     with richer position cards and explicit trajectory narratives. */
+
+  /* The spectrum */
+  .spectrum {
+    position: relative;
+    margin: 0 0 2.5rem;
+    padding: 0 20px;
+  }
+  .spectrum-axis {
+    position: relative;
+    height: 4px;
+    background: linear-gradient(
+      to right,
+      rgba(166, 61, 47, 0.25),
+      var(--border) 25%,
+      var(--accent-glow) 50%,
+      var(--border) 75%,
+      rgba(166, 61, 47, 0.25)
+    );
+    border-radius: 2px;
+    margin: 80px 0 60px;
+  }
+  .spectrum-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .spectrum-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.6875rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .spectrum-risks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+  .spectrum-risk {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.6rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--red);
+    max-width: 140px;
+    line-height: 1.3;
+  }
+  .spectrum-risk--right { text-align: right; }
+
+  /* Org markers on the spectrum */
+  .org-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+  .org-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    box-shadow: 0 1px 6px rgba(44, 36, 22, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .org-marker:hover .org-dot {
+    transform: scale(1.3);
+  }
+  .org-pip {
+    position: absolute;
+    top: -42px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .org-pip-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem; font-weight: 700;
+  }
+  .org-pip-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.5625rem;
+    color: var(--text-faint);
+  }
+
+  /* Trading zone highlight on the spectrum */
+  .trading-zone-marker {
+    position: absolute;
+    top: -16px; bottom: -16px;
+    border: 1.5px dashed rgba(184, 134, 11, 0.3);
+    border-radius: 8px;
+    background: rgba(184, 134, 11, 0.04);
+  }
+  .trading-zone-label {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.5rem; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(184, 134, 11, 0.5);
+    white-space: nowrap;
+  }
+
+  /* ─── Org detail cards ─── */
+  .org-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .org-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: start;
+    padding: 14px 18px;
+    border-radius: 8px;
+    background: var(--bg-warm);
+    border-left: 3px solid transparent;
+    transition: background 0.25s ease;
+  }
+  .org-card:hover {
+    background: var(--bg-card);
+  }
+  .org-card-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .org-card-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8125rem; font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .org-card-model {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .org-card-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    line-height: 1.5;
+  }
+  .org-card-trajectory {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.6875rem; font-weight: 500;
+    color: var(--text-faint);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+  }
+  .trajectory-arrow {
+    font-size: 0.875rem;
+  }
+
+  /* ─── Callout ─── */
+  .callout {
+    padding: 14px 18px;
+    background: var(--accent-dim);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 1.5rem;
+  }
+  .callout-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+  .annotation {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-style: italic;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 560px) {
+    .org-card { grid-template-columns: auto 1fr; }
+    .org-card-trajectory { display: none; }
+    .spectrum { padding: 0 10px; }
+    .org-pip-name { font-size: 0.6875rem; }
+    .org-pip-sub { display: none; }
+    .spectrum-risk { font-size: 0.5rem; max-width: 100px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <p class="eyebrow">Organizational Landscape</p>
+  <h3 class="title">Four models. One open question.</h3>
+</div>
+
+<div class="spectrum">
+  <div class="spectrum-labels">
+    <span class="spectrum-label">← Product-Dominant</span>
+    <span class="spectrum-label">Research-Autonomous →</span>
+  </div>
+
+  <div class="spectrum-axis">
+    <!-- Trading zone region -->
+    <div class="trading-zone-marker" style="left: 50%; right: 15%;">
+      <span class="trading-zone-label">Trading Zone</span>
+    </div>
+
+    <!-- OpenAI: far left (product-dominant) -->
+    <div class="org-marker" style="left: 12%;">
+      <div class="org-pip">
+        <p class="org-pip-name" style="color: var(--red);">OpenAI</p>
+        <p class="org-pip-sub">Product capture</p>
+      </div>
+      <div class="org-dot" style="background: var(--red);"></div>
+    </div>
+
+    <!-- Google DeepMind: center-left (forced merger) -->
+    <div class="org-marker" style="left: 40%;">
+      <div class="org-pip">
+        <p class="org-pip-name" style="color: var(--text-muted);">DeepMind</p>
+        <p class="org-pip-sub">Forced merger</p>
+      </div>
+      <div class="org-dot" style="background: var(--text-muted);"></div>
+    </div>
+
+    <!-- Anthropic: center-right (trading zone) -->
+    <div class="org-marker" style="left: 62%;">
+      <div class="org-pip">
+        <p class="org-pip-name" style="color: var(--accent);">Anthropic</p>
+        <p class="org-pip-sub">Trading zone</p>
+      </div>
+      <div class="org-dot" style="background: var(--accent); box-shadow: 0 0 0 4px rgba(184, 134, 11, 0.15), 0 1px 6px rgba(44, 36, 22, 0.1);"></div>
+    </div>
+
+    <!-- Meta FAIR: far right (research-autonomous) -->
+    <div class="org-marker" style="left: 88%;">
+      <div class="org-pip">
+        <p class="org-pip-name" style="color: var(--teal);">Meta FAIR</p>
+        <p class="org-pip-sub">Separate lab</p>
+      </div>
+      <div class="org-dot" style="background: var(--teal);"></div>
+    </div>
+  </div>
+
+  <div class="spectrum-risks">
+    <span class="spectrum-risk">Premature legibility (Watson Health)</span>
+    <span class="spectrum-risk spectrum-risk--right">Failed transition (PARC, FAIR world models)</span>
+  </div>
+</div>
+
+<!-- Detail cards for each org -->
+<div class="org-cards">
+  <div class="org-card" style="border-left-color: var(--red);">
+    <div class="org-card-dot" style="background: var(--red);"></div>
+    <div>
+      <p class="org-card-name" style="color: var(--red);">OpenAI</p>
+      <p class="org-card-model">Product-Dominant</p>
+      <p class="org-card-text">$12B revenue but significant research attrition. Safety processes subordinated to product cadence. GPT-4o safety team got one week.</p>
+    </div>
+    <div class="org-card-trajectory">
+      <span class="trajectory-arrow">↙</span> More product
+    </div>
+  </div>
+
+  <div class="org-card" style="border-left-color: var(--text-muted);">
+    <div class="org-card-dot" style="background: var(--text-muted);"></div>
+    <div>
+      <p class="org-card-name" style="color: var(--text-muted);">Google DeepMind</p>
+      <p class="org-card-model">Forced Merger</p>
+      <p class="org-card-text">Eliminated the autonomy buffer that produced AlphaFold. Whether this was wise depends on what you're optimizing for.</p>
+    </div>
+    <div class="org-card-trajectory">
+      <span style="font-size: 0.875rem;">?</span> Uncertain
+    </div>
+  </div>
+
+  <div class="org-card" style="border-left-color: var(--accent); background: rgba(184, 134, 11, 0.04);">
+    <div class="org-card-dot" style="background: var(--accent);"></div>
+    <div>
+      <p class="org-card-name" style="color: var(--accent);">Anthropic</p>
+      <p class="org-card-model">Trading Zone Model</p>
+      <p class="org-card-text">Constitutional AI aligns research with product. The research engineer role creates permanent residents of the trading zone between research and product.</p>
+    </div>
+    <div class="org-card-trajectory">
+      <span class="trajectory-arrow">↗</span> Dual track
+    </div>
+  </div>
+
+  <div class="org-card" style="border-left-color: var(--teal);">
+    <div class="org-card-dot" style="background: var(--teal);"></div>
+    <div>
+      <p class="org-card-name" style="color: var(--teal);">Meta FAIR</p>
+      <p class="org-card-model">Separate Lab</p>
+      <p class="org-card-text">Extraordinary research (PyTorch, Llama) but self-acknowledged transition failures. LeCun: "Where Meta was less successful is in pushing research into products."</p>
+    </div>
+    <div class="org-card-trajectory">
+      <span class="trajectory-arrow">↙</span> Toward integration
+    </div>
+  </div>
+</div>
+
+<div class="callout">
+  <p class="callout-text">
+    The research engineer role — deliberately blurring the researcher/engineer divide — may be the most consequential organizational innovation. It's the individual-level version of what Goldwater-Nichols did at the institutional level.
+  </p>
+</div>
+
+<p class="annotation">
+  "The research engineer role creates permanent residents of the trading zone."
+</p>
+
+</body>
+</html>

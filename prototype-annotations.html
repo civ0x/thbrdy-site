@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annotation System Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF6F0;
+    --bg-warm: #F4EFE7;
+    --bg-card: #EFEBE4;
+    --border: rgba(44, 36, 22, 0.1);
+    --border-mid: rgba(44, 36, 22, 0.18);
+    --text: #2C2416;
+    --text-mid: #4A3D30;
+    --text-light: #6B5D4F;
+    --text-muted: #9B8E80;
+    --text-faint: #C4B8AA;
+    --accent: #B8860B;
+    --accent-dim: rgba(184, 134, 11, 0.08);
+    --accent-glow: rgba(184, 134, 11, 0.15);
+    --teal: #2A7A6A;
+    --teal-dim: rgba(42, 122, 106, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.15rem;
+    line-height: 1.75;
+    padding: 3rem 1.5rem;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .prototype-header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .prototype-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .prototype-subtitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
+    line-height: 1.5;
+  }
+
+  /* Section dividers */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2.5rem 0 1.5rem;
+  }
+  .section-divider .number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .section-divider .line {
+    flex: 1;
+    height: 1px;
+    background: var(--border-mid);
+  }
+
+  p {
+    margin-bottom: 1.25rem;
+  }
+
+  /* ─── Annotation trigger ─── */
+  .annotation-trigger {
+    position: relative;
+    border-bottom: 1.5px dashed var(--accent);
+    cursor: pointer;
+    padding-bottom: 1px;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+  .annotation-trigger:hover,
+  .annotation-trigger.active {
+    background: var(--accent-dim);
+    border-bottom-color: var(--accent);
+  }
+
+  /* For link-type annotations, keep the link color */
+  a.annotation-trigger {
+    color: var(--teal);
+  }
+  a.annotation-trigger:hover,
+  a.annotation-trigger.active {
+    background: var(--teal-dim);
+    border-bottom-color: var(--teal);
+  }
+
+  /* ─── Popover ─── */
+  .annotation-popover {
+    position: absolute;
+    z-index: 1000;
+    width: min(380px, calc(100vw - 2rem));
+    background: var(--bg-warm);
+    border: 1px solid var(--border-mid);
+    border-radius: 6px;
+    box-shadow:
+      0 4px 12px rgba(44, 36, 22, 0.08),
+      0 1px 3px rgba(44, 36, 22, 0.06);
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    left: 50%;
+    translate: -50% 0;
+  }
+  .annotation-popover.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .annotation-popover.above {
+    bottom: calc(100% + 8px);
+    top: auto;
+  }
+  .annotation-popover.below {
+    top: calc(100% + 8px);
+    bottom: auto;
+  }
+
+  /* Popover arrow */
+  .annotation-popover::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    translate: -50% 0;
+    border: 6px solid transparent;
+  }
+  .annotation-popover.below::after {
+    bottom: 100%;
+    border-bottom-color: var(--bg-warm);
+  }
+  .annotation-popover.above::after {
+    top: 100%;
+    border-top-color: var(--bg-warm);
+  }
+
+  /* ─── Popover content styles ─── */
+  .popover-inner {
+    padding: 1.25rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    line-height: 1.4;
+  }
+
+  /* All popover children are block */
+  .popover-inner > span {
+    display: block;
+  }
+
+  /* Mode badge */
+  .popover-mode {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .popover-mode .mode-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .popover-mode.reference .mode-dot { background: var(--text-muted); }
+  .popover-mode.link .mode-dot { background: var(--teal); }
+
+  /* Term definition */
+  .popover-term-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+  .popover-definition {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-mid);
+    line-height: 1.45;
+  }
+
+  /* Reference card */
+  .popover-ref-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    font-style: italic;
+    margin-bottom: 0.15rem;
+    line-height: 1.35;
+  }
+  .popover-ref-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+    margin-bottom: 0.6rem;
+  }
+  .popover-ref-summary {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-mid);
+    line-height: 1.45;
+    margin-bottom: 0.5rem;
+  }
+  .popover-ref-context {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-light);
+    line-height: 1.4;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+  .popover-ref-context strong {
+    font-weight: 500;
+    font-style: normal;
+    color: var(--text-muted);
+  }
+  .popover-ref-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .popover-ref-link:hover {
+    color: var(--text);
+  }
+  .popover-ref-link .arrow {
+    font-size: 0.8rem;
+    transition: transform 0.15s ease;
+  }
+  .popover-ref-link:hover .arrow {
+    transform: translateX(2px);
+  }
+
+  /* Link preview card */
+  .popover-link-url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--text-faint);
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .popover-link-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.15rem;
+    line-height: 1.35;
+  }
+  .popover-link-source {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--teal);
+    letter-spacing: 0.03em;
+    margin-bottom: 0.5rem;
+  }
+  .popover-link-summary {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-mid);
+    line-height: 1.45;
+  }
+  .popover-link-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--teal);
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .popover-link-cta .arrow {
+    font-size: 0.8rem;
+    transition: transform 0.15s ease;
+  }
+  a.annotation-trigger:hover .popover-link-cta .arrow,
+  a.annotation-trigger.active .popover-link-cta .arrow {
+    transform: translateX(2px);
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 640px) {
+    body { font-size: 1.05rem; padding: 2rem 1rem; }
+    .annotation-popover {
+      position: fixed;
+      left: 1rem !important;
+      right: 1rem;
+      translate: 0 0;
+      width: auto;
+      bottom: 1rem;
+      top: auto !important;
+      border-radius: 10px;
+      box-shadow:
+        0 -4px 24px rgba(44, 36, 22, 0.12),
+        0 0 0 1px var(--border-mid);
+    }
+    .annotation-popover::after { display: none; }
+    .annotation-popover.visible {
+      transform: translateY(0);
+    }
+    .popover-inner { padding: 1.35rem 1.5rem; }
+
+    /* Backdrop for mobile */
+    .mobile-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 36, 22, 0.15);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .mobile-backdrop.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .annotation-popover {
+      transition: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="prototype-header">Annotation System Prototype</div>
+  <div class="prototype-title">Three modes, real essay text</div>
+  <div class="prototype-subtitle">
+    Hover (desktop) or tap (mobile) any dashed-underlined term to see the annotation.
+    Each example below demonstrates a different mode.
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- MODE 1: GLOSSARY TERM                       -->
+  <!-- ════════════════════════════════════════════ -->
+
+  <div class="section-divider">
+    <span class="number">01 · Term Definition</span>
+    <span class="line"></span>
+  </div>
+
+  <p>
+    Every large technology organization has a research lab. Most research labs produce papers,
+    benchmarks, and prototypes that never become products. The standard explanation is a funding
+    gap — not enough capital at the critical transition point between research demonstration
+    and commercial viability. Branscomb and Auerswald gave this diagnosis its canonical form
+    in 2003, and the policy community has been building programs around it ever since.
+  </p>
+
+  <p>
+    The funding-gap diagnosis is empirically weak. Ferguson's 2014 analysis found the perception
+    "inconsistent with empirical evidence." Beard and colleagues argued that government funding
+    of basic research paradoxically <em>creates</em> the gap by inflating early-stage output beyond
+    what private markets will absorb. EARTO found that even where governments increased financing
+    for the
+    <!-- ─── ANNOTATION: term ─── -->
+    <span class="annotation-trigger" data-annotation="term-vod" role="button" tabindex="0" aria-describedby="popover-term-vod">valley-of-death
+      phase<span class="annotation-popover below" id="popover-term-vod" role="tooltip">
+        <span class="popover-inner">
+          <span class="popover-mode"><span class="mode-dot"></span> Definition</span>
+          <span class="popover-term-name">Valley of Death</span>
+          <span class="popover-definition">
+            The gap between research demonstration and commercial viability where promising
+            technologies fail to transition into products. Named by analogy to the military
+            term for exposed terrain between two defensible positions — in this case, the
+            terrain between public research funding and private investment.
+          </span>
+        </span>
+      </span></span>,
+    <!-- ─── END ANNOTATION ─── -->
+    "the challenge of crossing it and securing first major commercialisation
+    investment persists." The money arrives. The transitions don't.
+  </p>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- MODE 2: REFERENCE SUMMARY                   -->
+  <!-- ════════════════════════════════════════════ -->
+
+  <div class="section-divider">
+    <span class="number">02 · Reference Summary</span>
+    <span class="line"></span>
+  </div>
+
+  <p>
+    Every large technology organization has a research lab. Most research labs produce papers,
+    benchmarks, and prototypes that never become products. The standard explanation is a funding
+    gap — not enough capital at the critical transition point between research demonstration
+    and commercial viability.
+    <!-- ─── ANNOTATION: reference ─── -->
+    <span class="annotation-trigger" data-annotation="ref-branscomb" role="button" tabindex="0" aria-describedby="popover-ref-branscomb">Branscomb and
+      Auerswald<span class="annotation-popover below" id="popover-ref-branscomb" role="tooltip">
+        <span class="popover-inner">
+          <span class="popover-mode reference"><span class="mode-dot"></span> Reference</span>
+          <span class="popover-ref-title">Between Invention and Innovation: An Analysis of Funding for Early-Stage Technology Development</span>
+          <span class="popover-ref-meta">Lewis M. Branscomb &amp; Philip E. Auerswald · NIST GCR 02-841 · 2003</span>
+          <span class="popover-ref-summary">
+            The canonical articulation of the "funding gap" hypothesis. Argues that the primary barrier
+            to technology transfer is insufficient private capital at the transition from research
+            demonstration (TRL 4–5) to commercial prototype (TRL 7–8). Proposes that government
+            programs should target this specific gap with bridge funding mechanisms.
+          </span>
+          <span class="popover-ref-context">
+            <strong>In this essay:</strong> This is the diagnosis the essay argues against.
+            The funding-gap framing shaped two decades of policy but is empirically weak —
+            the money arrives, the transitions still don't happen.
+          </span>
+          <a class="popover-ref-link" href="https://www.nist.gov/system/files/documents/2017/05/09/gcr02-841.pdf" target="_blank" rel="noopener">View paper <span class="arrow">→</span></a>
+        </span>
+      </span></span>
+    <!-- ─── END ANNOTATION ─── -->
+    gave this diagnosis its canonical form in 2003, and the policy community has been building
+    programs around it ever since.
+  </p>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- MODE 3: ENRICHED LINK                       -->
+  <!-- ════════════════════════════════════════════ -->
+
+  <div class="section-divider">
+    <span class="number">03 · Enriched Link</span>
+    <span class="line"></span>
+  </div>
+
+  <p>
+    <!-- ─── ANNOTATION: link ─── -->
+    <a class="annotation-trigger" data-annotation="link-neptuneml" role="link" tabindex="0" aria-describedby="popover-link-neptuneml" href="https://aws.amazon.com/neptune/machine-learning/" target="_blank" rel="noopener">Neptune
+      ML<span class="annotation-popover below" id="popover-link-neptuneml" role="tooltip">
+        <span class="popover-inner">
+          <span class="popover-mode link"><span class="mode-dot"></span> External Link</span>
+          <span class="popover-link-url">aws.amazon.com/neptune/machine-learning</span>
+          <span class="popover-link-title">Amazon Neptune ML</span>
+          <span class="popover-link-source">AWS · Managed Graph Database Service</span>
+          <span class="popover-link-summary">
+            Neptune ML integrates graph neural network inference directly into Amazon Neptune,
+            allowing customers to run link prediction, node classification, and knowledge graph
+            completion on their graph data without managing separate ML infrastructure.
+          </span>
+          <span class="popover-link-cta">Visit page <span class="arrow">→</span></span>
+        </span>
+      </span></a>
+    <!-- ─── END ANNOTATION ─── -->
+    illustrates the full cycle. Amazon's AI Lab included a team working on graph neural networks
+    applied to knowledge graphs — strong academic results, no obvious productization path. "Graph
+    neural networks for knowledge graph enrichment" is a research description, not a product
+    description. The translation step converted it: customers using Amazon Neptune could now run
+    ML-powered predictions directly on their graph data — link prediction, node classification,
+    knowledge graph completion — without moving data out of Neptune, without managing ML
+    infrastructure. The business review mechanism put this narrative in front of the Neptune
+    service team and their leadership chain. Neptune ML shipped as a production feature.
+  </p>
+
+</div>
+
+<!-- Mobile backdrop -->
+<div class="mobile-backdrop" id="mobile-backdrop"></div>
+
+<script>
+(function() {
+  const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
+  const backdrop = document.getElementById('mobile-backdrop');
+  let activePopover = null;
+  let activeTrigger = null;
+  let hoverTimeout = null;
+
+  function showPopover(trigger) {
+    // Close any open popover first
+    if (activeTrigger && activeTrigger !== trigger) {
+      hidePopover(activeTrigger);
+    }
+
+    const popover = trigger.querySelector('.annotation-popover');
+    if (!popover) return;
+
+    trigger.classList.add('active');
+    popover.classList.add('visible');
+    activePopover = popover;
+    activeTrigger = trigger;
+
+    if (!isMobile()) {
+      positionPopover(trigger, popover);
+    }
+
+    if (isMobile()) {
+      backdrop.classList.add('visible');
+    }
+  }
+
+  function hidePopover(trigger) {
+    if (!trigger) return;
+    const popover = trigger.querySelector('.annotation-popover');
+    if (!popover) return;
+
+    trigger.classList.remove('active');
+    popover.classList.remove('visible');
+    backdrop.classList.remove('visible');
+
+    if (activeTrigger === trigger) {
+      activePopover = null;
+      activeTrigger = null;
+    }
+  }
+
+  function positionPopover(trigger, popover) {
+    // Reset classes
+    popover.classList.remove('above', 'below');
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - triggerRect.bottom;
+    const spaceAbove = triggerRect.top;
+
+    // Prefer below, use above if not enough space
+    if (spaceBelow > 280 || spaceBelow > spaceAbove) {
+      popover.classList.add('below');
+    } else {
+      popover.classList.add('above');
+    }
+
+    // Horizontal edge clamping
+    requestAnimationFrame(() => {
+      const popoverRect = popover.getBoundingClientRect();
+      if (popoverRect.left < 8) {
+        const shift = 8 - popoverRect.left;
+        popover.style.translate = `calc(-50% + ${shift}px) 0`;
+      } else if (popoverRect.right > window.innerWidth - 8) {
+        const shift = popoverRect.right - (window.innerWidth - 8);
+        popover.style.translate = `calc(-50% - ${shift}px) 0`;
+      } else {
+        popover.style.translate = '-50% 0';
+      }
+    });
+  }
+
+  // Event delegation
+  document.querySelectorAll('.annotation-trigger').forEach(trigger => {
+    // Desktop hover
+    trigger.addEventListener('mouseenter', () => {
+      if (isMobile()) return;
+      clearTimeout(hoverTimeout);
+      showPopover(trigger);
+    });
+
+    trigger.addEventListener('mouseleave', (e) => {
+      if (isMobile()) return;
+      // Small delay to allow moving to popover
+      hoverTimeout = setTimeout(() => hidePopover(trigger), 120);
+    });
+
+    // Keep popover open when hovering it
+    const popover = trigger.querySelector('.annotation-popover');
+    if (popover) {
+      popover.addEventListener('mouseenter', () => {
+        clearTimeout(hoverTimeout);
+      });
+      popover.addEventListener('mouseleave', () => {
+        hoverTimeout = setTimeout(() => hidePopover(trigger), 120);
+      });
+    }
+
+    // Mobile/keyboard tap
+    trigger.addEventListener('click', (e) => {
+      // For link annotations, don't navigate on first tap (mobile) — show popover instead
+      if (trigger.tagName === 'A' && isMobile()) {
+        if (!trigger.classList.contains('active')) {
+          e.preventDefault();
+          showPopover(trigger);
+          return;
+        }
+        // Second tap navigates
+        return;
+      }
+
+      if (trigger.classList.contains('active')) {
+        hidePopover(trigger);
+      } else {
+        showPopover(trigger);
+      }
+    });
+
+    // Keyboard
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (trigger.classList.contains('active')) {
+          hidePopover(trigger);
+        } else {
+          showPopover(trigger);
+        }
+      }
+      if (e.key === 'Escape') {
+        hidePopover(trigger);
+      }
+    });
+  });
+
+  // Close on backdrop tap (mobile)
+  backdrop.addEventListener('click', () => {
+    if (activeTrigger) hidePopover(activeTrigger);
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (activeTrigger && !activeTrigger.contains(e.target) && e.target !== backdrop) {
+      hidePopover(activeTrigger);
+    }
+  });
+
+  // Reposition on scroll/resize
+  let rafPending = false;
+  function handleReposition() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+      if (activeTrigger && activePopover && !isMobile()) {
+        positionPopover(activeTrigger, activePopover);
+      }
+      rafPending = false;
+    });
+  }
+  window.addEventListener('scroll', handleReposition, { passive: true });
+  window.addEventListener('resize', handleReposition, { passive: true });
+})();
+</script>
+
+</body>
+</html>
