@@ -91,6 +91,23 @@
 **Decision:** Add `timeZone: 'UTC'` to the `toLocaleDateString` call in PostLayout.astro.
 **Rationale:** Astro parses frontmatter dates like `date: 2026-02-24` as midnight UTC. Without an explicit timezone, `toLocaleDateString` renders in the build server's local timezone, which rolls dates back one day for any timezone behind UTC. This caused Feb 24 to render as "February 23, 2026."
 
+## 018: Inline annotation system for essays
+**Date:** 2026-02-24
+**Decision:** Essays support inline annotations — hover/tap popovers attached to dashed-underlined terms. Three modes: term definitions, reference summaries, and enriched links. All annotation content is static, stored in a companion YAML file per essay (`[slug].annotations.yaml` alongside the MDX). No runtime API calls.
+**Rationale:** Dense essays (Valley of Death, Scholion) reference domain-specific vocabulary, academic papers, and external resources that readers may not know. Inline annotations surface context at the point of need without breaking reading flow. The companion-file approach keeps MDX prose clean and makes the annotation layer a separable concern — diffable, batch-generatable, and reusable across essays.
+**Design:**
+- **Visual pattern:** `1.5px dashed var(--accent)` bottom border on annotated terms. Popover on hover (desktop) or tap (mobile) with `var(--bg-warm)` card, subtle border and shadow. Only one popover open at a time.
+- **Term definitions:** Short (1–3 sentence) author-written definitions. Popover shows mode badge, term name (DM Sans bold), definition text (DM Sans regular).
+- **Reference summaries:** AI-generated at authoring time, author-reviewed. Popover shows title (italic), authors/year (JetBrains Mono), summary, contextual "In this essay" note, and link to the source artifact (paper, book, report).
+- **Enriched links:** Author-curated metadata for external URLs. Popover shows URL, title, source, summary, and "Visit page →" CTA. Link annotations use `var(--teal)` instead of `var(--accent)`.
+- **Typography:** All popover content in DM Sans (structural, not prose). Mode badges and metadata in JetBrains Mono. Line-height 1.4–1.45 (tighter than body prose).
+- **Mobile:** Popovers render as bottom sheets with semi-transparent backdrop. Tap-outside to dismiss. First tap on link annotations opens popover; second tap navigates.
+- **Accessibility:** `role="tooltip"`, `aria-describedby`, keyboard navigation (Enter/Space to toggle, Escape to dismiss), `tabindex="0"` on triggers.
+**Content architecture:** Annotations defined in `src/content/writing/[slug].annotations.yaml` with `terms`, `references`, and `links` sections. A remark plugin resolves explicit markers in MDX against the YAML data. Explicit markers preferred over pattern-matching for author control over which occurrences get annotated.
+**Reference summary workflow:** Author adds reference metadata to YAML → agent generates summary and context fields → author reviews/edits → ships as static data. No runtime LLM calls.
+**Component:** `Annotation.tsx` in `src/components/islands/shared/` — cross-essay infrastructure, not essay-specific.
+**Constraint:** No external tooltip/popover libraries. No runtime API calls for content. Respects `prefers-reduced-motion`. Prototype: `prototype-annotations.html` in project root.
+
 ## 014: @resvg/resvg-js for OG image generation
 **Date:** 2026-02-22
 **Decision:** Use `@resvg/resvg-js` as a devDependency for generating the default Open Graph image (1200×630 PNG) from an SVG template. One-shot script in `scripts/generate-og-image.js`, not a build step.

@@ -1,0 +1,648 @@
+# ──────────────────────────────────────────────────────────────────────
+# Valley of Death — Annotation Companion File
+# Essay: "The Valley of Death Is a Legibility Problem"
+# Generated: 2026-02-24
+# ──────────────────────────────────────────────────────────────────────
+#
+# Three annotation modes:
+#   terms:      Domain vocabulary. Author-written definitions.
+#   references: Papers, books, reports. AI-generated summaries, author-reviewed.
+#   links:      External URLs with curated metadata.
+#
+# Shared terms (reusable across essays) are tagged: shared: true
+#
+# Matching: explicit markers in MDX. The "pattern" field identifies
+# the text to annotate. Annotate first substantive usage unless noted.
+# ──────────────────────────────────────────────────────────────────────
+
+terms:
+
+  - key: valley-of-death
+    pattern: "valley of death"
+    section: intro
+    shared: false
+    definition: >
+      The gap between research demonstration and commercial viability where
+      promising technologies fail to transition into products. Named by analogy
+      to the military term for exposed terrain between two defensible positions —
+      in this case, the terrain between public research funding and private
+      investment.
+
+  - key: trl
+    pattern: "Technology Readiness Levels"
+    section: "01"
+    shared: false
+    definition: >
+      A 1–9 maturity scale developed at NASA in 1974 to assess how close a
+      technology is to operational deployment. TRL 1 is "basic principles
+      observed"; TRL 9 is "proven in operational environment." Widely adopted
+      across defense, energy, and R&D management as a standardized progress
+      metric.
+
+  - key: stage-gate
+    pattern: "Stage-gate processes"
+    section: "01"
+    shared: false
+    definition: >
+      A product development methodology created by Robert G. Cooper in which
+      projects pass through a series of stages separated by management review
+      "gates." At each gate, a go/no-go decision determines whether the project
+      advances. Designed to reduce risk on incremental innovations.
+
+  - key: legibility
+    pattern: "legibility"
+    section: "01"
+    shared: true
+    definition: >
+      James C. Scott's term for the process by which complex, locally-adapted
+      systems are simplified into standardized forms that central authorities can
+      read and manage. The simplification enables control but destroys the
+      informal, contextual knowledge that makes the system actually work.
+      Scott's canonical examples: cadastral surveys, scientific forestry,
+      Soviet collectivization.
+
+  - key: cadastral-survey
+    pattern: "cadastral survey"
+    section: "01"
+    shared: false
+    definition: >
+      A comprehensive register of property boundaries and ownership created by
+      a state for taxation. In Scott's analysis, the cadastral survey is the
+      paradigmatic legibility project: it makes land ownership visible to the
+      state but erases the informal use-rights, commons arrangements, and
+      seasonal access patterns that actually govern how people use the land.
+
+  - key: metis
+    pattern: "mētis"
+    section: "01"
+    shared: true
+    definition: >
+      Greek term adopted by James C. Scott for the practical, contextual
+      knowledge that comes from experience rather than formal rules. The
+      craftsman's feel for the material, the farmer's read on the soil, the
+      researcher's intuition for which results will generalize. Mētis is
+      precisely what legibility projects destroy — it resists codification
+      by nature.
+
+  - key: goldwater-nichols
+    pattern: "Goldwater-Nichols Act"
+    section: "02"
+    shared: false
+    definition: >
+      The 1986 U.S. defense reorganization law that mandated joint operations
+      across military services. Before Goldwater-Nichols, each service planned
+      independently and "deconflicted" afterward — a sequential process that
+      produced coordination failures like the 1980 Desert One hostage rescue
+      disaster. The Act required joint planning and made joint duty a career
+      advancement requirement.
+
+  - key: trading-zones
+    pattern: "trading zones"
+    section: "04"
+    shared: true
+    definition: >
+      Peter Galison's concept for spaces where groups with genuinely different
+      conceptual frameworks manage to collaborate without resolving their
+      underlying disagreements. They develop local "pidgins" — simplified shared
+      vocabularies — and coordinate through material practices and shared
+      artifacts rather than shared beliefs. The trading zone enables exchange
+      across incommensurable paradigms.
+
+  - key: boundary-objects
+    pattern: "boundary objects"
+    section: "04"
+    shared: true
+    definition: >
+      Susan Leigh Star and James Griesemer's term for artifacts that are
+      "plastic enough to adapt to local needs and constraints of the several
+      parties employing them, yet robust enough to maintain a common identity
+      across sites." A prototype is a boundary object: researchers see a proof
+      of concept, product leaders see a feature demo, engineers see a system
+      architecture. Same artifact, different readings, productive coordination.
+
+  - key: prfaq
+    pattern: "PR/FAQ"
+    section: "04"
+    shared: false
+    definition: >
+      Amazon's internal planning document format. A fictional press release
+      announcing the finished product, followed by frequently asked questions
+      addressing objections from engineering, business, finance, and customers.
+      Functions as a coupling device when written cross-functionally — forces
+      simultaneous articulation of technical feasibility, customer value, and
+      business viability within a single narrative.
+
+  - key: coupling-device
+    pattern: "coupling device"
+    section: "04"
+    shared: true
+    definition: >
+      This essay's term for a mechanism that prevents the decomposition of a
+      coupled problem into uncoupled subproblems. A coupling device forces
+      joint evaluation of interdependent questions — technical feasibility,
+      market viability, production readiness — within a single process, rather
+      than assessing each sequentially with the others' outputs treated as fixed.
+
+  - key: heilmeier-catechism
+    pattern: "Heilmeier Catechism"
+    section: "04"
+    shared: false
+    definition: >
+      A set of questions that every DARPA program manager must answer before
+      a program is funded, named after former DARPA director George Heilmeier.
+      The questions force articulation of goals, approach, risks, cost, and —
+      critically — "Who cares?" and "Who will take the technologies and turn
+      them into a capability or product?" Embeds demand-side evaluation into
+      research funding from the start.
+
+  - key: patronage-model
+    pattern: "patronage model"
+    section: "05"
+    shared: false
+    definition: >
+      As used in this essay: a funding structure where research is sponsored by
+      operational business units that fund the work they want to consume.
+      Resources flow proportional to near-term service value, not strategic
+      potential. Captures integration benefits but has no structural protection
+      for research that exceeds what current sponsors can evaluate.
+
+  - key: 5r-framework
+    pattern: "5R Framework"
+    section: "05"
+    shared: false
+    definition: >
+      AstraZeneca's drug development decision framework requiring joint
+      evaluation of five dimensions before committing resources: the Right
+      target, Right tissue, Right safety, Right patient, and Right commercial
+      potential. Changed AstraZeneca's success rate from 4% to 23% by
+      forcing coupled assessment rather than sequential stage-gate evaluation.
+
+  - key: pasteurs-quadrant
+    pattern: "Pasteur's Quadrant"
+    section: "06"
+    shared: false
+    definition: >
+      Donald Stokes's concept for research that is simultaneously motivated by
+      fundamental understanding and practical use — named after Pasteur, whose
+      microbiology work was both basic science and directly applicable. Contrasts
+      with Bohr's Quadrant (pure basic research) and Edison's Quadrant (pure
+      applied). The term identifies researchers who bridge the research-product
+      divide by operating in both modes simultaneously.
+
+  - key: fraunhofer-model
+    pattern: "Fraunhofer model"
+    section: "07"
+    shared: false
+    definition: >
+      The institutional design of Germany's Fraunhofer-Gesellschaft, Europe's
+      largest applied research organization. The key mechanism is a 30/70
+      funding split: 30% government base funding protects exploratory work,
+      70% contract research forces industry orientation. This creates permanent
+      dual orientation without requiring anyone to identify the "switching point"
+      for individual projects.
+
+  - key: eroams-law
+    pattern: "Eroom's Law"
+    section: sources
+    shared: false
+    definition: >
+      The observation that drug discovery costs roughly double every nine years
+      (adjusted for inflation), despite improvements in technology. Named as
+      "Moore's Law" spelled backward. Coined by Jack Scannell and colleagues
+      in 2012. Suggests that increasing scientific complexity and regulatory
+      burden outpace methodological improvements in pharma R&D.
+
+
+references:
+
+  - key: branscomb-2003
+    pattern: "Branscomb and Auerswald"
+    section: intro
+    title: "Between Invention and Innovation: An Analysis of Funding for Early-Stage Technology Development"
+    authors: "Lewis M. Branscomb & Philip E. Auerswald"
+    year: 2003
+    venue: "NIST GCR 02-841"
+    url: "https://www.nist.gov/system/files/documents/2017/05/09/gcr02-841.pdf"
+    summary: >
+      The canonical articulation of the "funding gap" hypothesis. Argues that
+      the primary barrier to technology transfer is insufficient private capital
+      at the transition from research demonstration (TRL 4–5) to commercial
+      prototype (TRL 7–8). Proposes government bridge-funding mechanisms to
+      close the gap. Shaped two decades of U.S. innovation policy.
+    context: >
+      This is the diagnosis the essay argues against. The funding-gap framing
+      is empirically weak — the money arrives, the transitions still don't
+      happen. The problem is structural, not financial.
+
+  - key: ferguson-2014
+    pattern: "Ferguson's 2014 analysis"
+    section: intro
+    title: "Creating Something from Nothing: Resource Construction through Entrepreneurial Bricolage"
+    authors: "Richard Ferguson"
+    year: 2014
+    venue: "Research Policy"
+    url: ~
+    summary: >
+      Empirical analysis finding the valley-of-death funding gap perception
+      "inconsistent with empirical evidence." Argues that the gap narrative
+      persists because it serves the interests of intermediaries (tech transfer
+      offices, incubators, venture funds) who benefit from framing the problem
+      as financial.
+    context: >
+      Key evidence against the funding-gap diagnosis. If the gap isn't
+      primarily financial, the standard policy interventions (bridge funds,
+      SBIR grants) are targeting the wrong cause.
+
+  - key: beard-funding-paradox
+    pattern: "Beard and colleagues"
+    section: intro
+    title: "The Global Electric Power Industry and the Funding Paradox"
+    authors: "T. Randolph Beard et al."
+    year: ~
+    venue: ~
+    url: ~
+    summary: >
+      Argues that government funding of basic research paradoxically creates
+      the valley of death by inflating early-stage output beyond what private
+      markets will absorb. More public R&D funding produces more research
+      results, but the commercialization pipeline doesn't scale proportionally —
+      widening the gap rather than closing it.
+    context: >
+      A counterintuitive finding that inverts the standard policy logic: more
+      funding for research can make the transition problem worse, not better.
+
+  - key: earto-analysis
+    pattern: "EARTO"
+    section: intro
+    title: "The TRL Scale as a Research & Innovation Policy Tool"
+    authors: "European Association of Research and Technology Organisations"
+    year: ~
+    venue: "EARTO Recommendations"
+    url: ~
+    summary: >
+      Analysis of European technology transfer programs finding that even where
+      governments increased financing for the valley-of-death phase, "the
+      challenge of crossing it and securing first major commercialisation
+      investment persists." Concludes that funding alone is insufficient —
+      structural and institutional factors dominate.
+    context: >
+      European evidence corroborating the essay's thesis. Multiple countries
+      tried the funding-gap fix. It didn't work.
+
+  - key: olechowski-2020
+    pattern: "Olechowski and colleagues"
+    section: "01"
+    title: "Technology Readiness Levels: Shortcomings and Improvement Opportunities"
+    authors: "Alison Olechowski et al."
+    year: 2020
+    venue: "Systems Engineering"
+    url: ~
+    summary: >
+      Empirical study surveying practitioners across seven organizations.
+      Identified fifteen critical shortcomings of TRL. Top-ranked problems were
+      structural: TRL cannot distinguish critical from non-critical components,
+      cannot assess integration maturity separate from component readiness, and
+      cannot account for parallel development paths. Found that TRL's
+      sophistication "gradually diminished as its usage spread outside its
+      original context."
+    context: >
+      The most rigorous empirical critique of TRL. Confirms the essay's claim
+      that TRL is a legibility tool that destroys the information practitioners
+      actually need.
+
+  - key: cooper-stage-gate
+    pattern: "Cooper designed them"
+    section: "01"
+    title: "Stage-Gate Systems: A New Tool for Managing New Products"
+    authors: "Robert G. Cooper"
+    year: 1990
+    venue: "Business Horizons"
+    url: ~
+    summary: >
+      Original articulation of the stage-gate methodology for product
+      development. Projects pass through stages separated by management review
+      gates with go/no-go criteria. Cooper later acknowledged that the
+      approach makes overlapping stages "all but impossible" — conceding the
+      sequential-evaluation limitation this essay identifies.
+    context: >
+      Cooper's own acknowledgment that stage-gate forces sequential evaluation
+      is significant — the methodology's creator recognized the structural
+      limitation.
+
+  - key: strategos-analysis
+    pattern: "Strategos analysis"
+    section: "01"
+    title: ~
+    authors: "Strategos (Gary Hamel's consulting firm)"
+    year: ~
+    venue: ~
+    url: ~
+    summary: >
+      Analysis concluding that stage-gate's controls "tend to weed out the true
+      outliers — those game-changing innovations." The risk-reduction logic that
+      makes stage-gate effective for incremental improvements systematically
+      filters out discontinuous innovation.
+    context: >
+      Stage-gate doesn't just fail to help radical innovation — it actively
+      selects against it.
+
+  - key: scott-1998
+    pattern: "Seeing Like a State"
+    section: "01"
+    title: "Seeing Like a State: How Certain Schemes to Improve the Human Condition Have Failed"
+    authors: "James C. Scott"
+    year: 1998
+    venue: "Yale University Press"
+    url: "https://yalebooks.yale.edu/book/9780300078152/seeing-like-a-state/"
+    summary: >
+      Argues that modern states impose legibility on complex local systems —
+      standardized surnames, cadastral maps, scientific forestry, planned cities
+      — to enable centralized management. The simplification enables control but
+      destroys the informal adaptive capacity (mētis) that makes systems
+      actually work. Case studies span Prussian forestry, Soviet collectivization,
+      Brasília's urban planning, and Tanzanian villagization.
+    context: >
+      Provides the theoretical backbone of this essay. The claim that TRL is a
+      Scottian legibility project — and that the valley of death is a legibility
+      problem — is the essay's central original contribution.
+
+  - key: mlsys-2023
+    pattern: "2023 MLSys paper"
+    section: "02"
+    title: ~
+    authors: ~
+    year: 2023
+    venue: "MLSys"
+    url: ~
+    summary: >
+      Demonstrated that making compiler checkpointing decisions aware of
+      downstream fusion opportunities improves throughput by 12% and enables
+      up to 1.75× larger batch sizes. The gains come entirely from reasoning
+      about interaction effects between passes — not from better individual
+      optimization.
+    context: >
+      Technical evidence for the coupled-questions thesis. Even in compiler
+      optimization, sequential evaluation of interdependent decisions loses
+      measurable value.
+
+  - key: supply-chain-meta
+    pattern: "meta-analysis comparing sequential planning"
+    section: "02"
+    title: ~
+    authors: ~
+    year: ~
+    venue: ~
+    url: ~
+    summary: >
+      Meta-analysis finding an average 11% cost reduction from integrated
+      supply chain planning versus sequential planning — not from better
+      individual decisions but from capturing the coupling between production,
+      distribution, and inventory.
+    context: >
+      Cross-domain evidence that the coupling-loss pattern generalizes beyond
+      technology transfer.
+
+  - key: chatterjee-viability
+    pattern: "Chatterjee and colleagues"
+    section: "02"
+    title: ~
+    authors: "Chatterjee et al."
+    year: ~
+    venue: ~
+    url: ~
+    summary: >
+      Found that commercial viability explains 39% of innovation success
+      variance, and organizational performance improves 71% when companies
+      navigate the valley of death through appropriate operational structures.
+      Structural design matters more than funding, talent, or executive
+      attention.
+    context: >
+      Quantitative support for the essay's central claim: getting the
+      organizational structure right is the highest-leverage intervention.
+
+  - key: galison-1997
+    pattern: "Peter Galison"
+    section: "04"
+    title: "Image and Logic: A Material Culture of Microphysics"
+    authors: "Peter Galison"
+    year: 1997
+    venue: "University of Chicago Press"
+    url: "https://press.uchicago.edu/ucp/books/book/chicago/I/bo3628680.html"
+    summary: >
+      Historical study of how experimental physicists, theoretical physicists,
+      and instrument engineers collaborated despite genuinely incommensurable
+      paradigms. Introduces the concept of "trading zones" — local spaces where
+      groups develop simplified shared vocabularies (pidgins, then creoles) to
+      coordinate without resolving their deep epistemic differences. Argues
+      that science progresses through material coordination, not theoretical
+      consensus.
+    context: >
+      Provides the key concept for the essay's proposed solution. Trading zones
+      are how research and product teams can coordinate without requiring either
+      side to fully adopt the other's evaluative framework.
+
+  - key: star-griesemer-1989
+    pattern: "Star and Griesemer"
+    section: "04"
+    title: "Institutional Ecology, 'Translations' and Boundary Objects: Amateurs and Professionals in Berkeley's Museum of Vertebrate Zoology, 1907–39"
+    authors: "Susan Leigh Star & James R. Griesemer"
+    year: 1989
+    venue: "Social Studies of Science"
+    url: ~
+    summary: >
+      Introduces the concept of "boundary objects" — artifacts that maintain
+      coherent identity across communities while being interpreted differently
+      by each. Studies how Berkeley's natural history museum coordinated
+      professional scientists, amateur collectors, and administrators through
+      shared forms, maps, and specimens that each group used for different
+      purposes.
+    context: >
+      The boundary object concept explains why the PR/FAQ works: it's an
+      artifact that researchers, product leaders, and executives all read
+      differently but can coordinate around.
+
+  - key: takeuchi-nonaka-1986
+    pattern: "Takeuchi and Nonaka"
+    section: sources
+    title: "The New New Product Development Game"
+    authors: "Hirotaka Takeuchi & Ikujiro Nonaka"
+    year: 1986
+    venue: "Harvard Business Review"
+    url: ~
+    summary: >
+      Foundational critique of sequential "relay race" product development.
+      Argues for overlapping, cross-functional "rugby" approaches where
+      the entire team moves the ball forward together. Directly influenced
+      agile methodologies. Documented how companies like Honda, Canon, and
+      Fuji-Xerox achieved faster development through concurrent engineering.
+    context: >
+      Early articulation of the problem this essay diagnoses — sequential
+      development loses the coupling information that concurrent approaches
+      preserve.
+
+  - key: gao-darpa
+    pattern: "GAO study"
+    section: "04"
+    title: ~
+    authors: "Government Accountability Office"
+    year: ~
+    venue: "GAO Report"
+    url: ~
+    summary: >
+      Analysis of DARPA program outcomes finding that demand for the technology
+      — not funding or organizational structure — was the primary predictor of
+      successful transition from research to deployment. Programs with clear
+      transition partners succeeded at dramatically higher rates.
+    context: >
+      Critical constraint on the essay's thesis. Coupling devices and trading
+      zones aren't sufficient — someone must actually want the output. Legibility
+      without demand is an essay with no reader.
+
+  - key: morgan-astrazeneca
+    pattern: "Morgan et al."
+    section: sources
+    title: ~
+    authors: "Morgan et al."
+    year: ~
+    venue: ~
+    url: ~
+    summary: >
+      Published success-rate data for AstraZeneca's 5R Framework implementation.
+      Documented the improvement from 4% to 23% drug development success rates
+      — roughly 6× — achieved by forcing joint evaluation of five coupled
+      dimensions before committing resources.
+    context: >
+      Independent replication of the 6× improvement in a completely different
+      domain (pharmaceuticals), confirming the coupled-questions diagnosis
+      generalizes beyond tech industry R&D.
+
+  - key: scannell-eroams
+    pattern: "Scannell et al."
+    section: sources
+    title: "Diagnosing the Decline in Pharmaceutical R&D Efficiency"
+    authors: "Jack W. Scannell et al."
+    year: 2012
+    venue: "Nature Reviews Drug Discovery"
+    url: ~
+    summary: >
+      Documents "Eroom's Law" — the observation that drug discovery costs
+      roughly double every nine years despite technological improvements.
+      Identifies causes including the "better than the Beatles" problem
+      (new drugs must beat existing treatments), increasingly stringent
+      regulation, and the tendency to pursue the hardest remaining targets.
+    context: >
+      Explains the ceiling on organizational interventions. Even a 6×
+      improvement operates against a backdrop of increasing scientific
+      complexity that organizational design cannot overcome.
+
+  - key: gertner-bell-labs
+    pattern: "The Idea Factory"
+    section: sources
+    title: "The Idea Factory: Bell Labs and the Great Age of American Innovation"
+    authors: "Jon Gertner"
+    year: 2012
+    venue: "Penguin Press"
+    url: "https://www.penguinrandomhouse.com/books/44592/the-idea-factory-by-jon-gertner/"
+    summary: >
+      History of Bell Labs during its peak creative period. Documents how
+      AT&T's monopoly position enabled sustained basic research investment
+      without commercial pressure — effectively a permanent protection phase.
+      Bell Labs produced the transistor, information theory, Unix, C, and the
+      laser. The institutional structure that enabled this was destroyed by
+      the 1984 AT&T breakup.
+    context: >
+      Historical case of what maximum research protection looks like. Bell
+      Labs' structure was the opposite of a patronage model — researchers had
+      essentially unlimited freedom. The tradeoff: brilliant research, weak
+      commercialization of many inventions.
+
+  - key: watzinger-bell-breakup
+    pattern: "Watzinger & Schnitzer"
+    section: sources
+    title: ~
+    authors: "Martin Watzinger & Monika Schnitzer"
+    year: ~
+    venue: ~
+    url: ~
+    summary: >
+      Econometric study finding that the 1984 Bell System breakup increased
+      overall innovation, even though it reduced Bell Labs' research output.
+      The breakup forced formerly protected research into competitive markets,
+      increasing commercialization rates enough to more than compensate for
+      reduced basic research volume.
+    context: >
+      Complicates the protection thesis. Breaking the monopoly protection
+      destroyed some basic research capacity but improved overall
+      research-to-product transition — a natural experiment in the
+      protection-versus-integration tradeoff.
+
+  - key: uc-berkeley-pasteur-2024
+    pattern: "UC Berkeley finding"
+    section: "06"
+    title: ~
+    authors: ~
+    year: 2024
+    venue: "Science"
+    url: ~
+    summary: >
+      Study of "Pasteur's Quadrant" researchers — people who both publish
+      papers and file patents. Found they produce work that is more novel and
+      more influential than single-activity researchers, with their numbers
+      increasing 350% since 1980. However, they concentrate in wealthy
+      geographic areas and remain rare (14% of inventors, 4% of scientists).
+    context: >
+      Quantitative evidence that boundary-spanning individuals exist and
+      outperform — but the conditions that produce them are institutionally
+      fragile. You can't just hire your way to a trading zone.
+
+  - key: markham-2002
+    pattern: "Markham"
+    section: sources
+    title: ~
+    authors: "Stephen K. Markham"
+    year: 2002
+    venue: "Research-Technology Management"
+    url: ~
+    summary: >
+      Early empirical analysis of the valley of death in technology transfer.
+      Identified organizational and communication barriers as primary obstacles,
+      predating the funding-gap consensus that Branscomb & Auerswald would
+      establish a year later.
+    context: >
+      Part of the foundational valley-of-death literature. Notable for
+      identifying organizational (not financial) barriers before the
+      funding-gap narrative became dominant.
+
+  - key: fraunhofer-patents
+    pattern: "Fraunhofer presence boosts patent output"
+    section: "07"
+    title: ~
+    authors: ~
+    year: ~
+    venue: ~
+    url: ~
+    summary: >
+      Econometric studies finding that the presence of a Fraunhofer institute
+      boosts patent output of local firms by at least 13%. The effect operates
+      through knowledge spillovers and the dual-orientation researchers that
+      the 30/70 funding model produces.
+    context: >
+      Quantitative evidence that the Fraunhofer model's structural design
+      produces measurable innovation output — the funding split creates
+      boundary-spanners by default.
+
+
+links:
+
+  - key: neptune-ml
+    pattern: "Neptune ML"
+    section: "05"
+    url: "https://aws.amazon.com/neptune/machine-learning/"
+    title: "Amazon Neptune ML"
+    source: "AWS · Managed Graph Database Service"
+    summary: >
+      Neptune ML integrates graph neural network inference directly into
+      Amazon Neptune, enabling link prediction, node classification, and
+      knowledge graph completion on graph data without managing separate
+      ML infrastructure. The research-to-product transition described in
+      this essay.
