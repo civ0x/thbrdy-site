@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback, useId } from "react";
-import { tokens } from "./tokens";
+import { createPortal } from "react-dom";
 
 type AnnotationMode = "term" | "reference" | "link";
 
@@ -44,13 +44,22 @@ function prefersReducedMotion(): boolean {
 
 export function Annotation({ mode, term, content, children }: AnnotationProps) {
   const [open, setOpen] = useState(false);
-  const [position, setPosition] = useState<"below" | "above">("below");
-  const [horizontalShift, setHorizontalShift] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [popoverPos, setPopoverPos] = useState<{ top: number; left: number; placement: "below" | "above" }>({
+    top: 0,
+    left: 0,
+    placement: "below",
+  });
   const triggerRef = useRef<HTMLSpanElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const uniqueId = useId();
   const popoverId = `annotation-popover-${uniqueId}`;
+
+  // Only render portal after mount (SSR safety)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const closePopover = useCallback(() => {
     setOpen(false);
@@ -60,7 +69,6 @@ export function Annotation({ mode, term, content, children }: AnnotationProps) {
   }, []);
 
   const openPopover = useCallback(() => {
-    // Close any other open popover
     if (globalCloseCallback && globalCloseCallback !== closePopover) {
       globalCloseCallback();
     }
@@ -68,32 +76,25 @@ export function Annotation({ mode, term, content, children }: AnnotationProps) {
     setOpen(true);
   }, [closePopover]);
 
-  // Position calculation
+  // Position calculation — positions popover relative to viewport using fixed positioning
   const updatePosition = useCallback(() => {
-    if (!triggerRef.current || !popoverRef.current || isMobile()) return;
+    if (!triggerRef.current || isMobile()) return;
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
     const spaceBelow = window.innerHeight - triggerRect.bottom;
     const spaceAbove = triggerRect.top;
+    const placement = spaceBelow > 280 || spaceBelow > spaceAbove ? "below" : "above";
 
-    if (spaceBelow > 280 || spaceBelow > spaceAbove) {
-      setPosition("below");
-    } else {
-      setPosition("above");
-    }
+    const popoverWidth = Math.min(380, window.innerWidth - 32);
+    let left = triggerRect.left + triggerRect.width / 2 - popoverWidth / 2;
 
-    // Horizontal edge clamping — defer to after render
-    requestAnimationFrame(() => {
-      if (!popoverRef.current) return;
-      const popoverRect = popoverRef.current.getBoundingClientRect();
-      if (popoverRect.left < 8) {
-        setHorizontalShift(8 - popoverRect.left);
-      } else if (popoverRect.right > window.innerWidth - 8) {
-        setHorizontalShift(-(popoverRect.right - (window.innerWidth - 8)));
-      } else {
-        setHorizontalShift(0);
-      }
-    });
+    // Horizontal edge clamping
+    if (left < 8) left = 8;
+    if (left + popoverWidth > window.innerWidth - 8) left = window.innerWidth - 8 - popoverWidth;
+
+    const top = placement === "below" ? triggerRect.bottom + 8 : triggerRect.top - 8;
+
+    setPopoverPos({ top, left, placement });
   }, []);
 
   useEffect(() => {
@@ -129,7 +130,6 @@ export function Annotation({ mode, term, content, children }: AnnotationProps) {
         closePopover();
       }
     };
-    // Delay to avoid catching the opening click
     const timer = setTimeout(() => {
       document.addEventListener("click", handleClick);
     }, 0);
@@ -170,14 +170,12 @@ export function Annotation({ mode, term, content, children }: AnnotationProps) {
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    // For link mode on mobile: first tap shows popover, second navigates
     if (mode === "link" && isMobile()) {
       if (!open) {
         e.preventDefault();
         openPopover();
         return;
       }
-      // Second tap: let the link navigate
       return;
     }
     if (open) {
@@ -200,36 +198,6 @@ export function Annotation({ mode, term, content, children }: AnnotationProps) {
   const reduced = prefersReducedMotion();
 
   const triggerClass = `annotation-trigger ${isLink ? "annotation-trigger--link" : ""} ${open ? "annotation-trigger--active" : ""}`;
-
-  const popoverStyle: React.CSSProperties = isMobile()
-    ? {
-        opacity: open ? 1 : 0,
-        pointerEvents: open ? "auto" : "none",
-        transform: open ? "translateY(0)" : "translateY(12px)",
-        transition: reduced ? "none" : "opacity 0.2s ease, transform 0.2s ease",
-      }
-    : {
-        opacity: open ? 1 : 0,
-        pointerEvents: open ? "auto" : "none",
-        transform: open ? "translateY(0)" : "translateY(6px)",
-        transition: reduced ? "none" : "opacity 0.2s ease, transform 0.2s ease",
-        translate: `calc(-50% + ${horizontalShift}px) 0`,
-        ...(position === "below"
-          ? { top: "calc(100% + 8px)", bottom: "auto" }
-          : { bottom: "calc(100% + 8px)", top: "auto" }),
-      };
-
-  const triggerProps = {
-    ref: triggerRef,
-    className: triggerClass,
-    onClick: handleClick,
-    onMouseEnter: handleMouseEnter,
-    onMouseLeave: handleMouseLeave,
-    onKeyDown: handleKeyDown,
-    tabIndex: 0,
-    role: isLink ? undefined : ("button" as const),
-    "aria-describedby": popoverId,
-  };
 
   const renderPopoverContent = () => {
     if (mode === "term") {
@@ -297,43 +265,90 @@ export function Annotation({ mode, term, content, children }: AnnotationProps) {
     );
   };
 
-  const popoverEl = (
-    <div
-      ref={popoverRef}
-      id={popoverId}
-      role="tooltip"
-      className={`annotation-popover ${!isMobile() ? `annotation-popover--${position}` : "annotation-popover--mobile"}`}
-      style={popoverStyle}
-      onMouseEnter={handlePopoverMouseEnter}
-      onMouseLeave={handlePopoverMouseLeave}
-    >
-      {renderPopoverContent()}
-    </div>
-  );
+  // Desktop popover style: fixed positioning from calculated coords
+  const desktopPopoverStyle: React.CSSProperties = {
+    position: "fixed",
+    zIndex: 1000,
+    width: `min(380px, calc(100vw - 2rem))`,
+    top: popoverPos.placement === "below" ? `${popoverPos.top}px` : undefined,
+    bottom: popoverPos.placement === "above" ? `${window.innerHeight - popoverPos.top}px` : undefined,
+    left: `${popoverPos.left}px`,
+    opacity: open ? 1 : 0,
+    pointerEvents: open ? "auto" : "none",
+    transform: open ? "translateY(0)" : popoverPos.placement === "below" ? "translateY(6px)" : "translateY(-6px)",
+    transition: reduced ? "none" : "opacity 0.2s ease, transform 0.2s ease",
+  };
 
-  const backdrop = isMobile() && open ? (
-    <div
-      className="annotation-backdrop"
-      style={{
-        opacity: 1,
-        pointerEvents: "auto",
-        transition: reduced ? "none" : "opacity 0.2s ease",
-      }}
-      onClick={closePopover}
-    />
-  ) : null;
+  // Mobile popover style: bottom sheet
+  const mobilePopoverStyle: React.CSSProperties = {
+    position: "fixed",
+    zIndex: 1000,
+    left: "1rem",
+    right: "1rem",
+    bottom: "1rem",
+    width: "auto",
+    opacity: open ? 1 : 0,
+    pointerEvents: open ? "auto" : "none",
+    transform: open ? "translateY(0)" : "translateY(12px)",
+    transition: reduced ? "none" : "opacity 0.2s ease, transform 0.2s ease",
+  };
+
+  const triggerProps = {
+    ref: triggerRef,
+    className: triggerClass,
+    onClick: handleClick,
+    onMouseEnter: handleMouseEnter,
+    onMouseLeave: handleMouseLeave,
+    onKeyDown: handleKeyDown,
+    tabIndex: 0,
+    role: isLink ? undefined : ("button" as const),
+    "aria-describedby": popoverId,
+  };
 
   const TriggerTag = isLink ? "a" : "span";
   const linkProps = isLink ? { href: linkUrl, target: "_blank" as const, rel: "noopener noreferrer" } : {};
 
+  // Portal content: popover + backdrop rendered into document.body
+  const portalContent = mounted
+    ? createPortal(
+        <>
+          {isMobile() && open && (
+            <div
+              className="annotation-backdrop"
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(44, 36, 22, 0.15)",
+                zIndex: 999,
+                opacity: 1,
+                transition: reduced ? "none" : "opacity 0.2s ease",
+              }}
+              onClick={closePopover}
+            />
+          )}
+          <div
+            ref={popoverRef}
+            id={popoverId}
+            role="tooltip"
+            className={`annotation-popover ${isMobile() ? "annotation-popover--mobile" : `annotation-popover--${popoverPos.placement}`}`}
+            style={isMobile() ? mobilePopoverStyle : desktopPopoverStyle}
+            onMouseEnter={handlePopoverMouseEnter}
+            onMouseLeave={handlePopoverMouseLeave}
+          >
+            {renderPopoverContent()}
+          </div>
+        </>,
+        document.body,
+      )
+    : null;
+
   return (
     <>
       <style>{annotationStyles}</style>
-      {backdrop}
       <TriggerTag {...triggerProps} {...linkProps}>
         {children}
-        {popoverEl}
       </TriggerTag>
+      {portalContent}
     </>
   );
 }
@@ -364,33 +379,18 @@ const annotationStyles = `
   }
 
   .annotation-popover {
-    position: absolute;
-    z-index: 1000;
-    width: min(380px, calc(100vw - 2rem));
     background: var(--bg-warm);
     border: 1px solid var(--border-mid);
     border-radius: 6px;
     box-shadow:
       0 4px 12px rgba(44, 36, 22, 0.08),
       0 1px 3px rgba(44, 36, 22, 0.06);
-    left: 50%;
-    translate: -50% 0;
   }
-  .annotation-popover--below::after,
-  .annotation-popover--above::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    translate: -50% 0;
-    border: 6px solid transparent;
-  }
-  .annotation-popover--below::after {
-    bottom: 100%;
-    border-bottom-color: var(--bg-warm);
-  }
-  .annotation-popover--above::after {
-    top: 100%;
-    border-top-color: var(--bg-warm);
+  .annotation-popover--mobile {
+    border-radius: 10px;
+    box-shadow:
+      0 -4px 24px rgba(44, 36, 22, 0.12),
+      0 0 0 1px var(--border-mid);
   }
 
   .annotation-popover-inner {
@@ -399,6 +399,12 @@ const annotationStyles = `
     flex-direction: column;
     gap: 0;
     line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .annotation-popover--mobile .annotation-popover-inner {
+      padding: 1.35rem 1.5rem;
+    }
   }
 
   .annotation-popover-mode {
@@ -545,34 +551,6 @@ const annotationStyles = `
     margin-top: 0.6rem;
     padding-top: 0.5rem;
     border-top: 1px solid var(--border);
-  }
-
-  .annotation-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(44, 36, 22, 0.15);
-    z-index: 999;
-  }
-
-  @media (max-width: 640px) {
-    .annotation-popover--mobile {
-      position: fixed;
-      left: 1rem;
-      right: 1rem;
-      width: auto;
-      bottom: 1rem;
-      top: auto;
-      translate: 0 0;
-      border-radius: 10px;
-      box-shadow:
-        0 -4px 24px rgba(44, 36, 22, 0.12),
-        0 0 0 1px var(--border-mid);
-      z-index: 1000;
-    }
-    .annotation-popover--mobile::after { display: none; }
-    .annotation-popover--mobile .annotation-popover-inner {
-      padding: 1.35rem 1.5rem;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
