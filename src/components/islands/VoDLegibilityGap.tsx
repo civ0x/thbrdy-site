@@ -137,6 +137,7 @@ export default function VoDLegibilityGap() {
         .vod-legibility-bridge-line {
           width: 100%;
           border-top: 1.5px dashed ${tokens.accent};
+          transform-origin: left;
         }
         .vod-legibility-tooltip {
           position: absolute;
@@ -265,11 +266,16 @@ export default function VoDLegibilityGap() {
               onMouseEnter={() => setHoveredBridge(i)}
               onMouseLeave={() => setHoveredBridge(null)}
               style={{
-                opacity: inView ? (hoveredBridge === i ? 1 : 0.6) : 0,
-                transition: `opacity 0.6s ${ease} ${0.9 + i * 0.1}s`,
+                opacity: inView ? (hoveredBridge === i ? 1 : 0.8) : 0,
+                transition: `opacity 0.6s ${ease} ${1.2 + i * 0.3}s`,
               }}
             >
-              <div className="vod-legibility-bridge-line" />
+              <div className="vod-legibility-bridge-line"
+                style={{
+                  transform: inView ? "scaleX(1)" : "scaleX(0)",
+                  transition: `transform 0.5s ${ease} ${1.2 + i * 0.3}s`,
+                }}
+              />
               {hoveredBridge === i && (
                 <div className="vod-legibility-tooltip">
                   {bridges[i].label}
@@ -343,7 +349,7 @@ export default function VoDLegibilityGap() {
         style={{
           opacity: inView ? 1 : 0,
           transform: inView ? "translateY(0)" : "translateY(8px)",
-          transition: `opacity 0.6s ${ease} 1.6s, transform 0.6s ${ease} 1.6s`,
+          transition: `opacity 0.6s ${ease} 3.0s, transform 0.6s ${ease} 3.0s`,
         }}
       >
         "The bridges exist but are not expressed in either vocabulary."
