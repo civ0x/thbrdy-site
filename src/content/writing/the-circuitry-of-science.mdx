@@ -6,6 +6,13 @@ tags: ["scholion", "epistemology", "safety-cases", "argument-structure", "resear
 connected_project: "Scholion"
 ---
 
+import ScholionDecompositionPipeline from '../../components/islands/ScholionDecompositionPipeline.tsx'
+import ScholionChenDependencyGraph from '../../components/islands/ScholionChenDependencyGraph.tsx'
+import ScholionSafetyCaseFragment from '../../components/islands/ScholionSafetyCaseFragment.tsx'
+import ScholionSchemaEvolution from '../../components/islands/ScholionSchemaEvolution.tsx'
+import ScholionCompetitiveGap from '../../components/islands/ScholionCompetitiveGap.tsx'
+import ScholionRoadmap from '../../components/islands/ScholionRoadmap.tsx'
+
 # The Circuitry of Science
 
 ## I. The Invisible Load-Bearing Wall
@@ -20,7 +27,7 @@ This is not a critique of [[ref:chen2025|Chen et al.]] The study is competently 
 
 Every research paper has this architecture. The question is whether we can make it explicit, machine-readable, and maintainable as evidence evolves. That is what Scholion does.
 
-{/* <DecompositionPipeline /> — diagram port session will wire this */}
+<ScholionDecompositionPipeline client:visible />
 
 ## II. The Methodology
 
@@ -58,7 +65,7 @@ The Balthazar-survival tension is the most analytically interesting. Symptom chr
 
 The cross-study comparison problem is the most methodologically consequential. The paper's thesis depends on contrasting its own null findings with positive findings from other studies using looser etiological definitions. But those studies used different populations, timeframes, and healthcare systems. The argument requires the assumption that the etiological definition is the relevant variable, rather than any of dozens of other methodological differences between the studies. This inferential pattern — one of six documented schema failure modes — does not map cleanly to the schema's five dependency types.
 
-{/* <ChenDependencyGraph /> — diagram port session will wire this */}
+<ScholionChenDependencyGraph client:visible />
 
 ## IV. The Safety Case Application
 
@@ -88,7 +95,7 @@ Combined with the two-layer annotation model described in Section II — structu
 
 This is the project's meta-crux: does structural verification of arguments preserve the asymmetric oversight property that Khan demonstrates in debate? The Chen extraction provides initial evidence. The confounding by indication, the absence-of-evidence fallacy, the Balthazar-survival tension — these structural vulnerabilities were visible in the dependency graph and obscured in the prose. They were identified by an annotator following method, not by a clinical epidemiologist applying domain knowledge. If this pattern holds for safety cases, then a structurally competent verifier can oversee a substantively stronger researcher — not by matching their domain expertise, but by auditing the logical scaffolding their arguments rest on.
 
-{/* <SafetyCaseFragment /> — diagram port session will wire this */}
+<ScholionSafetyCaseFragment client:visible />
 
 ## V. What the Extraction Revealed About the Schema
 
@@ -102,7 +109,7 @@ Annotator-synthesized claims posed a boundary problem. The Balthazar-survival te
 
 Cross-study comparison reasoning does not fit the five dependency types cleanly. The paper's central thesis — that COVID-19-induced AP is distinct from concurrent AP — rests on contrasting its own null results with positive results from other studies. This was coded as "purposive" and "conjunctive," but neither captures the actual logic: "our results differ from theirs, therefore the methodological difference explains the divergence." Whether this warrants a sixth dependency type ("comparative") or remains a documented edge case depends on how frequently the pattern recurs across domains.
 
-{/* <SchemaEvolution /> — diagram port session will wire this */}
+<ScholionSchemaEvolution client:visible />
 
 ## VI. The Competitive Landscape
 
@@ -110,7 +117,7 @@ The existing research infrastructure is good at adjacent problems. [[link:elicit
 
 The capabilities that define Scholion's territory — claim-level decomposition, typed dependency relationships, warrant extraction, crux identification, and invalidation propagation — are not provided by any existing tool. scite.ai comes closest with its citation context classification, but it operates on citation sentences, not on the internal argument structure of a paper. If scite tells you Paper B contradicts Paper A, Scholion tells you which claim contradicts which claim, through what reasoning, and what downstream conclusions in both papers are affected. The gap is real and has not closed since the first essay was written.
 
-{/* <CompetitiveGapTable /> — diagram port session will wire this */}
+<ScholionCompetitiveGap client:visible />
 
 ## VII. Where This Goes
 
@@ -128,4 +135,4 @@ But Phase 1 also tests a more specific hypothesis: that non-specialist annotator
 
 The project is a bet that making argument structure explicit is worth the overhead of decomposition — and that the structural layer carries independent epistemic authority, accessible to overseers who do not match the domain expertise of the systems or researchers they are evaluating. The medical extraction is the first evidence that the overhead produces insights the prose does not. The safety case application is the first domain where institutional demand is acute. The novice annotator hypothesis is the scalability test. The answer is not known yet. But the question is now precise enough to answer empirically.
 
-{/* <Roadmap /> — diagram port session will wire this */}
+<ScholionRoadmap client:visible />

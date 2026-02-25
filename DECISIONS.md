@@ -122,8 +122,30 @@
 **Reference:** `docs/interaction-patterns.md` for full specifications.
 **Constraint:** The reference document is authoritative for visual treatment and interaction mechanics. Individual components may extend but should not contradict these patterns without a new decision entry explaining why.
 
+## 020: Per-essay OG images and pull quote share cards
+**Date:** 2026-02-25
+**Decision:** Extend the OG image pipeline from a single default image to per-essay and per-pull-quote images, generated at build time via SVG templates → `@resvg/resvg-js`. Add a share affordance to the PullQuote component (Twitter intent + copy link). Quote share URLs resolve to lightweight static pages with quote-specific OG meta tags that redirect to the parent essay.
+**Rationale:** Every essay currently shares the same default OG image — when shared on Twitter, the card doesn't identify which essay is being linked. Per-essay images are table stakes. Pull quote share cards are the higher-leverage feature: readers can share specific passages, and the social card renders the quote in the site's typographic aesthetic (Cormorant Garamond on warm off-white, gold accents). This turns the site's visual identity into a social media differentiator.
+**Key design choices:**
+- **Build-time generation over Cloudflare Workers:** Static site with stable content. Build-time avoids Workers WASM constraints (no WOFF2 support in Satori, resvg-wasm bundling friction, 50ms CPU limits). Full Node.js environment at build time means actual TTF font embedding with no compromises.
+- **Raw SVG → resvg over Satori:** Matches existing `generate-og-image.js` pattern. Satori adds JSX→SVG complexity and font format constraints that aren't needed when generating static images in Node.
+- **Separate static pages for quote share URLs** (`/writing/[slug]/quote/[n]/`) **over query params:** Twitter's crawler may not differentiate OG images based on query params. Separate pages with `<meta http-equiv="refresh">` reliably serve quote-specific OG tags to crawlers while redirecting humans to the essay.
+- **Explicit PullQuote props over runtime URL inference:** 8 quotes across 6 essays is a trivial edit surface. Explicit `slug` and `quoteIndex` props are unambiguous and don't depend on runtime URL parsing during SSR/hydration.
+- **Twitter + copy link:** Twitter is the primary share target. Copy link covers LinkedIn, Bluesky, iMessage, and everything else. Web Share API (`navigator.share`) deferred — adds complexity with minimal gain over copy-to-clipboard.
+**Scope tiers:**
+- Tier 1 (Must Have): Per-essay OG images. Session prompt: `session-og-tier1.md`
+- Tier 2 (Should Have): Pull quote share cards + share UI. Session prompt: `session-og-tier2.md`
+- Not Building: Arbitrary text selection → share (requires on-demand OG generation or pre-rendering every possible highlight)
+**Constraint:** No new npm dependencies. TTF fonts stored in `scripts/fonts/`. OG images generated as `prebuild` step. No Satori.
+
 ## 014: @resvg/resvg-js for OG image generation
 **Date:** 2026-02-22
 **Decision:** Use `@resvg/resvg-js` as a devDependency for generating the default Open Graph image (1200×630 PNG) from an SVG template. One-shot script in `scripts/generate-og-image.js`, not a build step.
 **Rationale:** Alternatives (Puppeteer, Playwright) require a full headless browser — heavy dependency, slow execution, non-deterministic rendering. `@resvg/resvg-js` is a Rust-based SVG renderer compiled to WASM: deterministic output, fast execution, small footprint (~5MB devDependency), no browser required. The OG image is static (same for all pages), so a one-shot generation script is simpler and more reliable than build-time generation.
 **Constraint:** `@resvg/resvg-js` is devDependency only — zero runtime impact. The generated PNG ships as a static asset in `public/images/`. System fonts used in the SVG (Georgia, Courier New) since embedding web fonts into resvg adds complexity with no meaningful visual difference at OG preview sizes.
+
+## 016: Diagram popover approach — self-contained with shared component
+**Date:** 2026-02-24
+**Decision:** Create a shared `DiagramPopover.tsx` + `useDiagramPopover` hook in `islands/shared/` for diagram node popovers (SafetyCaseFragment, ChenDependencyGraph). Keep separate from `Annotation.tsx`.
+**Rationale:** `Annotation.tsx` is tightly coupled to its mode-specific content rendering (term/reference/link). Extracting its positioning/dismiss logic would require refactoring a working component. Diagram popovers show different content (label, title, body, structural significance) with a different trigger model (data-keyed nodes, not inline text). A lightweight shared component (~150 lines) avoids both the refactoring risk and the duplication of self-contained popovers in each diagram.
+**Constraint:** Same UX patterns as Annotation: desktop hover + click, mobile bottom sheet, one-at-a-time, keyboard accessible, Escape to close.
