@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoD Maturity Switch — Draggable Threshold Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF6F0;
+    --bg-warm: #F4EFE7;
+    --bg-card: #EFEBE4;
+    --border: rgba(44, 36, 22, 0.1);
+    --border-mid: rgba(44, 36, 22, 0.18);
+    --text: #2C2416;
+    --text-mid: #4A3D30;
+    --text-light: #6B5D4F;
+    --text-muted: #9B8E80;
+    --text-faint: #C4B8AA;
+    --accent: #B8860B;
+    --accent-dim: rgba(184, 134, 11, 0.08);
+    --accent-glow: rgba(184, 134, 11, 0.15);
+    --teal: #2A7A6A;
+    --teal-dim: rgba(42, 122, 106, 0.08);
+    --green: #4A7A4A;
+    --green-dim: rgba(74, 122, 74, 0.08);
+    --red: #A63D2F;
+    --red-dim: rgba(166, 61, 47, 0.08);
+    --blue: #2A5A8A;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 24px 120px;
+  }
+
+  .prototype-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 60px;
+    text-align: center;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: 6px;
+  }
+
+  /* ── Root ── */
+  .maturity-root {
+    max-width: 720px;
+    width: 100%;
+  }
+
+  /* ── Instruction ── */
+  .instruction {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .instruction-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .instruction-text em {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* ── Slider area ── */
+  .slider-area {
+    position: relative;
+    margin-bottom: 2rem;
+    padding-top: 100px; /* space for case dots above */
+  }
+
+  /* ── The bar ── */
+  .maturity-bar {
+    position: relative;
+    width: 100%;
+    height: 48px;
+    border-radius: 10px;
+    background: linear-gradient(
+      to right,
+      rgba(42, 122, 106, 0.08) 0%,
+      rgba(42, 122, 106, 0.04) 45%,
+      rgba(184, 134, 11, 0.04) 55%,
+      rgba(184, 134, 11, 0.08) 100%
+    );
+    border: 1px solid var(--border);
+    cursor: pointer;
+  }
+
+  /* ── Zone labels inside bar ── */
+  .bar-zone-labels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none;
+  }
+  .bar-zone-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: opacity 0.2s ease;
+  }
+  .bar-zone-label--left { color: var(--teal); }
+  .bar-zone-label--right { color: var(--accent); }
+
+  /* ── Threshold handle ── */
+  .threshold {
+    position: absolute;
+    top: -8px;
+    width: 3px;
+    height: calc(100% + 16px);
+    background: var(--accent);
+    transform: translateX(-50%);
+    cursor: ew-resize;
+    z-index: 10;
+    transition: box-shadow 0.2s ease;
+    border-radius: 2px;
+  }
+  .threshold:hover,
+  .threshold--dragging {
+    box-shadow: 0 0 12px rgba(184, 134, 11, 0.3);
+  }
+  .threshold-diamond {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    transform: translate(-50%, -50%) rotate(45deg);
+    border-radius: 3px;
+    box-shadow: 0 2px 8px rgba(184, 134, 11, 0.2);
+    cursor: ew-resize;
+  }
+  .threshold-diamond::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    transform: translate(-50%, -50%);
+    border-left: 2px solid var(--bg);
+    border-right: 2px solid var(--bg);
+    opacity: 0.8;
+  }
+
+  /* ── Axis labels ── */
+  .axis-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+  .axis-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.625rem;
+    color: var(--text-faint);
+  }
+
+  /* ── Case dots ── */
+  .case-dot {
+    position: absolute;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateX(-50%);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .case-dot:hover {
+    transform: translateX(-50%) scale(1.08);
+  }
+  .case-dot-circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .case-dot-circle--correct {
+    background: var(--green-dim);
+    border-color: var(--green);
+    box-shadow: 0 0 6px rgba(74, 122, 74, 0.2);
+  }
+  .case-dot-circle--wrong {
+    background: var(--red-dim);
+    border-color: var(--red);
+    box-shadow: 0 0 6px rgba(166, 61, 47, 0.2);
+  }
+  .case-dot-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.5625rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+    text-align: center;
+    max-width: 80px;
+    line-height: 1.2;
+  }
+  .case-dot-label--correct { color: var(--green); }
+  .case-dot-label--wrong { color: var(--red); }
+
+  /* ── Score display ── */
+  .score-area {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .score-row {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .score-number {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: color 0.3s ease;
+  }
+  .score-number--perfect { color: var(--green); }
+  .score-number--good { color: var(--accent); }
+  .score-number--poor { color: var(--red); }
+  .score-total {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+  .score-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+  .score-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: 4px;
+    transition: opacity 0.3s ease;
+  }
+
+  /* ── Zone cards ── */
+  .zone-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 2rem;
+  }
+  .zone-card {
+    padding: 10px 14px;
+    border-radius: 8px;
+    min-height: 0;
+    transition: border-color 0.3s ease;
+  }
+  .zone-card--protect {
+    background: var(--teal-dim);
+    border: 1px solid rgba(42, 122, 106, 0.2);
+  }
+  .zone-card--integrate {
+    background: var(--accent-dim);
+    border: 1px solid rgba(184, 134, 11, 0.2);
+  }
+  .zone-card-header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .zone-card-header--protect { color: var(--teal); }
+  .zone-card-header--integrate { color: var(--accent); }
+  .zone-case-list {
+    list-style: none;
+  }
+  .zone-case-item {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .zone-case-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .zone-case-icon--correct { background: var(--green); }
+  .zone-case-icon--wrong { background: var(--red); }
+  .zone-case-name { color: var(--text-mid); }
+  .zone-case-verdict {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.5rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-left: auto;
+  }
+  .zone-case-verdict--correct { color: var(--green); }
+  .zone-case-verdict--wrong { color: var(--red); }
+
+  /* ── Detail panel (click a case) ── */
+  .detail-panel {
+    padding: 14px 18px;
+    border-radius: 8px;
+    background: var(--bg-warm);
+    border-left: 3px solid var(--accent);
+    margin-bottom: 1.5rem;
+    transition: opacity 0.3s ease, max-height 0.4s ease;
+    overflow: hidden;
+  }
+  .detail-panel--hidden {
+    opacity: 0;
+    max-height: 0;
+    padding: 0 18px;
+    margin-bottom: 0;
+    border-left-color: transparent;
+  }
+  .detail-panel--visible {
+    opacity: 1;
+    max-height: 300px;
+  }
+  .detail-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .detail-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .detail-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .detail-badge--correct {
+    color: var(--green);
+    background: var(--green-dim);
+  }
+  .detail-badge--wrong {
+    color: var(--red);
+    background: var(--red-dim);
+  }
+  .detail-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  /* ── Callout ── */
+  .callout {
+    padding: 16px 20px;
+    background: var(--accent-dim);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+  }
+  .callout-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .zone-cards { grid-template-columns: 1fr; }
+    .slider-area { padding-top: 120px; }
+    .case-dot-label { font-size: 0.5rem; max-width: 60px; }
+    .score-number { font-size: 2rem; }
+  }
+  @media (max-width: 420px) {
+    .maturity-bar { height: 40px; }
+    .bar-zone-label { display: none; }
+    .case-dot-label { font-size: 0.45rem; max-width: 50px; }
+    .threshold-diamond { width: 16px; height: 16px; }
+  }
+
+  /* ── Reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .case-dot, .case-dot-circle, .case-dot-label,
+    .score-number, .threshold, .zone-case-item,
+    .detail-panel {
+      transition-duration: 0.01s !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="prototype-label">Prototype · VoD Maturity Switch · Draggable Threshold Slider</div>
+
+<div class="maturity-root">
+  <div class="header">
+    <p class="eyebrow">Maturity Threshold</p>
+    <h3 class="title">When to protect. When to integrate.</h3>
+    <p class="subtitle">Drag the threshold to find the switching point. Try to get all nine right.</p>
+  </div>
+
+  <div class="instruction">
+    <span class="instruction-text">Drag the <em>gold diamond</em> along the bar — or click anywhere on the bar</span>
+  </div>
+
+  <div class="slider-area" id="sliderArea">
+    <div class="maturity-bar" id="bar">
+      <div class="bar-zone-labels">
+        <span class="bar-zone-label bar-zone-label--left">Protect</span>
+        <span class="bar-zone-label bar-zone-label--right">Integrate</span>
+      </div>
+      <div class="threshold" id="threshold">
+        <div class="threshold-diamond"></div>
+      </div>
+    </div>
+    <div class="axis-labels">
+      <span class="axis-label">Low Maturity</span>
+      <span class="axis-label">High Maturity</span>
+    </div>
+    <!-- Case dots injected by JS -->
+  </div>
+
+  <div class="score-area" id="scoreArea">
+    <div class="score-row">
+      <span class="score-number" id="scoreNum">5</span>
+      <span class="score-total">/ 9</span>
+      <span class="score-label">correctly classified</span>
+    </div>
+    <div class="score-sub" id="scoreSub">Move the threshold to classify all nine cases</div>
+  </div>
+
+  <div class="zone-cards">
+    <div class="zone-card zone-card--protect">
+      <div class="zone-card-header zone-card-header--protect">← Protected exploration</div>
+      <ul class="zone-case-list" id="protectList"></ul>
+    </div>
+    <div class="zone-card zone-card--integrate">
+      <div class="zone-card-header zone-card-header--integrate">Structured translation →</div>
+      <ul class="zone-case-list" id="integrateList"></ul>
+    </div>
+  </div>
+
+  <div class="detail-panel detail-panel--hidden" id="detailPanel">
+    <div class="detail-header">
+      <span class="detail-name" id="detailName"></span>
+      <span class="detail-badge" id="detailBadge"></span>
+    </div>
+    <p class="detail-text" id="detailText"></p>
+  </div>
+
+  <div class="callout" id="callout">
+    <p class="callout-text" id="calloutText">
+      The best possible score is <strong>7 out of 9</strong>. No single threshold correctly classifies every case — the switching point depends on domain-specific factors that a maturity metric alone cannot capture.
+    </p>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ── Case data ──
+  // position: 0-100 on maturity axis
+  // correct: 'protect' or 'integrate' — what SHOULD have happened
+  // Positions are chosen so protect and integrate cases INTERLEAVE on the
+  // maturity axis. This makes 9/9 impossible — the best achievable is 7/9.
+  // The impossibility is the argument: domain-specific factors (reliability
+  // requirements, capital intensity, market tolerance) determine the correct
+  // prescription, not maturity alone.
+  //
+  // Key overlaps:
+  //   Deep Learning (35, integrate) < Cleantech (38, protect)
+  //   FAIR (48, integrate) < Watson (52, protect)
+  // These two crossing pairs make any single threshold lose at least 2 cases.
+  const cases = [
+    {
+      id: 'ai-winter',
+      name: 'AI Winter',
+      short: 'AI Winter',
+      position: 15,
+      correct: 'protect',
+      narrative: 'Expectations outran capability by decades. Symbolic AI couldn\'t deliver on promises, triggering a funding collapse that set the field back a generation. The research needed protection from premature commercial pressure — but that\'s obvious at this maturity level.',
+    },
+    {
+      id: 'deeplearn',
+      name: 'Deep Learning 2012',
+      short: 'Deep Learning',
+      position: 35,
+      correct: 'integrate',
+      narrative: 'At only moderate maturity, compute costs, dataset scale, and algorithmic understanding converged enough for image classification. The domain\'s tolerance for error was high — a misclassified image isn\'t a misdiagnosed patient. Integration was correct at a maturity level where other domains would still need protection.',
+    },
+    {
+      id: 'cleantech',
+      name: 'Cleantech 1.0',
+      short: 'Cleantech 1.0',
+      position: 38,
+      correct: 'protect',
+      narrative: 'Battery technology at $1,000/kWh was pushed to commercialize against $50/barrel oil. Despite moderate technical maturity — comparable to deep learning — the capital intensity of energy infrastructure meant failure was catastrophic. $25 billion destroyed because the domain demanded more protection than the maturity score alone would suggest.',
+    },
+    {
+      id: 'fair',
+      name: 'FAIR World Models',
+      short: 'FAIR',
+      position: 48,
+      correct: 'integrate',
+      narrative: 'Research-grade world models with demonstrated capability but no translation pathway to Meta\'s product surface. The domain\'s integration requirements were achievable — world models don\'t need medical-grade reliability. Continued protection of work that was ready for structured integration.',
+    },
+    {
+      id: 'watson',
+      name: 'Watson Health',
+      short: 'Watson Health',
+      position: 52,
+      correct: 'protect',
+      narrative: 'IBM announced a product at a maturity level comparable to FAIR\'s world models. But medical NLP demands extreme reliability — a wrong answer can kill. $5 billion destroyed because the domain\'s integration threshold was higher than the technology\'s maturity, even though other domains at this level were integration-ready.',
+    },
+    {
+      id: 'astrazeneca',
+      name: 'AstraZeneca 5R',
+      short: 'AstraZeneca',
+      position: 55,
+      correct: 'integrate',
+      narrative: 'Implemented a structured 5R framework with domain-specific gates — not a single maturity metric. The framework itself is the contribution: it shows that correct switching depends on matching integration criteria to the specific domain, not hitting a universal threshold.',
+    },
+    {
+      id: 'neptune',
+      name: 'Neptune ML',
+      short: 'Neptune ML',
+      position: 60,
+      correct: 'integrate',
+      narrative: 'AWS identified the integration window for ML infrastructure tooling — research-grade experiment tracking was mature enough for product packaging. The gap was translation, not capability. At this maturity level, integration is almost always correct.',
+    },
+    {
+      id: 'parc',
+      name: 'Xerox PARC GUI',
+      short: 'PARC → Apple',
+      position: 72,
+      correct: 'integrate',
+      narrative: 'The graphical interface was fully functional and user-tested. Xerox\'s research culture couldn\'t translate it. Apple could. The capability crossed the maturity threshold years before the organization recognized it — classic failed transition.',
+    },
+    {
+      id: 'zombie',
+      name: 'Zombie Research Labs',
+      short: 'Zombie Labs',
+      position: 82,
+      correct: 'integrate',
+      narrative: 'Corporate R&D labs producing publishable research disconnected from any product pathway. Mature capabilities that accumulate papers instead of products. At this maturity level, continued protection is pure organizational failure.',
+    },
+  ];
+
+  // ── State ──
+  let thresholdPct = 46; // start between the crossing pairs for maximum interest
+  let selectedCaseId = null;
+  let isDragging = false;
+
+  // ── DOM refs ──
+  const bar = document.getElementById('bar');
+  const thresholdEl = document.getElementById('threshold');
+  const sliderArea = document.getElementById('sliderArea');
+  const scoreNum = document.getElementById('scoreNum');
+  const scoreSub = document.getElementById('scoreSub');
+  const protectList = document.getElementById('protectList');
+  const integrateList = document.getElementById('integrateList');
+  const detailPanel = document.getElementById('detailPanel');
+  const detailName = document.getElementById('detailName');
+  const detailBadge = document.getElementById('detailBadge');
+  const detailText = document.getElementById('detailText');
+  const calloutText = document.getElementById('calloutText');
+
+  // ── Build case dots ──
+  const dotEls = {};
+  cases.forEach(c => {
+    const dot = document.createElement('div');
+    dot.className = 'case-dot';
+    dot.dataset.id = c.id;
+
+    const label = document.createElement('div');
+    label.className = 'case-dot-label';
+    label.textContent = c.short;
+
+    const circle = document.createElement('div');
+    circle.className = 'case-dot-circle';
+
+    dot.appendChild(label);
+    dot.appendChild(circle);
+
+    dot.addEventListener('click', function(evt) {
+      evt.stopPropagation();
+      if (selectedCaseId === c.id) {
+        selectedCaseId = null;
+      } else {
+        selectedCaseId = c.id;
+      }
+      updateDetail();
+    });
+
+    sliderArea.appendChild(dot);
+    dotEls[c.id] = { root: dot, label: label, circle: circle };
+  });
+
+  // Clear selection on outside click
+  document.addEventListener('click', function() {
+    if (selectedCaseId !== null) {
+      selectedCaseId = null;
+      updateDetail();
+    }
+  });
+
+  // ── Position case dots ──
+  // Stagger vertically to avoid overlaps
+  function layoutDots() {
+    // Sort by position for overlap detection
+    const sorted = [...cases].sort((a, b) => a.position - b.position);
+    const rows = []; // each row is an array of case positions
+
+    sorted.forEach(c => {
+      const dot = dotEls[c.id];
+      const barRect = bar.getBoundingClientRect();
+      const areaRect = sliderArea.getBoundingClientRect();
+      const barTop = barRect.top - areaRect.top;
+
+      // Place dot above the bar
+      const leftPct = c.position;
+      dot.root.style.left = leftPct + '%';
+
+      // Find a row that doesn't overlap
+      let row = 0;
+      for (let r = 0; r < rows.length; r++) {
+        const conflict = rows[r].some(pos => Math.abs(pos - c.position) < 11);
+        if (!conflict) { row = r; break; }
+        row = r + 1;
+      }
+      if (!rows[row]) rows[row] = [];
+      rows[row].push(c.position);
+
+      const bottomOffset = barTop - 8; // 8px gap above bar
+      const rowHeight = 38;
+      dot.root.style.bottom = 'auto';
+      dot.root.style.top = (bottomOffset - (row + 1) * rowHeight) + 'px';
+    });
+  }
+
+  // ── Classify a case given current threshold ──
+  function classify(c) {
+    const zone = c.position < thresholdPct ? 'protect' : 'integrate';
+    const isCorrect = zone === c.correct;
+    return { zone, isCorrect };
+  }
+
+  // ── Compute best possible score ──
+  function computeBestScore() {
+    let best = 0;
+    for (let t = 0; t <= 100; t++) {
+      let score = 0;
+      cases.forEach(c => {
+        const zone = c.position < t ? 'protect' : 'integrate';
+        if (zone === c.correct) score++;
+      });
+      if (score > best) best = score;
+    }
+    return best;
+  }
+  const bestPossible = computeBestScore();
+
+  // ── Update everything ──
+  function update() {
+    // Position threshold
+    thresholdEl.style.left = thresholdPct + '%';
+
+    // Score
+    let score = 0;
+    const protectCases = [];
+    const integrateCases = [];
+
+    cases.forEach(c => {
+      const { zone, isCorrect } = classify(c);
+      if (isCorrect) score++;
+
+      const dot = dotEls[c.id];
+      dot.circle.className = 'case-dot-circle ' +
+        (isCorrect ? 'case-dot-circle--correct' : 'case-dot-circle--wrong');
+      dot.label.className = 'case-dot-label ' +
+        (isCorrect ? 'case-dot-label--correct' : 'case-dot-label--wrong');
+
+      if (zone === 'protect') {
+        protectCases.push({ case: c, isCorrect });
+      } else {
+        integrateCases.push({ case: c, isCorrect });
+      }
+    });
+
+    // Score display
+    scoreNum.textContent = score;
+    if (score === 9) {
+      scoreNum.className = 'score-number score-number--perfect';
+    } else if (score >= 7) {
+      scoreNum.className = 'score-number score-number--good';
+    } else {
+      scoreNum.className = 'score-number score-number--poor';
+    }
+
+    // Score subtitle
+    if (score === bestPossible) {
+      scoreSub.textContent = 'That\'s the best possible. Two cases always end up in the wrong zone — click them to see why.';
+      scoreSub.style.color = 'var(--green)';
+    } else if (score >= bestPossible - 1) {
+      scoreSub.textContent = 'Close — you can still get one more right.';
+      scoreSub.style.color = '';
+    } else if (score >= bestPossible - 2) {
+      scoreSub.textContent = 'Getting warmer. Where does the threshold best separate protect from integrate?';
+      scoreSub.style.color = '';
+    } else {
+      scoreSub.textContent = 'Keep adjusting — the threshold separates protect (left) from integrate (right).';
+      scoreSub.style.color = '';
+    }
+
+    // Callout updates
+    if (score === bestPossible) {
+      calloutText.innerHTML = 'The best possible score is <strong>' + bestPossible + ' out of 9</strong>. ' +
+        'Deep learning integrated successfully at maturity 35 while cleantech at 38 was destroyed by premature integration. ' +
+        'FAIR\'s world models at 48 needed integration while Watson Health at 52 needed more protection. ' +
+        'The switching point depends on domain-specific factors — reliability requirements, capital intensity, market tolerance — ' +
+        'that a maturity metric alone cannot capture.';
+    } else {
+      calloutText.innerHTML = 'You\'re at <strong>' + score + ' out of 9</strong>. ' +
+        'The maximum achievable is <strong>' + bestPossible + '</strong> — ' +
+        'try to reach it, then ask why two cases remain stubbornly misclassified.';
+    }
+
+    // Zone lists
+    renderZoneList(protectList, protectCases);
+    renderZoneList(integrateList, integrateCases);
+
+    // Update detail panel if a case is selected
+    updateDetail();
+  }
+
+  function renderZoneList(ul, items) {
+    ul.innerHTML = '';
+    // Sort by position
+    items.sort((a, b) => a.case.position - b.case.position);
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'zone-case-item';
+
+      const icon = document.createElement('span');
+      icon.className = 'zone-case-icon ' +
+        (item.isCorrect ? 'zone-case-icon--correct' : 'zone-case-icon--wrong');
+
+      const name = document.createElement('span');
+      name.className = 'zone-case-name';
+      name.textContent = item.case.short;
+
+      const verdict = document.createElement('span');
+      verdict.className = 'zone-case-verdict ' +
+        (item.isCorrect ? 'zone-case-verdict--correct' : 'zone-case-verdict--wrong');
+      verdict.textContent = item.isCorrect ? '✓ correct' : '✗ wrong zone';
+
+      li.appendChild(icon);
+      li.appendChild(name);
+      li.appendChild(verdict);
+
+      li.addEventListener('click', function(evt) {
+        evt.stopPropagation();
+        selectedCaseId = item.case.id;
+        updateDetail();
+      });
+      li.style.cursor = 'pointer';
+
+      ul.appendChild(li);
+    });
+  }
+
+  function updateDetail() {
+    if (!selectedCaseId) {
+      detailPanel.className = 'detail-panel detail-panel--hidden';
+      return;
+    }
+
+    const c = cases.find(x => x.id === selectedCaseId);
+    const { zone, isCorrect } = classify(c);
+
+    detailName.textContent = c.name;
+    detailBadge.textContent = isCorrect
+      ? 'Correctly ' + (zone === 'protect' ? 'protected' : 'integrated')
+      : 'Should ' + (c.correct === 'protect' ? 'be protected' : 'be integrated');
+    detailBadge.className = 'detail-badge ' +
+      (isCorrect ? 'detail-badge--correct' : 'detail-badge--wrong');
+    detailText.textContent = c.narrative;
+    detailPanel.className = 'detail-panel detail-panel--visible';
+  }
+
+  // ── Drag handling ──
+  function pctFromEvent(evt) {
+    const barRect = bar.getBoundingClientRect();
+    let clientX;
+    if (evt.touches) {
+      clientX = evt.touches[0].clientX;
+    } else {
+      clientX = evt.clientX;
+    }
+    let pct = ((clientX - barRect.left) / barRect.width) * 100;
+    return Math.max(5, Math.min(95, pct));
+  }
+
+  function startDrag(evt) {
+    evt.preventDefault();
+    isDragging = true;
+    thresholdEl.classList.add('threshold--dragging');
+    thresholdPct = pctFromEvent(evt);
+    update();
+  }
+
+  function onDrag(evt) {
+    if (!isDragging) return;
+    evt.preventDefault();
+    thresholdPct = pctFromEvent(evt);
+    update();
+  }
+
+  function endDrag() {
+    if (!isDragging) return;
+    isDragging = false;
+    thresholdEl.classList.remove('threshold--dragging');
+  }
+
+  // Mouse
+  thresholdEl.addEventListener('mousedown', startDrag);
+  bar.addEventListener('mousedown', function(evt) {
+    thresholdPct = pctFromEvent(evt);
+    isDragging = true;
+    thresholdEl.classList.add('threshold--dragging');
+    update();
+  });
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', endDrag);
+
+  // Touch
+  thresholdEl.addEventListener('touchstart', startDrag, { passive: false });
+  bar.addEventListener('touchstart', function(evt) {
+    thresholdPct = pctFromEvent(evt);
+    isDragging = true;
+    thresholdEl.classList.add('threshold--dragging');
+    update();
+  }, { passive: false });
+  document.addEventListener('touchmove', onDrag, { passive: false });
+  document.addEventListener('touchend', endDrag);
+
+  // Keyboard
+  thresholdEl.setAttribute('tabindex', '0');
+  thresholdEl.setAttribute('role', 'slider');
+  thresholdEl.setAttribute('aria-label', 'Maturity threshold');
+  thresholdEl.setAttribute('aria-valuemin', '5');
+  thresholdEl.setAttribute('aria-valuemax', '95');
+  thresholdEl.addEventListener('keydown', function(evt) {
+    if (evt.key === 'ArrowRight' || evt.key === 'ArrowUp') {
+      evt.preventDefault();
+      thresholdPct = Math.min(95, thresholdPct + 2);
+      update();
+    } else if (evt.key === 'ArrowLeft' || evt.key === 'ArrowDown') {
+      evt.preventDefault();
+      thresholdPct = Math.max(5, thresholdPct - 2);
+      update();
+    }
+    thresholdEl.setAttribute('aria-valuenow', Math.round(thresholdPct));
+  });
+
+  // ── Layout & init ──
+  function init() {
+    layoutDots();
+    update();
+  }
+
+  // Relayout on resize
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(init, 100);
+  });
+
+  init();
+})();
+</script>
+
+</body>
+</html>

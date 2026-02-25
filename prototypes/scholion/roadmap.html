@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholion: Roadmap Prototype</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..150,400;0,9..150,500;0,9..150,600;1,9..150,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #FAF7F2;
+      --bg-warm: #F4EFE7;
+      --bg-card: #FFFFFF;
+      --text: #2C2416;
+      --text-mid: #5C5344;
+      --text-light: #8A7E6E;
+      --text-muted: #A69E90;
+      --border-mid: #D4CBBD;
+      --border-light: #E8E2D8;
+      --accent: #C4922A;
+      --accent-dim: rgba(196, 146, 42, 0.08);
+      --teal: #2A7A6A;
+      --teal-dim: rgba(42, 122, 106, 0.08);
+      --blue: #4A7AB5;
+      --blue-dim: rgba(74, 122, 181, 0.08);
+      --red: #B54A4A;
+      --red-dim: rgba(181, 74, 74, 0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Cormorant Garamond", serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+
+    .context-prose p {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    /* ─── COMPONENT WRAPPER ─── */
+    .roadmap-component {
+      margin: 48px 0;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .roadmap-component.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .component-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* ─── TIMELINE SPINE ─── */
+    .timeline {
+      position: relative;
+      padding-left: 32px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 8px;
+      bottom: 8px;
+      width: 1px;
+      background: var(--border-mid);
+    }
+
+    /* ─── PHASE CARDS ─── */
+    .phase {
+      position: relative;
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .phase.phase-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .phase:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Timeline dot */
+    .phase::before {
+      content: '';
+      position: absolute;
+      left: -32px;
+      top: 10px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 2px solid var(--border-mid);
+      background: var(--bg);
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+
+    .phase[data-color="teal"]::before { border-color: var(--teal); }
+    .phase[data-color="accent"]::before { border-color: var(--accent); }
+    .phase[data-color="blue"]::before { border-color: var(--blue); }
+    .phase[data-color="red"]::before { border-color: var(--red); }
+
+    /* Active phase (Phase 1) gets filled dot */
+    .phase.active::before {
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+
+    .phase-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      padding: 20px 24px;
+      transition: border-color 0.3s ease;
+    }
+
+    .phase[data-color="teal"] .phase-card { border-left: 3px solid var(--teal); }
+    .phase[data-color="accent"] .phase-card { border-left: 3px solid var(--accent); }
+    .phase[data-color="blue"] .phase-card { border-left: 3px solid var(--blue); }
+    .phase[data-color="red"] .phase-card { border-left: 3px solid var(--red); }
+
+    .phase-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .phase-number {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .phase[data-color="teal"] .phase-number { color: var(--teal); }
+    .phase[data-color="accent"] .phase-number { color: var(--accent); }
+    .phase[data-color="blue"] .phase-number { color: var(--blue); }
+    .phase[data-color="red"] .phase-number { color: var(--red); }
+
+    .phase-title {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .phase-status {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5625rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .status-active {
+      background: var(--teal-dim);
+      color: var(--teal);
+    }
+
+    .status-pending {
+      background: var(--bg-warm);
+      color: var(--text-light);
+    }
+
+    .phase-desc {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.8125rem;
+      line-height: 1.55;
+      color: var(--text-mid);
+      margin-bottom: 16px;
+    }
+
+    /* ─── SUCCESS / KILL ROWS ─── */
+    .criteria-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .criteria-block {
+      padding: 12px 14px;
+      border-radius: 3px;
+    }
+
+    .criteria-success {
+      background: var(--teal-dim);
+      border-left: 2px solid var(--teal);
+    }
+
+    .criteria-kill {
+      background: var(--red-dim);
+      border-left: 2px solid var(--red);
+    }
+
+    .criteria-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .criteria-success .criteria-label { color: var(--teal); }
+    .criteria-kill .criteria-label { color: var(--red); }
+
+    .criteria-text {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: var(--text-mid);
+    }
+
+    /* ─── DEPENDENCY ARROW ─── */
+    .phase-dep {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .dep-arrow {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.625rem;
+      color: var(--text-light);
+    }
+
+    .dep-label {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      color: var(--text-light);
+    }
+
+    /* ─── ANNOTATION NOTE ─── */
+    .annotation-note {
+      margin-top: 32px;
+      padding: 16px 20px;
+      background: var(--bg-warm);
+      border-radius: 4px;
+      border-left: 3px solid var(--border-mid);
+    }
+
+    .annotation-note p {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      line-height: 1.6;
+      color: var(--text-mid);
+    }
+
+    .annotation-note em {
+      color: var(--text);
+      font-style: italic;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .container {
+        padding: 32px 20px;
+      }
+
+      .timeline {
+        padding-left: 28px;
+      }
+
+      .phase::before {
+        left: -28px;
+      }
+
+      .phase-card {
+        padding: 16px 18px;
+      }
+
+      .criteria-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .phase-header {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+    }
+
+    /* ─── REDUCED MOTION ─── */
+    @media (prefers-reduced-motion: reduce) {
+      .roadmap-component,
+      .phase {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+
+      .phase::before {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="context-prose">
+      <p>Scholion is currently a schema, two worked extractions, and a documented set of limitations. Turning it into a validated methodology and eventually a usable tool requires four phases, each with explicit success criteria and kill conditions.</p>
+    </div>
+
+    <div class="roadmap-component" id="roadmap">
+      <div class="component-label">&lt;Roadmap /&gt;</div>
+
+      <div class="timeline">
+
+        <!-- Phase 1: Manual Annotation -->
+        <div class="phase active" data-color="teal" data-delay="0">
+          <div class="phase-card">
+            <div class="phase-header">
+              <span class="phase-number">Phase 1</span>
+              <span class="phase-title">Manual Annotation</span>
+              <span class="phase-status status-active">Active</span>
+            </div>
+            <p class="phase-desc">Three to five papers across domains — clinical medicine (started), interpretability research, and formal verification or philosophy of science. Tests inter-annotator agreement and the novice annotator hypothesis: that non-specialists with structured method and inline contextual scaffolding can produce decompositions of comparable quality to domain experts.</p>
+            <div class="criteria-grid">
+              <div class="criteria-block criteria-success">
+                <div class="criteria-label">Success criteria</div>
+                <div class="criteria-text">Consistent inter-annotator agreement on claim boundaries, dependency types, and crux identification across independent annotators and domains.</div>
+              </div>
+              <div class="criteria-block criteria-kill">
+                <div class="criteria-label">Kill condition</div>
+                <div class="criteria-text">Agreement too low — the schema captures annotator idiosyncrasies, not stable structural features of arguments.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 2: LLM Extraction -->
+        <div class="phase" data-color="accent" data-delay="1">
+          <div class="phase-card">
+            <div class="phase-header">
+              <span class="phase-number">Phase 2</span>
+              <span class="phase-title">LLM Extraction Pipeline</span>
+              <span class="phase-status status-pending">Pending</span>
+            </div>
+            <p class="phase-desc">Benchmark automated extraction against manual ground truth from Phase 1. The argument mining literature suggests LLMs can perform argument component detection at levels rivaling supervised baselines but struggle with fine-grained structural reasoning — exactly the capability Scholion requires.</p>
+            <div class="criteria-grid">
+              <div class="criteria-block criteria-success">
+                <div class="criteria-label">Success criteria</div>
+                <div class="criteria-text">Automated extraction produces dependency graphs structurally valid enough to propagate invalidation correctly.</div>
+              </div>
+              <div class="criteria-block criteria-kill">
+                <div class="criteria-label">Kill condition</div>
+                <div class="criteria-text">Extraction quality too low — methodology requires human-in-the-loop annotation at a level that does not scale, or fundamental advances in LLM reasoning.</div>
+              </div>
+            </div>
+            <div class="phase-dep">
+              <span class="dep-arrow">←</span>
+              <span class="dep-label">Depends on Phase 1 ground truth corpus</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 3: Graph Infrastructure -->
+        <div class="phase" data-color="blue" data-delay="2">
+          <div class="phase-card">
+            <div class="phase-header">
+              <span class="phase-number">Phase 3</span>
+              <span class="phase-title">Graph Infrastructure</span>
+              <span class="phase-status status-pending">Pending</span>
+            </div>
+            <p class="phase-desc">Typed dependency storage, invalidation propagation as a graph operation, cross-document claim linking. Technical implementation depends on whether dependency types are stable, whether cross-document references are tractable, and what query patterns matter for actual use.</p>
+            <div class="criteria-grid">
+              <div class="criteria-block criteria-success">
+                <div class="criteria-label">Success criteria</div>
+                <div class="criteria-text">Graph operations correctly propagate status changes through typed dependencies and support cross-document claim resolution.</div>
+              </div>
+              <div class="criteria-block criteria-kill">
+                <div class="criteria-label">Kill condition</div>
+                <div class="criteria-text">Dependency types too unstable across domains — no consistent graph substrate supports the structural operations the methodology requires.</div>
+              </div>
+            </div>
+            <div class="phase-dep">
+              <span class="dep-arrow">←</span>
+              <span class="dep-label">Depends on Phase 1–2 findings on type stability and extraction fidelity</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 4: Reading Interface -->
+        <div class="phase" data-color="red" data-delay="3">
+          <div class="phase-card">
+            <div class="phase-header">
+              <span class="phase-number">Phase 4</span>
+              <span class="phase-title">Reading Interface &amp; Validation</span>
+              <span class="phase-status status-pending">Pending</span>
+            </div>
+            <p class="phase-desc">Domain experts use the dependency graph alongside the original paper and report whether the structural representation adds value over reading the prose. This is the final and most important test: utility, not elegance.</p>
+            <div class="criteria-grid">
+              <div class="criteria-block criteria-success">
+                <div class="criteria-label">Success criteria</div>
+                <div class="criteria-text">Domain experts report the graph surfaces structural insights — cruxes, hidden dependencies, invalidation paths — that the prose alone does not make visible.</div>
+              </div>
+              <div class="criteria-block criteria-kill">
+                <div class="criteria-label">Kill condition</div>
+                <div class="criteria-text">Experts do not find the graph more useful than the paper. The structural advantage thesis is wrong.</div>
+              </div>
+            </div>
+            <div class="phase-dep">
+              <span class="dep-arrow">←</span>
+              <span class="dep-label">Depends on Phase 3 graph infrastructure and validated extraction pipeline</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- .timeline -->
+
+      <div class="annotation-note">
+        <p>Each phase gates the next. The kill conditions are not hypothetical — they are the specific empirical questions the project exists to answer. <em>If the structure is not stable, do not automate it. If the automation is not faithful, do not build infrastructure on it. If the infrastructure does not help readers, stop.</em></p>
+      </div>
+
+    </div><!-- .roadmap-component -->
+
+    <div class="context-prose">
+      <p>The project is a bet that making argument structure explicit is worth the overhead of decomposition — and that the structural layer carries independent epistemic authority, accessible to overseers who do not match the domain expertise of the systems or researchers they are evaluating.</p>
+    </div>
+
+  </div><!-- .container -->
+
+  <script>
+    // ─── Intersection Observer: scroll-triggered reveal ───
+    const component = document.getElementById('roadmap');
+    const phases = component.querySelectorAll('.phase');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+
+          // Stagger phase reveals
+          phases.forEach((phase, i) => {
+            const delay = parseInt(phase.dataset.delay, 10) || 0;
+            setTimeout(() => {
+              phase.classList.add('phase-visible');
+            }, 200 + delay * 150);
+          });
+
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    observer.observe(component);
+
+    // ─── Respect prefers-reduced-motion ───
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      component.classList.add('in-view');
+      phases.forEach(p => p.classList.add('phase-visible'));
+    }
+  </script>
+</body>
+</html>

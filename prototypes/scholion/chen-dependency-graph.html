@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholion: ChenDependencyGraph Prototype</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..150,400;0,9..150,500;0,9..150,600;1,9..150,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── CSS RESET & CUSTOM PROPERTIES ─── */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #FAF7F2;
+      --bg-warm: #F4EFE7;
+      --bg-card: #FFFFFF;
+      --text: #2C2416;
+      --text-mid: #5C5344;
+      --text-light: #8A7E6E;
+      --text-muted: #A69E90;
+      --border-mid: #D4CBBD;
+      --border-light: #E8E2D8;
+      --accent: #C4922A;
+      --accent-dim: rgba(196, 146, 42, 0.08);
+      --teal: #2A7A6A;
+      --teal-dim: rgba(42, 122, 106, 0.08);
+      --blue: #4A7AB5;
+      --red: #B54A4A;
+      --connector-color: var(--border-mid);
+      --connector-crux: var(--accent);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Cormorant Garamond", serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    /* ─── LAYOUT ─── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+
+    .context-prose p {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      max-width: 700px;
+    }
+
+    /* ─── COMPONENT WRAPPER ─── */
+    .graph-component {
+      margin: 48px 0;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .graph-component.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .component-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .component-label::before {
+      content: '';
+      display: block;
+      width: 12px;
+      height: 1.5px;
+      background-color: var(--accent);
+    }
+
+    /* ─── GRAPH SCROLL ─── */
+    .graph-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+    }
+
+    .scroll-hint {
+      display: none;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.625rem;
+      color: var(--text-muted);
+      text-align: right;
+      margin-bottom: 8px;
+    }
+
+    /* ─── GRAPH STRUCTURE ─── */
+    .graph {
+      min-width: 740px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ─── NODE CARDS ─── */
+    .node {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 10px 12px;
+      position: relative;
+      cursor: pointer;
+      transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.15s ease;
+    }
+
+    .node:hover, .node:focus-visible {
+      box-shadow: 0 2px 12px rgba(44, 36, 22, 0.08);
+      outline: none;
+    }
+
+    .node:active {
+      box-shadow: 0 1px 4px rgba(44, 36, 22, 0.06);
+    }
+
+    /* Staggered entry */
+    .graph-component .node {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .graph-component.in-view .node {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: var(--d, 0s);
+    }
+
+    .node-id {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-in { background-color: var(--teal); }
+    .dot-und { background-color: var(--accent); }
+
+    .node-label {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.35;
+    }
+
+    .node-stat {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      color: var(--text-light);
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+
+    /* ─── NODE VARIANTS ─── */
+    .node.crux {
+      border-left: 3px solid var(--accent);
+      background: linear-gradient(135deg, var(--bg-card), var(--accent-dim));
+    }
+
+    .node.crux .node-label { font-weight: 600; }
+
+    .crux-badge {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background-color: var(--accent-dim);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .node.synthesis {
+      border-color: var(--border-mid);
+      background: var(--bg-warm);
+    }
+
+    .node.limitation {
+      border-left: 2px solid var(--red);
+    }
+
+    .node.low-conf { opacity: 0.72; }
+    .node.med-conf { opacity: 0.88; }
+
+    .node.annotator-synth {
+      border-left: 2px dashed var(--accent);
+      opacity: 0.75;
+    }
+
+    /* ─── GROUPED BLOCK (collapsed claims) ─── */
+    .group-block {
+      background: var(--bg-warm);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 12px 14px;
+      position: relative;
+      cursor: pointer;
+      transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.15s ease;
+    }
+
+    .group-block:hover { box-shadow: 0 2px 12px rgba(44, 36, 22, 0.08); }
+
+    .graph-component .group-block {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .graph-component.in-view .group-block {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: var(--d, 0s);
+    }
+
+    .group-header {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .group-items {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .group-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      padding: 6px 8px;
+      flex: 1;
+      min-width: 90px;
+    }
+
+    .group-item.dropped {
+      border-style: dashed;
+      opacity: 0.5;
+    }
+
+    .group-item .gi-label {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.625rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .group-item .gi-stat {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .group-item .gi-label-dropped {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.625rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      line-height: 1.3;
+      text-decoration: line-through;
+      text-decoration-color: var(--border-mid);
+    }
+
+    .group-arrow {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 4px 0;
+    }
+
+    /* ─── CONNECTORS ─── */
+    .vert {
+      width: 1px;
+      background-color: var(--connector-color);
+      align-self: center;
+    }
+
+    .vert.accent {
+      width: 1.5px;
+      background-color: var(--accent);
+    }
+
+    .dep-type {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.45rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      background-color: var(--bg);
+      padding: 0 4px;
+      line-height: 1;
+      z-index: 1;
+      position: relative;
+    }
+
+    .branch-bar {
+      height: 1px;
+      background-color: var(--connector-color);
+    }
+
+    .branch-bar.accent {
+      height: 1.5px;
+      background-color: var(--accent);
+    }
+
+    .center-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ─── TWO-CHAIN LAYOUT ─── */
+    .chains {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      width: 100%;
+    }
+
+    .chain {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .chain-label {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-light);
+      text-align: center;
+      padding: 6px 12px;
+    }
+
+    .chain-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    /* ─── INVALIDATION ANNOTATION ─── */
+    .invalidation-note {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      color: var(--text-light);
+      line-height: 1.4;
+      padding: 12px 16px;
+      background-color: var(--bg-warm);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      margin-top: 24px;
+      max-width: 700px;
+    }
+
+    .invalidation-note strong {
+      color: var(--text-mid);
+      font-weight: 600;
+    }
+
+    /* ─── LEGEND ─── */
+    .graph-legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.8125rem;
+      color: var(--text-mid);
+    }
+
+    .legend-swatch {
+      width: 18px;
+      height: 13px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .legend-swatch.sw-crux {
+      border: 1px solid var(--border-light);
+      border-left: 3px solid var(--accent);
+      background: linear-gradient(135deg, var(--bg-card), var(--accent-dim));
+    }
+
+    .legend-swatch.sw-synth {
+      background: var(--bg-warm);
+      border: 1px solid var(--border-mid);
+    }
+
+    .legend-swatch.sw-limit {
+      border: 1px solid var(--border-light);
+      border-left: 2px solid var(--red);
+    }
+
+    .legend-swatch.sw-std {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+    }
+
+    .legend-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    /* ─── POPOVERS ─── */
+    .popover {
+      position: fixed;
+      background-color: var(--bg-warm);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(44, 36, 22, 0.08);
+      padding: 12px 14px;
+      max-width: 300px;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      pointer-events: none;
+    }
+
+    .popover.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .popover-close {
+      display: none;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-light);
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      line-height: 1;
+    }
+
+    .pop-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pop-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .pop-dot.clinical { background-color: var(--teal); }
+    .pop-dot.argument { background-color: var(--accent); }
+
+    .pop-title {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .pop-body {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-mid);
+      line-height: 1.45;
+      margin-bottom: 0;
+    }
+
+    .pop-body + .pop-body {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .pop-sub {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    /* ─── MOBILE POPOVER ─── */
+    .popover-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.3);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .popover-backdrop.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 860px) {
+      .container { padding: 32px 16px; }
+      .scroll-hint { display: block; }
+
+      .popover {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        max-width: none;
+        width: calc(100% - 32px);
+        margin: 0 16px;
+        border-radius: 12px 12px 0 0;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .popover-close { display: block; }
+      .popover-backdrop { display: block; }
+    }
+
+    /* ─── REDUCED MOTION ─── */
+    @media (prefers-reduced-motion: reduce) {
+      .graph-component, .graph-component *, .graph-component .node, .graph-component .group-block {
+        transition-duration: 0.01s !important;
+        transition-delay: 0s !important;
+      }
+      .graph-component { opacity: 1; transform: none; }
+      .graph-component .node, .graph-component .group-block { opacity: 1; transform: none; }
+      /* Restore variant opacity */
+      .graph-component .node.low-conf { opacity: 0.72; }
+      .graph-component .node.med-conf { opacity: 0.88; }
+      .graph-component .node.annotator-synth { opacity: 0.75; }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="context-prose">
+    <p>Twenty-five claims were extracted across two structurally distinct argument chains. The dependency graph below renders those claims as a navigable structure. Tap any node for context on what the claim means, why it matters, and where the argument is vulnerable.</p>
+  </div>
+
+  <!-- ─── CHEN DEPENDENCY GRAPH ─── -->
+  <div class="graph-component" id="chenGraph">
+
+    <div class="component-label">Chen et al. (2025) — Dependency Structure · 25 claims, 2 chains</div>
+    <div class="scroll-hint">Scroll to see full graph →</div>
+
+    <div class="graph-scroll">
+      <div class="graph">
+
+        <!-- ═══ LEVEL 0: Foundational Crux ═══ -->
+        <div class="node crux" style="--d:0.1s; max-width:340px;" tabindex="0" role="button" data-pop="method1">
+          <div class="node-id">
+            <span class="dot dot-in"></span>
+            method.1
+            <span class="crux-badge">Crux</span>
+          </div>
+          <div class="node-label">Inclusion criteria: COVID-19-induced AP defined by exclusion of alternative etiologies</div>
+          <div class="node-stat">Foundational — all 25 claims depend on this</div>
+        </div>
+
+        <div class="center-col"><div class="vert accent" style="height:24px;"></div></div>
+
+        <!-- ═══ LEVEL 1: Study Population ═══ -->
+        <div class="node" style="--d:0.2s; max-width:280px;" tabindex="0" role="button" data-pop="method2">
+          <div class="node-id"><span class="dot dot-in"></span> method.2</div>
+          <div class="node-label">111 patients from 87 case reports, dual-reviewer PRISMA screening</div>
+          <div class="node-stat">11 deaths (9.9% mortality) · median onset→death 7d</div>
+        </div>
+
+        <div class="center-col"><div class="vert" style="height:16px;"></div></div>
+
+        <!-- ═══ BRANCH POINT ═══ -->
+        <div style="width:60%; margin:0 auto;"><div class="branch-bar"></div></div>
+
+        <!-- ═══ TWO CHAINS ═══ -->
+        <div class="chains">
+
+          <!-- ──── LEFT: MORTALITY PREDICTORS ──── -->
+          <div class="chain">
+            <div class="vert" style="height:12px;"></div>
+            <div class="chain-label">Mortality Predictors</div>
+            <div class="vert" style="height:12px;"></div>
+
+            <!-- method.3: second crux -->
+            <div class="node crux" style="--d:0.3s; max-width:240px;" tabindex="0" role="button" data-pop="method3">
+              <div class="node-id">
+                <span class="dot dot-in"></span>
+                method.3
+                <span class="crux-badge">Crux</span>
+              </div>
+              <div class="node-label">Cox regression, adjusted for age + gender only</div>
+              <div class="node-stat">n=111, 11 events · ~10 events/covariate limit</div>
+            </div>
+
+            <div class="center-col"><div class="vert" style="height:16px;"></div></div>
+            <div class="dep-type">conditional</div>
+            <div class="center-col"><div class="vert" style="height:12px;"></div></div>
+
+            <!-- GROUPED: Univariate → Multivariate pipeline -->
+            <div class="group-block" style="--d:0.45s; max-width:380px;" tabindex="0" role="button" data-pop="uvmv">
+              <div class="group-header">Univariate screening → Multivariate filter</div>
+              <div class="group-items">
+                <div class="group-item">
+                  <div class="gi-label">WBC count</div>
+                  <div class="gi-stat">HR 1.014 → 1.013 (adj.)</div>
+                  <div class="gi-stat">p = .042</div>
+                </div>
+                <div class="group-item">
+                  <div class="gi-label">AST/ALT ≥ 2</div>
+                  <div class="gi-stat">HR 7.93 → 11.05 (adj.)</div>
+                  <div class="gi-stat">CI 1.4 – 84.8</div>
+                </div>
+                <div class="group-item">
+                  <div class="gi-label">Surgery</div>
+                  <div class="gi-stat">HR 6.30 → 6.60 (adj.)</div>
+                  <div class="gi-stat">p = .010 · n=7</div>
+                </div>
+                <div class="group-item dropped">
+                  <div class="gi-label-dropped">Albumin</div>
+                  <div class="gi-stat">Lost in MV · p = .065</div>
+                </div>
+              </div>
+              <div class="group-arrow">4 univariate significant → 3 survive adjustment</div>
+            </div>
+
+            <div class="center-col"><div class="vert" style="height:12px;"></div></div>
+            <div class="dep-type">conjunctive</div>
+            <div class="center-col"><div class="vert" style="height:8px;"></div></div>
+
+            <!-- Synthesis: mortality.9 -->
+            <div class="node synthesis med-conf" style="--d:0.6s; max-width:260px;" tabindex="0" role="button" data-pop="mort9">
+              <div class="node-id"><span class="dot dot-in"></span> mortality.9</div>
+              <div class="node-label">Three independent mortality predictors in COVID-19-induced AP</div>
+              <div class="node-stat">Synthesis · medium confidence</div>
+            </div>
+
+            <div class="center-col"><div class="vert" style="height:16px;"></div></div>
+            <div class="dep-type">contrastive</div>
+            <div class="center-col"><div class="vert" style="height:8px;"></div></div>
+            <div style="width:80%; margin:0 auto;"><div class="branch-bar"></div></div>
+
+            <!-- Limitations -->
+            <div class="chain-row">
+              <div class="node limitation" style="--d:0.7s; max-width:150px;" tabindex="0" role="button" data-pop="limit1">
+                <div class="node-id" style="font-size:0.5rem;"><span class="dot dot-in"></span> limit.1</div>
+                <div class="node-label" style="font-size:0.65rem;">Selection + recall bias</div>
+              </div>
+              <div class="node limitation" style="--d:0.75s; max-width:150px;" tabindex="0" role="button" data-pop="limit2">
+                <div class="node-id" style="font-size:0.5rem;"><span class="dot dot-in"></span> limit.2</div>
+                <div class="node-label" style="font-size:0.65rem;">Terminology gap</div>
+                <div class="node-stat">Feeds back to method.1</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ──── RIGHT: SYMPTOM CHRONOLOGY ──── -->
+          <div class="chain">
+            <div class="vert" style="height:12px;"></div>
+            <div class="chain-label">Symptom Chronology</div>
+            <div class="vert" style="height:12px;"></div>
+
+            <!-- chronology.1 -->
+            <div class="node" style="--d:0.3s; max-width:240px;" tabindex="0" role="button" data-pop="chron1">
+              <div class="node-id"><span class="dot dot-in"></span> chronology.1</div>
+              <div class="node-label">Symptom prevalence and temporal sequencing</div>
+              <div class="node-stat">91.9% GI · 79.3% respiratory · 52.3% resp-first</div>
+            </div>
+
+            <div class="center-col"><div class="vert" style="height:12px;"></div></div>
+
+            <!-- GROUPED: Clinical profiles + Balthazar -->
+            <div class="group-block" style="--d:0.45s; max-width:300px;" tabindex="0" role="button" data-pop="clinbal">
+              <div class="group-header">Clinical profiles &amp; radiologic severity</div>
+              <div class="group-items">
+                <div class="group-item">
+                  <div class="gi-label">Onset timing profiles</div>
+                  <div class="gi-stat">Age, lymphocytes, N/L ratio differ by timing</div>
+                </div>
+                <div class="group-item">
+                  <div class="gi-label">Balthazar associations</div>
+                  <div class="gi-stat">GI-first → higher severity (p=.013)</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="center-col"><div class="vert" style="height:12px;"></div></div>
+            <div class="dep-type">conditional</div>
+            <div class="center-col"><div class="vert" style="height:8px;"></div></div>
+
+            <!-- Two K-M negative findings (cruxes) -->
+            <div class="chain-row">
+              <div class="node crux low-conf" style="--d:0.6s; max-width:160px;" tabindex="0" role="button" data-pop="chron5">
+                <div class="node-id" style="font-size:0.5rem;">
+                  <span class="dot dot-in"></span> chron.5
+                  <span class="crux-badge" style="font-size:0.4rem;">Crux</span>
+                </div>
+                <div class="node-label" style="font-size:0.65rem;">No survival diff by symptom sequence</div>
+                <div class="node-stat">K-M p = .543 · 11 events</div>
+              </div>
+              <div class="node crux low-conf" style="--d:0.65s; max-width:160px;" tabindex="0" role="button" data-pop="chron6">
+                <div class="node-id" style="font-size:0.5rem;">
+                  <span class="dot dot-in"></span> chron.6
+                  <span class="crux-badge" style="font-size:0.4rem;">Crux</span>
+                </div>
+                <div class="node-label" style="font-size:0.65rem;">No survival diff by onset timing</div>
+                <div class="node-stat">K-M p = .228 · 8.1% vs 16.7%</div>
+              </div>
+            </div>
+
+            <div class="center-col"><div class="vert" style="height:12px;"></div></div>
+            <div class="dep-type">conjunctive</div>
+            <div class="center-col"><div class="vert" style="height:8px;"></div></div>
+
+            <!-- Synthesis: chronology.8 -->
+            <div class="node synthesis crux med-conf" style="--d:0.75s; max-width:260px;" tabindex="0" role="button" data-pop="chron8">
+              <div class="node-id">
+                <span class="dot dot-in"></span> chronology.8
+                <span class="crux-badge">Crux</span>
+              </div>
+              <div class="node-label">Chronology does not predict survival — distinguishes induced from concurrent AP</div>
+              <div class="node-stat">Central thesis · medium confidence</div>
+            </div>
+
+            <div class="center-col"><div class="vert" style="height:16px;"></div></div>
+            <div class="dep-type">contrastive</div>
+            <div class="center-col"><div class="vert" style="height:8px;"></div></div>
+            <div style="width:80%; margin:0 auto;"><div class="branch-bar"></div></div>
+
+            <!-- Bottom row: external evidence + limitation + tension -->
+            <div class="chain-row">
+              <div class="node" style="--d:0.85s; max-width:130px;" tabindex="0" role="button" data-pop="chron10">
+                <div class="node-id" style="font-size:0.5rem;"><span class="dot dot-in"></span> chron.10</div>
+                <div class="node-label" style="font-size:0.625rem;">External: concurrent AP worse outcomes</div>
+              </div>
+              <div class="node limitation" style="--d:0.9s; max-width:130px;" tabindex="0" role="button" data-pop="chron11">
+                <div class="node-id" style="font-size:0.5rem;"><span class="dot dot-in"></span> chron.11</div>
+                <div class="node-label" style="font-size:0.625rem;">Recall bias → null</div>
+              </div>
+            </div>
+
+            <!-- Balthazar-survival tension -->
+            <div class="center-col"><div class="vert" style="height:16px;"></div></div>
+            <div class="node annotator-synth" style="--d:1.0s; max-width:240px;" tabindex="0" role="button" data-pop="chron9">
+              <div class="node-id" style="font-size:0.5rem;"><span class="dot dot-und"></span> chronology.9</div>
+              <div class="node-label" style="font-size:0.7rem;">Balthazar-survival tension: timing predicts severity but not death</div>
+              <div class="node-stat">Annotator-synthesized · UNDETERMINED</div>
+            </div>
+          </div>
+
+        </div>
+        <!-- end chains -->
+
+      </div>
+    </div>
+
+    <!-- Selective invalidation annotation -->
+    <div class="invalidation-note">
+      <strong>Selective invalidation:</strong> If <strong>method.1</strong> falls, all 25 claims collapse — both chains depend on the induced/coincident distinction. If <strong>method.3</strong> falls, only the mortality chain collapses; the chronology chain uses Kaplan-Meier, not Cox regression, and survives. This asymmetry is invisible in the prose but immediate in the graph.
+    </div>
+
+    <!-- Legend -->
+    <div class="graph-legend">
+      <div class="legend-item"><span class="legend-swatch sw-crux"></span> Crux (load-bearing)</div>
+      <div class="legend-item"><span class="legend-swatch sw-synth"></span> Synthesis / grouped</div>
+      <div class="legend-item"><span class="legend-swatch sw-limit"></span> Contrastive / limitation</div>
+      <div class="legend-item"><span class="legend-swatch sw-std"></span> Standard claim</div>
+      <div class="legend-item"><span class="legend-dot dot-in"></span> IN</div>
+      <div class="legend-item"><span class="legend-dot dot-und"></span> UNDETERMINED</div>
+      <div class="legend-item" style="font-style:italic;">Reduced opacity = lower confidence · Tap any node for context</div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ─── POPOVER + BACKDROP ─── -->
+<div class="popover-backdrop"></div>
+<div class="popover">
+  <button class="popover-close" aria-label="Close popover">×</button>
+  <div class="popover-content"></div>
+</div>
+
+<script>
+// ─── POPOVER DATA ───
+// Sourced from extraction YAML: warrants, qualifiers, rebuttals — rewritten as reader-facing context
+const popData = {
+  method1: {
+    cat: 'argument', label: 'Foundational Crux',
+    title: 'Inclusion Criteria: Induced vs. Coincident',
+    body: 'The entire analysis hinges on one distinction: were these patients\' pancreatic injuries <em>caused by</em> COVID-19, or did pancreatitis merely <em>coincide with</em> COVID-19 infection? The study defines "induced" by ruling out other known causes (gallstones, alcohol, medications). If that exclusion is imperfect — and the authors acknowledge it may be — some patients in the cohort may not have COVID-19-induced pancreatitis at all, contaminating every downstream finding.',
+    structural: 'This is the single node on which all 25 claims depend. Pull it, and both the mortality predictor chain and the symptom chronology chain collapse simultaneously.'
+  },
+  method2: {
+    cat: 'clinical', label: 'Study Population',
+    title: '111 Patients, 87 Case Reports',
+    body: 'The cohort was assembled from published case reports — individual patient stories, not a prospective study. Dual-reviewer screening per PRISMA standards adds methodological rigor, but case reports over-represent severe or unusual presentations. The 9.9% mortality rate and 7-day median time to death suggest a population skewed toward fulminant cases.',
+    structural: 'With only 11 deaths in 111 patients, every statistical analysis downstream operates near the minimum viable sample size. The standard rule of thumb is ~10 events per covariate in regression models.'
+  },
+  method3: {
+    cat: 'argument', label: 'Methodological Crux',
+    title: 'Cox Regression — Limited Adjustment Scope',
+    body: 'Cox proportional hazards regression is the standard method for identifying mortality predictors from time-to-event data. The critical limitation: this model adjusted only for age and gender. Comorbidities, COVID-19 severity, treatment protocols, and geographic variation in care standards were not controlled. With 11 deaths, adding more covariates would risk overfitting — so the narrow adjustment is a genuine statistical constraint, not an oversight.',
+    structural: 'This is the second crux, but it only affects the <em>mortality predictor</em> chain. The chronology chain uses Kaplan-Meier (a different method), so it survives if this node falls. That selective invalidation pattern is the key structural insight.'
+  },
+  uvmv: {
+    cat: 'clinical', label: 'Statistical Pipeline',
+    title: 'Univariate Screening → Multivariate Filter',
+    body: 'Four variables reached statistical significance in univariate (unadjusted) analysis. Three survived after adjustment for age and gender:<br><br><strong>WBC count</strong> — HR 1.013 per unit increase. Statistically significant (p=.042) but clinically tiny: each 1,000/µL increase in white blood cells adds ~1.3% additional mortality risk. The confidence interval barely excludes 1.0.<br><br><strong>AST/ALT ratio ≥ 2</strong> — HR 11.05. The headline number. But the confidence interval spans 1.4 to 84.8 — a 60-fold range. The true effect could be a modest 44% increase or an implausible 8,400% increase. This ratio (the "De Ritis ratio") is classically associated with hepatocellular injury, suggesting multi-organ involvement.<br><br><strong>Surgical intervention</strong> — HR 6.60, p=.010. The strongest p-value, but the most questionable interpretation. Surgery doesn\'t cause death; severe disease causes both surgery and death. This is <em>confounding by indication</em> — a structural vulnerability the paper doesn\'t discuss, which Toulmin decomposition surfaced.<br><br><strong>Hypoalbuminemia</strong> (crossed out) lost significance after adjustment (p=.065), demonstrating the filtering function of multivariate analysis.',
+    structural: 'All three survivors depend on method.3 (the Cox regression). If the model\'s limited adjustment scope is inadequate, these "independent predictors" may be proxies for unmeasured confounders rather than true risk factors.'
+  },
+  mort9: {
+    cat: 'argument', label: 'Synthesis Claim',
+    title: 'Three Independent Mortality Predictors',
+    body: 'The paper\'s headline conclusion: WBC count, AST/ALT ratio ≥ 2, and surgical intervention are independent predictors of mortality in COVID-19-induced acute pancreatitis. "Independent" here means independent of age and gender only — not of disease severity, treatment variation, or comorbidities.',
+    structural: 'This is a conjunctive synthesis — it requires all three predictor findings to hold. If any individual predictor is refuted, this claim weakens. But the deeper vulnerability is upstream: if method.1 or method.3 falls, all three collapse simultaneously.'
+  },
+  limit1: {
+    cat: 'argument', label: 'Limitation',
+    title: 'Selection and Recall Bias',
+    body: 'Published case reports over-represent severe or unusual presentations (selection bias), and symptom timing relies on patient memory and clinician documentation (recall bias). Both systematically affect the cohort composition and the precision of temporal data. These biases are acknowledged but not quantified.',
+    structural: 'A contrastive node — it argues <em>against</em> the strength of upstream claims without defeating them. The schema\'s binary IN/OUT status struggles here: this claim is technically IN but it reduces our confidence in the mortality predictor findings.'
+  },
+  limit2: {
+    cat: 'argument', label: 'Limitation',
+    title: 'Terminology Gap',
+    body: 'The field lacks standardized terminology for distinguishing "COVID-19-induced" from "concurrent COVID-19 and" pancreatitis. The authors recognize their own definition (diagnosis by exclusion) is imperfect. Without a direct biomarker for viral pancreatic injury, the distinction may be clinically unverifiable.',
+    structural: 'Creates a quasi-circular structure: the analysis depends on the definition, and the analysis reveals the definition is insufficient. Not a true logical circle, but worth flagging.'
+  },
+  chron1: {
+    cat: 'clinical', label: 'Descriptive Baseline',
+    title: 'Symptom Prevalence and Temporal Sequencing',
+    body: 'GI symptoms occurred in 91.9% and respiratory symptoms in 79.3% of patients. Respiratory symptoms preceded admission more frequently (52.3% vs 30.6% GI-first). A notable asymmetry: 61.8% of GI-first patients never developed respiratory symptoms, while 96.6% of respiratory-first patients eventually developed GI symptoms — suggesting distinct clinical trajectories within the same diagnostic category.',
+    structural: 'Descriptive groundwork that enables the temporal analysis. Not a crux itself, but the 52.3% respiratory-first figure supports the "induced" mechanism: virus first, then pancreatic injury.'
+  },
+  clinbal: {
+    cat: 'clinical', label: 'Clinical Profiles',
+    title: 'Onset Timing Profiles & Balthazar Severity',
+    body: '<strong>Clinical profiles:</strong> Patients with pre-admission AP onset were significantly younger (36 vs 50 years), had lower lymphocyte counts, and higher radiologic severity (Balthazar ≥ D: 56.9% vs 27.3%). Four significant results out of ~15 comparisons without multiple comparison correction.<br><br><strong>Balthazar associations:</strong> Higher radiologic severity was associated with GI-first presentation (p=.013) and pre-admission onset (p=.042), but <em>not</em> with the duration between symptom types. This creates an important tension with the survival findings below.',
+    structural: 'The Balthazar findings set up the most analytically interesting observation in the chronology chain: timing predicts imaging severity, but imaging severity apparently doesn\'t predict death. That disconnect is what chronology.9 captures.'
+  },
+  chron5: {
+    cat: 'argument', label: 'Negative Finding Crux',
+    title: 'No Survival Difference by Symptom Sequence',
+    body: 'Kaplan-Meier analysis found no significant difference in survival between patients whose GI symptoms came first versus respiratory symptoms first (p=.543). But with only 11 deaths split across three groups, this analysis had very low statistical power. A non-significant p-value is an <em>absence of evidence</em>, not <em>evidence of absence</em> — the study may simply have been too small to detect a real difference.',
+    structural: 'Marked as a crux because the paper\'s central thesis — that induced AP behaves differently from concurrent AP — rests on this null result. But it\'s an epistemically fragile crux: low power, wide confidence intervals. A larger study could overturn it.'
+  },
+  chron6: {
+    cat: 'argument', label: 'Negative Finding Crux',
+    title: 'No Survival Difference by Onset Timing',
+    body: 'Whether AP developed before or during hospitalization did not significantly predict survival (p=.228). However, the raw mortality rates tell a different story: 8.1% in the pre-admission group versus 16.7% during hospitalization — a twofold difference the study was underpowered to detect. The non-significant p-value masks a potentially meaningful clinical difference.',
+    structural: 'The second fragile crux. Together with chron.5, this supports the synthesis claim that chronology doesn\'t matter. But both are epistemically weak, and the recall bias limitation (chron.11) biases specifically toward the null — meaning the "no effect" finding may be an artifact of measurement imprecision.'
+  },
+  chron8: {
+    cat: 'argument', label: 'Central Thesis',
+    title: 'Chronology Doesn\'t Predict Survival',
+    body: 'The paper\'s most ambitious claim: in true COVID-19-induced AP (defined by etiological exclusion), symptom chronology does not predict survival — unlike in "concurrent" AP studies where comorbid etiologies worsen outcomes. This argues that the two categories represent distinct clinical entities.<br><br>The argument performs two moves: (1) an internal negative finding (our data show no chronology effect), and (2) an external contrastive claim (other studies with looser definitions DO show effects). Move (2) requires assuming that the etiological definition, rather than population differences, explains the divergence across studies.',
+    structural: 'A conjunctive synthesis crux — depends on both K-M negative findings and the foundational inclusion criteria. The cross-study comparison logic doesn\'t map cleanly to the schema\'s five dependency types, flagged as a potential "comparative" type for Phase 1.'
+  },
+  chron10: {
+    cat: 'clinical', label: 'External Evidence',
+    title: 'Concurrent AP Studies Show Worse Outcomes',
+    body: 'Multiple studies of "concurrent COVID-19 and AP" (without etiological exclusion) consistently found that COVID-19 comorbidity was associated with increased AP severity and mortality. These external findings are marshaled as evidence for the induced/concurrent distinction. The weakness: those studies used different populations, timeframes, and definitions — the comparison conflates etiological category with population heterogeneity.',
+    structural: 'A purposive dependency — these findings serve the argumentative goal of establishing that the induced/concurrent distinction matters. But the cross-study inference pattern is one of six documented schema failure modes.'
+  },
+  chron11: {
+    cat: 'argument', label: 'Limitation',
+    title: 'Recall Bias Biases Toward the Null',
+    body: 'Symptom onset timing relies on patient memory and clinician documentation, both of which vary with healthcare access and quarantine policies. Non-differential measurement error in the exposure variable (onset timing) biases survival analysis toward the null — meaning the "no survival difference" finding could be partly an artifact of imprecise timing data.',
+    structural: 'Particularly corrosive to the chronology argument because the key finding IS the null result. In a well-powered study this bias direction wouldn\'t matter much. In a study with 11 events, it substantially undermines the "no effect" interpretation.'
+  },
+  chron9: {
+    cat: 'argument', label: 'Annotator-Synthesized',
+    title: 'Balthazar-Survival Tension',
+    body: 'The most analytically interesting observation in the extraction — and one the paper does not address. Symptom chronology is significantly associated with radiologic severity (Balthazar score), but chronology does not predict survival. If timing predicts imaging severity but not death, either: (a) radiologic severity doesn\'t translate to mortality in this disease, (b) the survival analysis lacks power to detect the downstream effect, or (c) treatment interventions break the link between imaging and outcomes.',
+    structural: 'This claim was synthesized by the annotator, not asserted by the authors. Status is UNDETERMINED because the paper provides no resolution. It emerged from juxtaposing two sets of findings the authors present separately — a structural observation that the Toulmin decomposition methodology makes systematic.'
+  }
+};
+
+// ─── POPOVER LOGIC ───
+const popover = document.querySelector('.popover');
+const backdrop = document.querySelector('.popover-backdrop');
+const closeBtn = document.querySelector('.popover-close');
+const popContent = document.querySelector('.popover-content');
+let currentTrigger = null;
+let hoverTimeout = null;
+let isHoverOpen = false;
+const isDesktop = () => window.innerWidth > 860;
+
+function renderPopover(key) {
+  const d = popData[key];
+  if (!d) return;
+
+  const dotClass = d.cat === 'clinical' ? 'clinical' : 'argument';
+
+  popContent.innerHTML = `
+    <div class="pop-label">
+      <span class="pop-dot ${dotClass}"></span>
+      ${d.label}
+    </div>
+    <div class="pop-title">${d.title}</div>
+    <div class="pop-body">${d.body}</div>
+    <div class="pop-body">
+      <div class="pop-sub">Structural significance</div>
+      ${d.structural}
+    </div>
+  `;
+}
+
+function positionPopover(trigger) {
+  if (!isDesktop()) {
+    popover.style.top = '';
+    popover.style.left = '';
+    return;
+  }
+
+  const rect = trigger.getBoundingClientRect();
+  popover.style.visibility = 'hidden';
+  popover.style.display = 'block';
+  const pr = popover.getBoundingClientRect();
+  popover.style.visibility = '';
+  popover.style.display = '';
+
+  let top = rect.top - pr.height - 12;
+  let left = rect.left + (rect.width - pr.width) / 2;
+
+  if (top < 12) top = rect.bottom + 12;
+  if (top + pr.height > window.innerHeight - 12) top = rect.top - pr.height - 12;
+
+  left = Math.max(12, Math.min(window.innerWidth - pr.width - 12, left));
+
+  popover.style.top = top + 'px';
+  popover.style.left = left + 'px';
+}
+
+function openPop(trigger) {
+  const key = trigger.dataset.pop;
+  renderPopover(key);
+  currentTrigger = trigger;
+  popover.classList.add('visible');
+  backdrop.classList.add('visible');
+  requestAnimationFrame(() => positionPopover(trigger));
+}
+
+function closePop() {
+  popover.classList.remove('visible');
+  backdrop.classList.remove('visible');
+  currentTrigger = null;
+}
+
+function clearHover() {
+  if (hoverTimeout) { clearTimeout(hoverTimeout); hoverTimeout = null; }
+}
+
+// ─── EVENT LISTENERS ───
+document.querySelectorAll('[data-pop]').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    if (!isDesktop()) return;
+    clearHover();
+    hoverTimeout = setTimeout(() => {
+      closePop();
+      openPop(el);
+      isHoverOpen = true;
+    }, 120);
+  });
+
+  el.addEventListener('mouseleave', () => {
+    if (!isDesktop() || !isHoverOpen) return;
+    clearHover();
+    hoverTimeout = setTimeout(() => {
+      if (isHoverOpen) { closePop(); isHoverOpen = false; }
+    }, 150);
+  });
+
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearHover();
+    isHoverOpen = false;
+    if (currentTrigger === el && popover.classList.contains('visible')) {
+      closePop();
+    } else {
+      closePop();
+      openPop(el);
+    }
+  });
+
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+    else if (e.key === 'Escape') closePop();
+  });
+});
+
+popover.addEventListener('mouseenter', () => { if (isDesktop()) clearHover(); });
+popover.addEventListener('mouseleave', () => {
+  if (!isDesktop() || !isHoverOpen) return;
+  clearHover();
+  hoverTimeout = setTimeout(() => { if (isHoverOpen) { closePop(); isHoverOpen = false; } }, 200);
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.popover') && !e.target.closest('[data-pop]')) {
+    closePop(); isHoverOpen = false;
+  }
+});
+
+closeBtn.addEventListener('click', () => { closePop(); isHoverOpen = false; });
+backdrop.addEventListener('click', () => { closePop(); isHoverOpen = false; });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); });
+window.addEventListener('resize', () => {
+  if (currentTrigger && popover.classList.contains('visible')) positionPopover(currentTrigger);
+});
+
+// ─── SCROLL-TRIGGERED ENTRY ───
+(function() {
+  const pref = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const comp = document.getElementById('chenGraph');
+  if (pref) { comp.classList.add('in-view'); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('in-view'); obs.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  obs.observe(comp);
+})();
+</script>
+
+</body>
+</html>

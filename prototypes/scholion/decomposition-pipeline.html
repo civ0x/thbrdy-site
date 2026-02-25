@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholion: DecompositionPipeline Prototype</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..150,400;0,9..150,500;0,9..150,600;1,9..150,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #FAF7F2;
+      --bg-warm: #F4EFE7;
+      --bg-card: #FFFFFF;
+      --text: #2C2416;
+      --text-mid: #5C5344;
+      --text-light: #8A7E6E;
+      --text-muted: #A69E90;
+      --border-mid: #D4CBBD;
+      --border-light: #E8E2D8;
+      --accent: #C4922A;
+      --accent-dim: rgba(196, 146, 42, 0.08);
+      --teal: #2A7A6A;
+      --teal-dim: rgba(42, 122, 106, 0.08);
+      --blue: #4A7AB5;
+      --blue-dim: rgba(74, 122, 181, 0.08);
+      --red: #B54A4A;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Cormorant Garamond", serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+
+    /* ─── CONTEXT PROSE ─── */
+    .context-prose p {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    /* ─── COMPONENT WRAPPER ─── */
+    .pipeline-component {
+      margin: 48px 0;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .pipeline-component.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .component-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .component-label::before {
+      content: '';
+      display: block;
+      width: 12px;
+      height: 1.5px;
+      background-color: var(--accent);
+    }
+
+    /* ─── PIPELINE LAYOUT ─── */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ─── SOURCE TEXT BLOCK ─── */
+    .source-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 16px 20px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .pipeline-component.in-view .source-block {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.1s;
+    }
+
+    .source-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .source-label .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+    }
+
+    .source-text {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1rem;
+      font-style: italic;
+      line-height: 1.55;
+      color: var(--text);
+    }
+
+    .source-ref {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.625rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* ─── STAGE CONNECTOR (arrow down) ─── */
+    .stage-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .pipeline-component.in-view .stage-connector {
+      opacity: 1;
+    }
+
+    .connector-line {
+      width: 1px;
+      height: 20px;
+      background-color: var(--border-mid);
+    }
+
+    .connector-arrow {
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid var(--border-mid);
+    }
+
+    /* ─── STAGE BLOCK ─── */
+    .stage {
+      border-radius: 8px;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .pipeline-component.in-view .stage {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stage-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+
+    .stage-number {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--bg);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stage-title {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--bg);
+    }
+
+    .stage-subtitle {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 400;
+      color: var(--bg);
+      opacity: 0.75;
+      margin-left: auto;
+    }
+
+    .stage-body {
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+    }
+
+    /* Stage 1: Accent */
+    .stage-1 .stage-header { background-color: var(--accent); }
+    .stage-1 .stage-number { background-color: rgba(255,255,255,0.2); }
+
+    /* Stage 2: Teal */
+    .stage-2 .stage-header { background-color: var(--teal); }
+    .stage-2 .stage-number { background-color: rgba(255,255,255,0.2); }
+
+    /* Stage 3: Blue */
+    .stage-3 .stage-header { background-color: var(--blue); }
+    .stage-3 .stage-number { background-color: rgba(255,255,255,0.2); }
+
+    /* ─── STAGE 1: ATOMIC DECOMPOSITION CONTENT ─── */
+    .atomic-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .atomic-card {
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 10px 12px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .atomic-id {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      font-weight: 500;
+      color: var(--accent);
+      background-color: var(--accent-dim);
+      padding: 2px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .atomic-text {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .atomic-stat {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      color: var(--text-light);
+      margin-top: 3px;
+    }
+
+    .atomic-note {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.625rem;
+      color: var(--text-light);
+      font-style: italic;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    /* ─── STAGE 2: TOULMIN REVEAL CONTENT ─── */
+    .toulmin-card {
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-left: 3px solid var(--teal);
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+
+    .toulmin-claim {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .toulmin-claim-id {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      font-weight: 500;
+      color: var(--teal);
+      margin-right: 6px;
+    }
+
+    .toulmin-fields {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 4px 10px;
+      align-items: baseline;
+    }
+
+    .tf-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .tf-value {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      color: var(--text-mid);
+      line-height: 1.4;
+    }
+
+    .tf-value em {
+      color: var(--teal);
+      font-style: normal;
+      font-weight: 500;
+    }
+
+    .tf-value .implicit-tag {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.45rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--teal);
+      background-color: var(--teal-dim);
+      padding: 1px 4px;
+      border-radius: 2px;
+      margin-left: 4px;
+    }
+
+    .toulmin-note {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.625rem;
+      color: var(--text-light);
+      font-style: italic;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    /* ─── STAGE 3: DEPENDENCY TYPING CONTENT ─── */
+    .dep-graph-mini {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .dep-node {
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: 5px;
+      padding: 8px 12px;
+      text-align: center;
+      min-width: 100px;
+    }
+
+    .dep-node.crux-node {
+      border-left: 3px solid var(--accent);
+      background: linear-gradient(135deg, var(--bg), var(--accent-dim));
+    }
+
+    .dep-node .dn-id {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .dep-node .dn-label {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .dep-node .dn-stat {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .dep-edge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px 0;
+    }
+
+    .dep-edge .de-line {
+      width: 1px;
+      height: 14px;
+      background-color: var(--border-mid);
+    }
+
+    .dep-edge .de-type {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.45rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      background-color: var(--bg-card);
+      padding: 0 4px;
+    }
+
+    .dep-edge .de-line-2 {
+      width: 1px;
+      height: 10px;
+      background-color: var(--border-mid);
+    }
+
+    .dep-edge .de-arrow {
+      width: 0;
+      height: 0;
+      border-left: 3px solid transparent;
+      border-right: 3px solid transparent;
+      border-top: 4px solid var(--border-mid);
+    }
+
+    .dep-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .dep-row-branched {
+      position: relative;
+    }
+
+    .dep-row-branched .dep-branch {
+      position: absolute;
+      top: 0;
+      left: calc(100% / 6);
+      right: calc(100% / 6);
+      height: 1px;
+      background: var(--border-mid);
+    }
+
+    .dep-note {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.625rem;
+      color: var(--text-light);
+      font-style: italic;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    /* ─── STAGGERED ENTRY ─── */
+    .pipeline-component.in-view .stage-1 { transition-delay: 0.25s; }
+    .pipeline-component.in-view .sc-1 { transition-delay: 0.2s; }
+    .pipeline-component.in-view .stage-2 { transition-delay: 0.5s; }
+    .pipeline-component.in-view .sc-2 { transition-delay: 0.45s; }
+    .pipeline-component.in-view .stage-3 { transition-delay: 0.75s; }
+    .pipeline-component.in-view .sc-3 { transition-delay: 0.7s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 640px) {
+      .container { padding: 32px 16px; }
+      .stage-subtitle { display: none; }
+      .stage-header { padding: 8px 12px; }
+      .stage-body { padding: 12px 14px; }
+      .toulmin-fields { grid-template-columns: 1fr; gap: 6px 0; }
+      .tf-label { margin-bottom: -4px; }
+    }
+
+    /* ─── REDUCED MOTION ─── */
+    @media (prefers-reduced-motion: reduce) {
+      .pipeline-component, .pipeline-component * {
+        transition-duration: 0.01s !important;
+        transition-delay: 0s !important;
+      }
+      .pipeline-component { opacity: 1; transform: none; }
+      .source-block, .stage, .stage-connector { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="context-prose">
+    <p>Every research paper has this architecture. The question is whether we can make it explicit, machine-readable, and maintainable as evidence evolves. That is what Scholion does.</p>
+  </div>
+
+  <!-- ─── DECOMPOSITION PIPELINE ─── -->
+  <div class="pipeline-component" id="pipeline">
+
+    <div class="component-label">Decomposition Pipeline · prose → typed dependency graph</div>
+
+    <div class="pipeline">
+
+      <!-- ═══ SOURCE TEXT ═══ -->
+      <div class="source-block">
+        <div class="source-label"><span class="dot"></span> Source text</div>
+        <div class="source-text">"Multivariate analysis demonstrated that WBC count, AST-to-ALT ratio, and surgical intervention remained independently correlated with survival."</div>
+        <div class="source-ref">— Chen et al. (2025), Results Discussion</div>
+      </div>
+
+      <!-- connector -->
+      <div class="stage-connector sc-1">
+        <div class="connector-line"></div>
+        <div class="connector-arrow"></div>
+      </div>
+
+      <!-- ═══ STAGE 1: ATOMIC DECOMPOSITION ═══ -->
+      <div class="stage stage-1">
+        <div class="stage-header">
+          <div class="stage-number">1</div>
+          <div class="stage-title">Atomic Decomposition</div>
+          <div class="stage-subtitle">One assertion per claim</div>
+        </div>
+        <div class="stage-body">
+          <div class="atomic-cards">
+            <div class="atomic-card">
+              <div class="atomic-id">mort.6</div>
+              <div>
+                <div class="atomic-text">Elevated WBC count is an independent predictor of mortality after adjustment for age and gender</div>
+                <div class="atomic-stat">HR 1.013 · CI 1.000–1.025 · p = .042</div>
+              </div>
+            </div>
+            <div class="atomic-card">
+              <div class="atomic-id">mort.7</div>
+              <div>
+                <div class="atomic-text">AST-to-ALT ratio ≥ 2 is an independent predictor of mortality after adjustment for age and gender</div>
+                <div class="atomic-stat">HR 11.052 · CI 1.441–84.770 · p = .021</div>
+              </div>
+            </div>
+            <div class="atomic-card">
+              <div class="atomic-id">mort.8</div>
+              <div>
+                <div class="atomic-text">Surgical intervention is an independent predictor of mortality after adjustment for age and gender</div>
+                <div class="atomic-stat">HR 6.604 · CI 1.581–27.593 · p = .010</div>
+              </div>
+            </div>
+          </div>
+          <div class="atomic-note">One sentence → three individually falsifiable claims, each with its own statistical evidence</div>
+        </div>
+      </div>
+
+      <!-- connector -->
+      <div class="stage-connector sc-2">
+        <div class="connector-line"></div>
+        <div class="connector-arrow"></div>
+      </div>
+
+      <!-- ═══ STAGE 2: TOULMIN REVEAL ═══ -->
+      <div class="stage stage-2">
+        <div class="stage-header">
+          <div class="stage-number">2</div>
+          <div class="stage-title">Toulmin Reveal</div>
+          <div class="stage-subtitle">Surface the unstated reasoning</div>
+        </div>
+        <div class="stage-body">
+          <div class="toulmin-card">
+            <div class="toulmin-claim">
+              <span class="toulmin-claim-id">mort.8</span>
+              Surgical intervention is an independent predictor of mortality
+            </div>
+            <div class="toulmin-fields">
+              <div class="tf-label">Warrant</div>
+              <div class="tf-value"><em>Patients requiring surgery represent the most physiologically compromised subgroup</em> <span class="implicit-tag">Implicit</span></div>
+
+              <div class="tf-label">Qualifier</div>
+              <div class="tf-value">Based on 7 surgical patients (3 deaths). Adjusted for age and gender only — not disease severity.</div>
+
+              <div class="tf-label">Rebuttal</div>
+              <div class="tf-value">Confounding by indication: surgery is performed on the sickest patients, so the association reflects severity, not a causal effect of surgery on death.</div>
+            </div>
+          </div>
+          <div class="toulmin-note">The paper calls surgery an "independent predictor" without discussing confounding by indication. The warrant field surfaces this gap — the implicit reasoning the author expects readers to fill in, and the point where the argument is most structurally vulnerable.</div>
+        </div>
+      </div>
+
+      <!-- connector -->
+      <div class="stage-connector sc-3">
+        <div class="connector-line"></div>
+        <div class="connector-arrow"></div>
+      </div>
+
+      <!-- ═══ STAGE 3: DEPENDENCY TYPING ═══ -->
+      <div class="stage stage-3">
+        <div class="stage-header">
+          <div class="stage-number">3</div>
+          <div class="stage-title">Dependency Typing</div>
+          <div class="stage-subtitle">Wire claims into a directed graph</div>
+        </div>
+        <div class="stage-body">
+          <div class="dep-graph-mini">
+
+            <!-- method.3 (crux) at top -->
+            <div class="dep-node crux-node">
+              <div class="dn-id">method.3 · CRUX</div>
+              <div class="dn-label">Cox regression, age + gender only</div>
+            </div>
+
+            <div class="dep-edge">
+              <div class="de-line"></div>
+              <div class="de-type">conditional</div>
+              <div class="de-line-2"></div>
+              <div class="de-arrow"></div>
+            </div>
+
+            <!-- three mortality claims in a row -->
+            <div class="dep-row dep-row-branched">
+              <div class="dep-branch"></div>
+              <div class="dep-node">
+                <div class="dn-id">mort.6</div>
+                <div class="dn-label">WBC</div>
+                <div class="dn-stat">HR 1.013</div>
+              </div>
+              <div class="dep-node">
+                <div class="dn-id">mort.7</div>
+                <div class="dn-label">AST/ALT ≥ 2</div>
+                <div class="dn-stat">HR 11.05</div>
+              </div>
+              <div class="dep-node">
+                <div class="dn-id">mort.8</div>
+                <div class="dn-label">Surgery</div>
+                <div class="dn-stat">HR 6.60</div>
+              </div>
+            </div>
+
+            <div class="dep-edge">
+              <div class="de-line"></div>
+              <div class="de-type">conjunctive</div>
+              <div class="de-line-2"></div>
+              <div class="de-arrow"></div>
+            </div>
+
+            <!-- synthesis -->
+            <div class="dep-node" style="background: var(--bg-warm); border-color: var(--border-mid);">
+              <div class="dn-id">mortality.9</div>
+              <div class="dn-label">Three independent mortality predictors</div>
+            </div>
+
+          </div>
+          <div class="dep-note">Each relationship is classified by type. The graph makes structural properties computable: if method.3 (the Cox regression) is overturned, all three predictor claims collapse simultaneously — but findings from the chronology chain, which uses a different statistical method, survive.</div>
+        </div>
+      </div>
+
+    </div>
+    <!-- end pipeline -->
+
+  </div>
+
+</div>
+
+<!-- ─── SCROLL-TRIGGERED ENTRY ─── -->
+<script>
+(function() {
+  const pref = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const comp = document.getElementById('pipeline');
+  if (pref) { comp.classList.add('in-view'); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('in-view'); obs.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  obs.observe(comp);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholion: SchemaEvolution Prototype</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..150,400;0,9..150,500;0,9..150,600;1,9..150,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #FAF7F2;
+      --bg-warm: #F4EFE7;
+      --bg-card: #FFFFFF;
+      --text: #2C2416;
+      --text-mid: #5C5344;
+      --text-light: #8A7E6E;
+      --text-muted: #A69E90;
+      --border-mid: #D4CBBD;
+      --border-light: #E8E2D8;
+      --accent: #C4922A;
+      --accent-dim: rgba(196, 146, 42, 0.08);
+      --teal: #2A7A6A;
+      --teal-dim: rgba(42, 122, 106, 0.08);
+      --blue: #4A7AB5;
+      --blue-dim: rgba(74, 122, 181, 0.08);
+      --red: #B54A4A;
+      --red-dim: rgba(181, 74, 74, 0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Cormorant Garamond", serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+
+    .context-prose p {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    /* ─── COMPONENT WRAPPER ─── */
+    .evo-component {
+      margin: 48px 0;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .evo-component.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .component-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .component-label::before {
+      content: '';
+      display: block;
+      width: 12px;
+      height: 1.5px;
+      background-color: var(--accent);
+    }
+
+    /* ─── SECTION HEADERS ─── */
+    .section-header {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 8px 14px;
+      border-radius: 6px 6px 0 0;
+      color: var(--bg);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-header.worked { background-color: var(--teal); }
+    .section-header.added { background-color: var(--accent); }
+    .section-header.edge { background-color: var(--blue); }
+
+    .section-body {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      margin-bottom: 20px;
+    }
+
+    /* ─── SCHEMA FIELD ROWS ─── */
+    .field-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 0;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-light);
+      align-items: baseline;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .field-row:last-child { border-bottom: none; }
+
+    .evo-component.in-view .field-row {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: var(--d, 0s);
+    }
+
+    .field-name {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .field-desc {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-mid);
+      line-height: 1.4;
+    }
+
+    .field-example {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.6rem;
+      color: var(--text-light);
+      margin-top: 3px;
+    }
+
+    /* ─── STATUS INDICATORS ─── */
+    .status-chip {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.5rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .chip-worked {
+      color: var(--teal);
+      background-color: var(--teal-dim);
+    }
+
+    .chip-new {
+      color: var(--accent);
+      background-color: var(--accent-dim);
+    }
+
+    .chip-open {
+      color: var(--blue);
+      background-color: var(--blue-dim);
+    }
+
+    /* ─── FAILURE MODE CARDS ─── */
+    .failure-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 0;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-light);
+      align-items: baseline;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .failure-row:last-child { border-bottom: none; }
+
+    .evo-component.in-view .failure-row {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: var(--d, 0s);
+    }
+
+    .failure-id {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .failure-content {}
+
+    .failure-title {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+      margin-bottom: 3px;
+    }
+
+    .failure-desc {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      color: var(--text-mid);
+      line-height: 1.4;
+    }
+
+    .failure-resolution {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.625rem;
+      color: var(--text-light);
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    .severity {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.45rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 1px 5px;
+      border-radius: 2px;
+    }
+
+    .sev-high {
+      color: var(--red);
+      background-color: var(--red-dim);
+    }
+
+    .sev-med {
+      color: var(--accent);
+      background-color: var(--accent-dim);
+    }
+
+    .sev-low {
+      color: var(--text-light);
+      background-color: var(--bg-warm);
+    }
+
+    /* ─── ANNOTATION NOTE ─── */
+    .annotation-note {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      color: var(--text-light);
+      line-height: 1.4;
+      padding: 12px 16px;
+      background-color: var(--bg-warm);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      margin-top: 24px;
+    }
+
+    .annotation-note strong {
+      color: var(--text-mid);
+      font-weight: 600;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 640px) {
+      .container { padding: 32px 16px; }
+      .field-row { grid-template-columns: 1fr; gap: 2px; }
+      .failure-row { grid-template-columns: 1fr; gap: 2px; }
+    }
+
+    /* ─── REDUCED MOTION ─── */
+    @media (prefers-reduced-motion: reduce) {
+      .evo-component, .evo-component .field-row, .evo-component .failure-row {
+        transition-duration: 0.01s !important;
+        transition-delay: 0s !important;
+        opacity: 1;
+        transform: none;
+      }
+      .evo-component { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="context-prose">
+    <p>Twenty-five claims from one paper stress-tested the schema and produced an honest accounting of where it works, where it needed revision, and where open questions remain for Phase 1.</p>
+  </div>
+
+  <div class="evo-component" id="schemaEvo">
+
+    <div class="component-label">Schema Evolution · v0.1 → v0.2 after Chen extraction</div>
+
+    <!-- ═══ WHAT WORKED ═══ -->
+    <div class="section-header worked">What Worked</div>
+    <div class="section-body">
+
+      <div class="field-row" style="--d:0.1s;">
+        <div class="field-name"><span>warrant</span> <span class="status-chip chip-worked">Validated</span></div>
+        <div class="field-desc">Consistently surfaced implicit reasoning the paper's prose left unstated. The confounding-by-indication problem in the surgical intervention finding, the continuity assumption in the safety case — both captured through the warrant field doing genuine analytical work.</div>
+      </div>
+
+      <div class="field-row" style="--d:0.15s;">
+        <div class="field-name"><span>dependency_type</span> <span class="status-chip chip-worked">Validated</span></div>
+        <div class="field-desc">Five types (causal, conditional, purposive, contrastive, conjunctive) covered most relationships without straining. The mortality tree and chronology synthesis both mapped naturally.</div>
+      </div>
+
+      <div class="field-row" style="--d:0.2s;">
+        <div class="field-name"><span>crux</span> <span class="status-chip chip-worked">Validated</span></div>
+        <div class="field-desc">The flip test produced the essay's most practically significant output: the selective invalidation pattern where different cruxes collapse different subsets of the argument.</div>
+      </div>
+
+      <div class="field-row" style="--d:0.25s;">
+        <div class="field-name"><span>depends_on</span> <span class="status-chip chip-worked">Validated</span></div>
+        <div class="field-desc">Cross-extraction references worked: the chronology extraction shares two foundational claims with the mortality extraction without duplication, validating extraction by argument block rather than by paper section.</div>
+      </div>
+
+    </div>
+
+    <!-- ═══ FIELDS ADDED ═══ -->
+    <div class="section-header added">Fields Added in v0.2</div>
+    <div class="section-body">
+
+      <div class="field-row" style="--d:0.35s;">
+        <div class="field-name"><span>confidence</span> <span class="status-chip chip-new">New</span></div>
+        <div>
+          <div class="field-desc">Binary IN/OUT/UNDETERMINED cannot represent epistemic weight. The chronology null findings are technically IN — published, peer-reviewed results — but rest on 11 events with wide confidence intervals. Treating them as straightforwardly IN misrepresents their evidential strength.</div>
+          <div class="field-example">Values: high | medium | low · Alongside status, not replacing it</div>
+        </div>
+      </div>
+
+      <div class="field-row" style="--d:0.4s;">
+        <div class="field-name"><span>claim_source</span> <span class="status-chip chip-new">New</span></div>
+        <div>
+          <div class="field-desc">The Balthazar-survival tension — the most analytically interesting observation in the extraction — is not something the authors assert. The schema needs to distinguish between what the paper says and what the annotator surfaces.</div>
+          <div class="field-example">Values: author_explicit | author_implicit | annotator_synthesized</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ OPEN EDGE CASES ═══ -->
+    <div class="section-header edge">Documented Edge Cases — 6 Failure Modes</div>
+    <div class="section-body">
+
+      <div class="failure-row" style="--d:0.5s;">
+        <div class="failure-id"><span>SF-001</span> <span class="severity sev-high">High</span></div>
+        <div class="failure-content">
+          <div class="failure-title">Weighted support</div>
+          <div class="failure-desc">Binary status cannot capture that a claim is published but epistemically weak. Absence of evidence treated identically to strong positive findings.</div>
+          <div class="failure-resolution">Resolved → confidence field added</div>
+        </div>
+      </div>
+
+      <div class="failure-row" style="--d:0.55s;">
+        <div class="failure-id"><span>SF-002</span> <span class="severity sev-med">Medium</span></div>
+        <div class="failure-content">
+          <div class="failure-title">Annotator-synthesized claims</div>
+          <div class="failure-desc">No way to distinguish author assertions from structural observations the annotator surfaces by juxtaposing findings.</div>
+          <div class="failure-resolution">Resolved → claim_source field added</div>
+        </div>
+      </div>
+
+      <div class="failure-row" style="--d:0.6s;">
+        <div class="failure-id"><span>SF-003</span> <span class="severity sev-med">Medium</span></div>
+        <div class="failure-content">
+          <div class="failure-title">Cross-study comparison reasoning</div>
+          <div class="failure-desc">"Our null results differ from their positive results, therefore the methodological difference explains the divergence" — doesn't map to any of the five dependency types.</div>
+          <div class="failure-resolution">Open → may warrant a sixth type ("comparative"). Track frequency in Phase 1.</div>
+        </div>
+      </div>
+
+      <div class="failure-row" style="--d:0.65s;">
+        <div class="failure-id"><span>SF-004</span> <span class="severity sev-low">Low</span></div>
+        <div class="failure-content">
+          <div class="failure-title">Informal schema drift</div>
+          <div class="failure-desc">Extraction practice surfaced useful fields (boundary conditions, flip test notes, typed anchors) not in the canonical schema. The schema evolved informally through annotation before being formally revised.</div>
+          <div class="failure-resolution">Open → reconcile practice-derived fields with schema.yaml for Phase 1.</div>
+        </div>
+      </div>
+
+      <div class="failure-row" style="--d:0.7s;">
+        <div class="failure-id"><span>SF-005</span> <span class="severity sev-med">Medium</span></div>
+        <div class="failure-content">
+          <div class="failure-title">Confounding by indication</div>
+          <div class="failure-desc">Statistical association ≠ causal relationship. The warrant field captures this, but no structured way to flag that the observed effect may be spurious.</div>
+          <div class="failure-resolution">Open → track across domains. May be specific to empirical/statistical research.</div>
+        </div>
+      </div>
+
+      <div class="failure-row" style="--d:0.75s;">
+        <div class="failure-id"><span>SF-006</span> <span class="severity sev-low">Low</span></div>
+        <div class="failure-content">
+          <div class="failure-title">Multi-span claim text</div>
+          <div class="failure-desc">Synthesis claims draw from multiple non-contiguous sections. claim_text becomes a semi-verbatim composite rather than a true verbatim extract.</div>
+          <div class="failure-resolution">Open → allow claim_text as a list of source spans with section references.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Annotation -->
+    <div class="annotation-note">
+      <strong>Honest accounting over premature polish.</strong> Two of six failure modes were resolved by adding fields (confidence, claim_source). Four remain open — deliberately. The schema should be tested across domains before committing to structural changes that may be artifacts of a single paper's idiosyncrasies. Phase 1's job is to determine which edge cases are universal and which are domain-specific.
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ─── SCROLL-TRIGGERED ENTRY ─── -->
+<script>
+(function() {
+  const pref = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const comp = document.getElementById('schemaEvo');
+  if (pref) { comp.classList.add('in-view'); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('in-view'); obs.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  obs.observe(comp);
+})();
+</script>
+
+</body>
+</html>

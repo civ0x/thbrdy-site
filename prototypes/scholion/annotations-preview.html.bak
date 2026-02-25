@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scholion: The Circuitry of Science — Annotation Preview</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..150,400;0,9..150,500;0,9..150,600;1,9..150,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── CSS RESET & CUSTOM PROPERTIES ─── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #FAF7F2;
+      --bg-warm: #F4EFE7;
+      --text: #2C2416;
+      --text-mid: #5C5344;
+      --text-light: #8A7E6E;
+      --text-muted: #A69E90;
+      --border-mid: #D4CBBD;
+      --accent: #C4922A;
+      --accent-dim: rgba(196, 146, 42, 0.08);
+      --teal: #2A7A6A;
+      --teal-dim: rgba(42, 122, 106, 0.08);
+      --blue: #4A7AB5;
+      --blue-dim: rgba(74, 122, 181, 0.08);
+      --red: #B54A4A;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Cormorant Garamond", serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    /* ─── LAYOUT ─── */
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+
+    /* ─── HEADER ─── */
+    .header {
+      margin-bottom: 64px;
+    }
+
+    .header h1 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 3rem;
+      font-weight: 400;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .header .meta {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 24px;
+    }
+
+    .header p {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.125rem;
+      color: var(--text-mid);
+      line-height: 1.6;
+      max-width: 600px;
+    }
+
+    /* ─── PROSE ─── */
+    h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 2rem;
+      font-weight: 400;
+      margin: 64px 0 24px 0;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    p + h2 {
+      margin-top: 72px;
+    }
+
+    /* ─── ANNOTATIONS ─── */
+    .ann {
+      position: relative;
+      cursor: pointer;
+      tab-index: 0;
+    }
+
+    .ann-term {
+      border-bottom: 1.5px dashed var(--accent);
+      transition: background-color 0.2s ease;
+    }
+
+    .ann-term:hover,
+    .ann-term:focus {
+      background-color: var(--accent-dim);
+      outline: none;
+    }
+
+    .ann-ref {
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .ann-ref:hover,
+    .ann-ref:focus {
+      background-color: var(--accent-dim);
+      outline: none;
+    }
+
+    .ann-link {
+      border-bottom: 1.5px dashed var(--teal);
+      transition: background-color 0.2s ease;
+    }
+
+    .ann-link:hover,
+    .ann-link:focus {
+      background-color: var(--teal-dim);
+      outline: none;
+    }
+
+    /* ─── POPOVERS ─── */
+    .popover {
+      position: fixed;
+      background-color: var(--bg-warm);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(44, 36, 22, 0.08);
+      padding: 12px 14px;
+      max-width: 280px;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      pointer-events: none;
+    }
+
+    .popover.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* Popover close button (for mobile) */
+    .popover-close {
+      display: none;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-light);
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      line-height: 1;
+    }
+
+    /* ─── POPOVER: TERM/DEFINITION ─── */
+    .popover-badge {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-bottom: 8px;
+      color: white;
+    }
+
+    .popover-badge.clinical {
+      background-color: var(--teal);
+    }
+
+    .popover-badge.argument {
+      background-color: var(--accent);
+    }
+
+    .popover-badge.safety {
+      background-color: var(--blue);
+    }
+
+    .popover-title {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .popover-definition {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-mid);
+      line-height: 1.45;
+      margin-bottom: 0;
+    }
+
+    /* ─── POPOVER: REFERENCE/CITATION ─── */
+    .popover-citation-title {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.8125rem;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .popover-attribution {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .popover-summary {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-mid);
+      line-height: 1.45;
+      margin-bottom: 6px;
+    }
+
+    .popover-context {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      font-style: italic;
+      color: var(--text-light);
+      margin-bottom: 6px;
+    }
+
+    .popover-link {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    .popover-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ─── POPOVER: LINK PREVIEW ─── */
+    .popover-domain {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.55rem;
+      color: var(--text-muted);
+      text-transform: lowercase;
+      margin-bottom: 4px;
+    }
+
+    .popover-link-title {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .popover-source {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      color: var(--text-light);
+      margin-bottom: 6px;
+    }
+
+    .popover-cta {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.6875rem;
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    .popover-cta:hover {
+      text-decoration: underline;
+    }
+
+    /* ─── MOBILE BACKDROP ─── */
+    .popover-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.3);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .popover-backdrop.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ─── PLACEHOLDER COMPONENTS ─── */
+    .placeholder {
+      background-color: var(--bg-warm);
+      border: 1px dashed var(--border-mid);
+      border-radius: 8px;
+      padding: 32px;
+      margin: 32px 0;
+      text-align: center;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.875rem;
+      color: var(--text-light);
+    }
+
+    .placeholder-label {
+      font-weight: 600;
+      color: var(--text-mid);
+      margin-bottom: 8px;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 640px) {
+      .container {
+        padding: 32px 16px;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .popover {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: none;
+        width: calc(100% - 32px);
+        margin: 0 16px;
+        border-radius: 12px 12px 0 0;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .popover-close {
+        display: block;
+      }
+
+      .popover-backdrop {
+        display: block;
+      }
+    }
+
+    /* ─── REDUCED MOTION ─── */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01s !important;
+        transition-duration: 0.01s !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="meta">Scholion Research Infrastructure</div>
+    <h1>The Circuitry of Science</h1>
+    <p>Scholion extracts the logical architecture of research arguments — typed dependencies, implicit warrants, load-bearing claims — and makes them machine-readable. A methodology tested on clinical medicine, built for safety cases.</p>
+  </div>
+
+  <!-- ─── SECTION I ─── -->
+  <h2>I. The Invisible Load-Bearing Wall</h2>
+
+  <p>An eleven-fold increase in mortality risk. That is the headline number from a recent systematic review of COVID-19-induced acute pancreatitis: patients with an <span class="ann ann-term" data-key="de-ritis-ratio" data-type="term" tabindex="0" role="button">AST-to-ALT ratio</span> of 2 or greater had an <span class="ann ann-term" data-key="adjusted-hazard-ratio" data-type="term" tabindex="0" role="button">adjusted hazard ratio</span> of 11.052 (95% CI 1.441–84.770, p = 0.021) for death. Published in a peer-reviewed journal, reported with the standard apparatus of Cox regression, confidence intervals, and p-values. The kind of finding that gets cited.</p>
+
+  <p>But trace its dependencies. The adjusted hazard ratio comes from a <span class="ann ann-term" data-key="cox-model" data-type="term" tabindex="0" role="button">multivariate Cox model</span> that controlled for age and gender — and nothing else. Not disease severity. Not comorbidities. Not treatment variation across the 87 case reports from which the 111-patient cohort was assembled. The model had 11 deaths to work with, giving it a confidence interval that spans a 60-fold range. The true effect could be a modest 44% increase or an implausible 8,400% increase. The statistical method is legitimate; the precision is not.</p>
+
+  <p>Go deeper. The entire analysis rests on a definitional claim: that these 111 patients had pancreatitis <em>caused by</em> COVID-19, not pancreatitis that merely <em>coincided with</em> COVID-19 infection. The study defines this by exclusion — ruling out biliary, alcoholic, and iatrogenic etiologies — but acknowledges that "comprehensive assessment of AP etiology was constrained by the limitations of the published literature." If the inclusion criteria misclassify even a fraction of the cohort, the patient population is contaminated and every downstream finding is unreliable.</p>
+
+  <p>This is not a critique of <span class="ann ann-ref" data-key="chen2025" data-type="ref" tabindex="0" role="button">Chen et al.</span> The study is competently executed, the limitations are disclosed, and the findings are genuinely informative for a rare clinical presentation. The point is structural. A headline finding that reads as a single dramatic claim is actually the terminal node of a dependency chain — inclusion criteria → patient population → statistical methodology → univariate screening → multivariate adjustment → synthesis. Pull the foundational nodes and the terminal claim collapses. But you cannot see this chain by reading the paper in prose. The dependencies are there, but they are invisible — load-bearing walls hidden behind drywall.</p>
+
+  <p>Every research paper has this architecture. The question is whether we can make it explicit, machine-readable, and maintainable as evidence evolves. That is what Scholion does.</p>
+
+  <div class="placeholder">
+    <div class="placeholder-label">DecompositionPipeline</div>
+    Interactive component showing extraction pipeline would render here
+  </div>
+
+  <!-- ─── SECTION II ─── -->
+  <h2>II. The Methodology</h2>
+
+  <p>Scholion is a decomposition methodology. It takes the prose arguments in research documents and renders them as typed dependency graphs where every node is an individually falsifiable claim and every edge is a classified relationship. The methodology has three layers.</p>
+
+  <p><strong><span class="ann ann-term" data-key="atomic-decomposition" data-type="term" tabindex="0" role="button">Atomic decomposition</span></strong> is the foundation. A single sentence in a research paper often contains multiple logical assertions. "WBC count, AST/ALT ratio, and surgical intervention remained independently correlated with survival" is three claims, not one. Atomic decomposition breaks compound assertions into individually falsifiable propositions, each carrying its own statistical evidence, scope conditions, and failure modes. You cannot track dependencies between claims you have not identified.</p>
+
+  <p><strong>Toulmin reveal</strong> operates on each atomic claim. <span class="ann ann-ref" data-key="toulmin" data-type="ref" tabindex="0" role="button">Stephen Toulmin's model of argumentation</span> distinguishes six components: the claim itself, the grounds (data supporting it), the <span class="ann ann-term" data-key="warrant" data-type="term" tabindex="0" role="button">warrant</span> (the reasoning connecting data to claim), the backing (what authorizes the warrant), the qualifier (scope conditions), and the rebuttal (conditions under which the claim fails). Of these, the warrant is the highest-value extraction target. Warrants are where authors expect readers to fill in unstated reasoning, and they are where arguments are most structurally vulnerable. A paper can report a statistical result accurately while leaving the inferential hazard — the gap between what the data shows and what the conclusion claims — entirely implicit. Toulmin decomposition forces the annotator to surface that gap, and once surfaced, it becomes auditable. Section III demonstrates this concretely.</p>
+
+  <p><strong>Dependency typing</strong> turns the flat list of annotated claims into a directed graph. Each relationship between claims is classified by type — causal, conditional, purposive, contrastive, or conjunctive — making structural properties computable. <span class="ann ann-term" data-key="transitive-closure" data-type="term" tabindex="0" role="button">Transitive closure</span> identifies everything that depends on a given claim. Crux identification finds load-bearing nodes whose failure would collapse significant downstream structure. <span class="ann ann-term" data-key="invalidation-propagation" data-type="term" tabindex="0" role="button">Invalidation propagation</span> traces the consequences of a claim being overturned — which conclusions survive, which fall, and which become undetermined. The output is not a summary. It is the argument's logical architecture rendered as a navigable, queryable graph.</p>
+
+  <p>A critical design observation emerges from this layering: the methodology separates into two distinct tasks that require different capabilities. The first is <em>structural decomposition</em> — identifying claims, tracing dependencies, classifying relationship types, flagging where warrants are unstated. This task is textual, not inferential. It asks "what does the argument say and how are its parts connected?" and can be performed by someone who does not know the domain, provided they have method. The second is <em>substantive evaluation</em> — assessing whether a warrant is sound, whether a statistical method is appropriate, whether a rebuttal is fatal. This requires domain knowledge.</p>
+
+  <p>The separation matters because it implies that the annotator does not need to carry the domain expertise. The annotation environment can carry it instead — through inline contextual annotations that surface domain-specific meaning at the point of need. When a non-specialist annotator encounters "AST/ALT ratio ≥ 2" in a source text, a contextual popover can provide the clinical significance (the De Ritis ratio, hepatocellular injury patterns, what this marker means in the context of multi-organ involvement) without requiring the annotator to already know hepatology. The annotator's job is to decompose the structure; the scaffolding bridges the vocabulary gap. Domain knowledge shifts from a prerequisite of the annotator to a property of the annotation environment.</p>
+
+  <p>This is not merely a workflow optimization. The absence of domain priors may be a structural advantage for the decomposition task. An expert annotating the Chen extraction fills in warrants from their own clinical knowledge — confounding by indication, the De Ritis ratio interpretation — producing richer annotations but also importing reasoning the paper does not contain. A non-expert, forced to work from the text, annotates what the argument <em>actually says</em> rather than what a knowledgeable reader <em>infers</em>. When the non-expert marks a warrant field as "unstated — the paper does not explain why surgery would predict mortality," they have identified the structural vulnerability just as precisely as the expert who fills in the mechanism, and without contaminating the extraction with external knowledge. The gap itself is the finding.</p>
+
+  <!-- ─── SECTION III ─── -->
+  <h2>III. The Medical Demonstration</h2>
+
+  <p>The methodology was tested on <span class="ann ann-ref" data-key="chen2025" data-type="ref" tabindex="0" role="button">Chen et al.'s 2025 systematic review of COVID-19-induced acute pancreatitis</span>. The paper was chosen deliberately: a medical systematic review uses argument structures — statistical evidence, inclusion criteria, regression models, negative findings — that are remote from the AI safety domain where Scholion originated. If the schema works on clinical medicine, it is more credibly general than if tested only on the arguments it was designed for.</p>
+
+  <p>Twenty-five claims were extracted across two structurally distinct argument chains.</p>
+
+  <p><strong>The mortality predictors chain</strong> follows a clean tree structure. The foundational crux is the inclusion criterion — the diagnosis-by-exclusion definition of "COVID-19-induced" pancreatitis. From there, the chain flows through the study population (111 patients from 87 case reports, dual-reviewer screening per <span class="ann ann-term" data-key="prisma" data-type="term" tabindex="0" role="button">PRISMA</span>), to the statistical methodology (Cox proportional hazards, adjusted for age and gender only), through four univariate predictors, to three that survive multivariate adjustment (<span class="ann ann-term" data-key="wbc" data-type="term" tabindex="0" role="button">WBC count</span> at HR 1.013, AST/ALT ratio ≥ 2 at HR 11.052, surgical intervention at HR 6.604), and finally to the synthesis claim that these three are independent mortality predictors.</p>
+
+  <p>Two nodes are load-bearing <span class="ann ann-term" data-key="crux" data-type="term" tabindex="0" role="button">cruxes</span>. The inclusion criteria (method.1) are foundational: if the induced/coincident distinction is invalid, the patient population is contaminated and all 25 claims collapse. The statistical methodology (method.3) is the second: if the Cox model is inappropriate or the adjustment scope is too narrow, the mortality predictor findings fall — but the chronology findings, which use a different analytical method (<span class="ann ann-term" data-key="kaplan-meier" data-type="term" tabindex="0" role="button">Kaplan-Meier</span>), survive. This kind of selective invalidation is invisible in prose but immediate in the graph.</p>
+
+  <p>The warrant field did its most productive work on the surgical intervention finding. The paper reports surgery as an "independent predictor" without discussing <span class="ann ann-term" data-key="confounding-by-indication" data-type="term" tabindex="0" role="button">confounding by indication</span>. The warrant extraction surfaced the implicit reasoning: surgery does not cause death; severe disease causes both surgery and death. The De Ritis ratio interpretation of the AST/ALT finding — that a ratio ≥ 2 is classically associated with hepatocellular injury and, in this context, suggests multi-organ involvement — is another implicit warrant the annotator reconstructed. These are not criticisms of the paper. They are structural observations that Toulmin decomposition makes systematic.</p>
+
+  <p><strong>The symptom chronology chain</strong> is a structurally different kind of argument: a negative finding. The paper reports that symptom timing does not predict survival — Kaplan-Meier log-rank p = 0.543 for the sequence of GI versus respiratory onset, p = 0.228 for whether pancreatitis developed before or during hospitalization. The authors interpret these nulls as evidence that COVID-19-induced pancreatitis is a distinct clinical entity. The extraction revealed three structural vulnerabilities that the prose obscures.</p>
+
+  <p>The absence-of-evidence problem is the most fundamental. With 11 deaths across three subgroups, the analysis had very low statistical power. The raw mortality rates — 8.1% in the before-admission group versus 16.7% during hospitalization — suggest a twofold difference the study was underpowered to detect. The non-significant p-value is an <span class="ann ann-term" data-key="absence-of-evidence" data-type="term" tabindex="0" role="button">absence of evidence, not evidence of absence</span>, and the paper's central conclusion treats it as the latter.</p>
+
+  <p>The Balthazar-survival tension is the most analytically interesting. Symptom chronology is significantly associated with radiologic severity (<span class="ann ann-term" data-key="balthazar-score" data-type="term" tabindex="0" role="button">Balthazar score</span> ≥ D: p = 0.013 for GI-first presentation, p = 0.042 for pre-admission onset). But chronology does not predict survival. If timing predicts imaging severity but not death, either radiologic severity does not translate to mortality in this disease, or the survival analysis lacks the power to detect the downstream effect. The paper does not address this disconnect. It emerged from the extraction — a structural observation by the annotator juxtaposing two sets of findings the authors present separately.</p>
+
+  <p>The cross-study comparison problem is the most methodologically consequential. The paper's thesis depends on contrasting its own null findings with positive findings from other studies using looser etiological definitions. But those studies used different populations, timeframes, and healthcare systems. The argument requires the assumption that the etiological definition is the relevant variable, rather than any of dozens of other methodological differences between the studies. This inferential pattern — one of six documented schema failure modes — does not map cleanly to the schema's five dependency types.</p>
+
+  <div class="placeholder">
+    <div class="placeholder-label">ChenDependencyGraph</div>
+    Interactive dependency graph visualization would render here
+  </div>
+
+  <!-- ─── SECTION IV ─── -->
+  <h2>IV. The Safety Case Application</h2>
+
+  <p>The medical demonstration establishes that Scholion's decomposition methodology works across domains. But the domain where the methodology has the most urgent institutional demand is AI safety — specifically, safety cases.</p>
+
+  <p>A <span class="ann ann-term" data-key="safety-case" data-type="term" tabindex="0" role="button">safety case</span> is a structured argument that a system is safe enough to deploy. In the past year, this has moved from a conceptual proposal to an operational framework. <span class="ann ann-ref" data-key="anthropic-rsp" data-type="ref" tabindex="0" role="button">Anthropic's Responsible Scaling Policy (v3.0)</span> made the most structurally significant move: it replaced pre-specified AI Safety Levels with argument-based standards, restructuring its industry-wide recommendations "around requiring analysis and arguments making a strong case for safety, rather than AI Safety Levels." The policy then acknowledges the gap this opens — "one actor's view of what constitutes good risk assessment and mitigation may be very different from another's" — and responds with external review requirements that ask reviewers to assess "analytical rigor" and whether they "disagree with any of the Risk Report's key claims." The quality of safety arguments is now the load-bearing question, and there is no shared method for evaluating argument quality at the structural level. <span class="ann ann-ref" data-key="uk-aisi" data-type="ref" tabindex="0" role="button">The UK AI Security Institute</span> (formerly AISI) published safety case templates including <span class="ann ann-term" data-key="inability-argument" data-type="term" tabindex="0" role="button">inability arguments</span> and end-to-end misuse safeguard cases using <span class="ann ann-term" data-key="gsn" data-type="term" tabindex="0" role="button">Goal Structuring Notation</span>. <span class="ann ann-ref" data-key="lee2026" data-type="ref" tabindex="0" role="button">A January 2026 paper</span> proposed a reusable template framework with comprehensive taxonomies for claim types (assertion-based, constraint-based, capability-based), argument types (demonstrative, comparative, causal, risk-based, normative), and evidence families.</p>
+
+  <p>Everyone is converging on structured safety arguments. And everyone acknowledges, in varying degrees of explicitness, that the unsolved problem is maintenance.</p>
+
+  <p>A safety case is not a one-time artifact. It is a living argument that must be updated as model capabilities change, as new evaluation results arrive, as interpretability findings revise our understanding of what a model can do. When a new result challenges a claim in a safety case — say, a scaling monosemanticity finding that reveals features not captured by the original interpretability assessment — someone has to trace the implications. Which claims in the safety case depended on the original assessment? Which downstream conclusions are affected? Does the top-level safety claim still hold, or does it need revision?</p>
+
+  <p>Today, that trace is manual. A safety case author reads the new finding, mentally reconstructs the dependency structure, and updates the relevant claims. This works when the safety case is small and the author is the same person who wrote it. It does not scale to safety cases maintained by teams over months, informed by dozens of upstream research papers, and subject to regulatory review.</p>
+
+  <p>Scholion automates that trace. If the claims in a safety case are decomposed into a typed dependency graph with identified cruxes and classified warrants, then the question "what happens if this claim is overturned?" becomes a graph operation: propagate the status change through the dependency edges, identify which downstream conclusions are affected, and flag which load-bearing claims have lost their foundation. The structural bookkeeping, which is error-prone, tedious, and easy to get wrong at scale, becomes mechanical.</p>
+
+  <p>A safety case has the same structural properties the Chen extraction revealed. An interpretability claim supporting an inability argument is a crux, just as the inclusion criterion was a crux for all 25 claims in the medical extraction. When a new finding undermines it, the graph immediately identifies which safety claims depended on it, which alternative evidence paths survive, and whether the top-level safety claim still holds — the same selective invalidation the Chen extraction demonstrated when overturning the statistical methodology collapsed the mortality findings but left the chronology findings intact. The medical extraction demonstrated this on paper. Safety cases need it operationally.</p>
+
+  <p><span class="ann ann-ref" data-key="sabotage-report" data-type="ref" tabindex="0" role="button">The Sabotage Risk Report</span> published alongside the RSP illustrates the point concretely. The report's central argument rests on four claims — prior expectations about alignment, alignment assessment findings, inability to undermine the assessment, and limited opaque reasoning capabilities — functioning as evidential pillars supporting the top-level safety determination. Its Section 7 contains a table that is, in effect, a hand-built Scholion extraction: load-bearing claims in the left column, invalidation conditions in the right. "An updated alignment audit reports major new concerning findings" invalidates "we are aware of no dangerous coherent misaligned goals." "A <span class="ann ann-term" data-key="model-organisms" data-type="term" tabindex="0" role="button">model-organisms study</span> shows circumvention of the full suite of audit methods" invalidates "the methods used in the alignment audit appear sufficient." This is manually constructed invalidation propagation — the same graph operation the Chen extraction demonstrated. The warrant problem appears here too. The report's Claim 1 rests on continuity between successive models, but the warrant connecting similar training to similar alignment properties is stated as belief rather than mechanism — an implicit warrant that Toulmin decomposition would surface and make auditable, just as it surfaced the confounding-by-indication problem in the surgical intervention finding. The alignment science team converged on this structure independently because the structural bookkeeping is the hard part, and they are doing it by hand.</p>
+
+  <p>But the deeper implication is not organizational. It concerns oversight.</p>
+
+  <p>The central problem in AI safety is asymmetric evaluation: how does a less capable overseer verify the reasoning of a more capable system? <span class="ann ann-ref" data-key="khan2024" data-type="ref" tabindex="0" role="button">Khan's research programme on safe automated research (2024)</span> — which reframes <span class="ann ann-term" data-key="superalignment" data-type="term" tabindex="0" role="button">superalignment</span> as a verification problem, where the challenge shifts from specifying all desired behaviors to verifying work outputs — provides an empirical anchor for thinking about this, investigating how multi-agent structure can compensate for capability gaps across several domains. In their study of AI debates, optimizing debaters for persuasiveness <em>increases</em> judge accuracy on truthfulness questions — the opposite of the naïve expectation that more persuasive models would be more misleading. The mechanism is asymmetric access to evidence: debaters arguing for the correct answer can cite verifiable facts from the source text, and this advantage grows with persuasiveness. Crucially, stronger consultants in a single-advisor format make judges <em>less</em> accurate — the adversarial structure is doing epistemic work that single-expert consultancy cannot, because consultancy provides no pressure to surface the strongest counter-argument. The judge does not need to match the debaters' capability. The structure compensates for the capability gap. Khan is candid about where this breaks down: debate works well for code and factual domains but struggles with "complex theoretical work" and "abstract alignment theories" — precisely the kind of arguments safety cases contain. The two-layer annotation model addresses this gap: it decomposes arguments into auditable structural joints even when the substantive claims exceed the verifier's domain expertise, complementing debate at the argument level rather than replacing it at the claim level.</p>
+
+  <p>Scholion extends this principle beyond the debate format. A dependency graph is immune to rhetorical fluency in a way that prose evaluation is not. A beautifully written argument with a foundational crux resting on an unstated warrant looks exactly as vulnerable in the graph as a clumsily written one. A <span class="ann ann-ref" data-key="arg-mining-survey" data-type="ref" tabindex="0" role="button">recent survey of LLMs in argument mining</span> finds that they "favour fluent but logically thin arguments over less polished yet better-supported ones" (arXiv 2506.16383) — precisely the failure mode that structural representation neutralizes. If the claims in a safety case are rendered as a typed dependency graph, a reviewer who is weaker than the system that produced the arguments can still audit them, because the evaluation task is structural: are the dependencies valid? Are the warrants stated? Do the cruxes survive the <span class="ann ann-term" data-key="flip-test" data-type="term" tabindex="0" role="button">flip test</span>? These are questions about the argument's architecture, not about the domain.</p>
+
+  <p>Combined with the two-layer annotation model described in Section II — structural decomposition by method-equipped non-specialists, substantive evaluation by domain experts, bridged by inline contextual scaffolding — this yields a specific version of <span class="ann ann-term" data-key="scalable-oversight" data-type="term" tabindex="0" role="button">scalable oversight</span>. The structural layer is where the tractable, automatable, capability-independent verification happens. The substantive layer is where domain expertise remains necessary but is scoped to a specific, bounded task: reviewing warrants and cruxes that the structural layer has already identified as load-bearing. The overseer does not need to reconstruct the entire argument. They need to audit the joints.</p>
+
+  <p>This is the project's meta-crux: does structural verification of arguments preserve the asymmetric oversight property that Khan demonstrates in debate? The Chen extraction provides initial evidence. The confounding by indication, the absence-of-evidence fallacy, the Balthazar-survival tension — these structural vulnerabilities were visible in the dependency graph and obscured in the prose. They were identified by an annotator following method, not by a clinical epidemiologist applying domain knowledge. If this pattern holds for safety cases, then a structurally competent verifier can oversee a substantively stronger researcher — not by matching their domain expertise, but by auditing the logical scaffolding their arguments rest on.</p>
+
+  <div class="placeholder">
+    <div class="placeholder-label">SafetyCaseFragment</div>
+    Interactive safety case visualization would render here
+  </div>
+
+  <!-- ─── SECTION V ─── -->
+  <h2>V. What the Extraction Revealed About the Schema</h2>
+
+  <p>Twenty-five claims from one paper is a promising start, not a validated methodology. The extraction stress-tested the schema and produced an honest accounting of where it works and where it does not.</p>
+
+  <p><strong>What worked.</strong> The warrant field consistently surfaced implicit reasoning the paper's prose did not make explicit — the structural vulnerabilities described in Section III were all captured through Toulmin decomposition doing genuine analytical work, not just reformatting. The five dependency types covered most relationships without straining; the tree structure of the mortality chain and the conjunctive structure of the chronology synthesis both mapped naturally. Cross-extraction references worked: the chronology extraction shares two foundational claims with the mortality extraction without duplication, validating the decision to extract by argument block rather than by paper section. Crux identification via the flip test produced the essay's most practically significant output: the selective invalidation pattern where different cruxes collapse different subsets of the argument.</p>
+
+  <p><strong>What did not work.</strong> The binary IN/OUT/UNDETERMINED status cannot represent epistemic weight. The chronology negative findings are technically IN — they are published results from a peer-reviewed review — but they are epistemically weak, resting on 11 events with wide confidence intervals. Treating them as straightforwardly IN misrepresents their evidential strength. The schema now includes a confidence field (high/medium/low) alongside status, but a richer representation may be needed — the same problem at an institutional scale, where Anthropic's own capability threshold assessments resist binary classification because models approach thresholds without clearly passing them.</p>
+
+  <p>Annotator-synthesized claims posed a boundary problem. The Balthazar-survival tension — the most analytically interesting observation in the chronology extraction — is not something the authors assert. The schema now includes a claim_source field (author_explicit / author_implicit / annotator_synthesized) to maintain traceability, but the convention for when and how annotators should generate structural observations needs codification before a second annotator begins work.</p>
+
+  <p>Cross-study comparison reasoning does not fit the five dependency types cleanly. The paper's central thesis — that COVID-19-induced AP is distinct from concurrent AP — rests on contrasting its own null results with positive results from other studies. This was coded as "purposive" and "conjunctive," but neither captures the actual logic: "our results differ from theirs, therefore the methodological difference explains the divergence." Whether this warrants a sixth dependency type ("comparative") or remains a documented edge case depends on how frequently the pattern recurs across domains.</p>
+
+  <div class="placeholder">
+    <div class="placeholder-label">SchemaEvolution</div>
+    Schema refinement visualization would render here
+  </div>
+
+  <!-- ─── SECTION VI ─── -->
+  <h2>VI. The Competitive Landscape</h2>
+
+  <p>The existing research infrastructure is good at adjacent problems. <span class="ann ann-link" data-key="elicit" data-type="link" tabindex="0" role="button">Elicit</span> extracts structured data from papers — effect sizes, sample sizes, study characteristics — across 138 million indexed papers. <span class="ann ann-link" data-key="semantic-scholar" data-type="link" tabindex="0" role="button">Semantic Scholar</span> maps citation graphs at massive scale. <span class="ann ann-link" data-key="scite" data-type="link" tabindex="0" role="button">scite.ai</span> classifies citation context as supporting, contradicting, or mentioning. Safety case frameworks help authors build structured arguments. Each of these operates at a different resolution than Scholion. Elicit answers "what did this paper find?" Semantic Scholar answers "which papers cite which?" scite.ai answers "does this citation support or contradict?" None of them answers "which specific claim in this argument depends on which other claim, through what warrant, and what breaks if this claim is wrong?"</p>
+
+  <p>The capabilities that define Scholion's territory — claim-level decomposition, typed dependency relationships, warrant extraction, crux identification, and invalidation propagation — are not provided by any existing tool. scite.ai comes closest with its citation context classification, but it operates on citation sentences, not on the internal argument structure of a paper. If scite tells you Paper B contradicts Paper A, Scholion tells you which claim contradicts which claim, through what reasoning, and what downstream conclusions in both papers are affected. The gap is real and has not closed since the first essay was written.</p>
+
+  <div class="placeholder">
+    <div class="placeholder-label">CompetitiveGapTable</div>
+    Competitive landscape comparison table would render here
+  </div>
+
+  <!-- ─── SECTION VII ─── -->
+  <h2>VII. Where This Goes</h2>
+
+  <p>Scholion is currently a schema, two worked extractions, and a documented set of limitations. Turning it into a validated methodology and eventually a usable tool requires four phases, each with explicit success criteria and kill conditions.</p>
+
+  <p><strong>Phase 1: Manual annotation and the novice annotator hypothesis.</strong> Three to five papers across domains — clinical medicine (already started), interpretability research, and possibly formal verification or philosophy of science. The core validation is inter-annotator agreement: does the schema carve arguments at consistent joints across independent annotators? If agreement is too low, the schema captures annotator idiosyncrasies, not stable structural features. That would be a kill condition.</p>
+
+  <p>But Phase 1 also tests a more specific hypothesis: that non-specialist annotators equipped with structured method and inline contextual scaffolding can produce structural decompositions of comparable quality to domain experts. This requires building the scaffolding — point-of-need contextual annotations, authored by domain experts, that bridge vocabulary gaps at each step of the decomposition. If the hypothesis holds, it means the structural layer of argument analysis is genuinely domain-independent, which transforms the scalability story: the bottleneck is not "finding willing domain experts" but "building good enough method and scaffolding that non-experts can do reliable structural work." The annotated corpus is also a potential contribution to the argument mining community as a novel dataset with Toulmin decomposition and typed dependencies.</p>
+
+  <p><strong>Phase 2: LLM extraction pipeline.</strong> Benchmark automated extraction against the manual ground truth from Phase 1. The argument mining literature suggests that LLMs can perform argument component detection at levels rivaling supervised baselines, but struggle with fine-grained structural reasoning — exactly the capability Scholion requires. If extraction quality is too low for the dependency graph to be structurally valid, the methodology requires either human-in-the-loop annotation at a level that does not scale or fundamental advances in LLM reasoning. Either way, the question is empirical.</p>
+
+  <p><strong>Phase 3: Graph infrastructure.</strong> Typed dependency storage, invalidation propagation as a graph operation, cross-document claim linking. The technical implementation depends on Phase 1–2 findings — whether the dependency types are stable, whether cross-document references are tractable, and what query patterns matter for actual use.</p>
+
+  <p><strong>Phase 4: Reading interface and validation.</strong> Domain experts use the dependency graph alongside the original paper and report whether the structural representation adds value over reading the prose. If domain experts do not find the graph more useful than the paper, the structural advantage thesis is wrong. This is the final kill condition and the most important one: utility, not elegance.</p>
+
+  <p>The project is a bet that making argument structure explicit is worth the overhead of decomposition — and that the structural layer carries independent epistemic authority, accessible to overseers who do not match the domain expertise of the systems or researchers they are evaluating. The medical extraction is the first evidence that the overhead produces insights the prose does not. The safety case application is the first domain where institutional demand is acute. The novice annotator hypothesis is the scalability test. The answer is not known yet. But the question is now precise enough to answer empirically.</p>
+
+  <div class="placeholder">
+    <div class="placeholder-label">Roadmap</div>
+    Phase progression timeline visualization would render here
+  </div>
+
+</div>
+
+<!-- ─── POPOVER CONTAINER ─── -->
+<div class="popover-backdrop"></div>
+<div class="popover">
+  <button class="popover-close" aria-label="Close popover">×</button>
+  <div class="popover-content"></div>
+</div>
+
+<!-- ─── ANNOTATION DATA (EMBEDDED) ─── -->
+<script>
+const annotationData = {
+  terms: {
+    'de-ritis-ratio': {
+      display: 'De Ritis Ratio (AST/ALT)',
+      definition: 'The ratio of aspartate aminotransferase (AST) to alanine aminotransferase (ALT), two liver enzymes. A ratio ≥ 2 is classically associated with hepatocellular injury from non-hepatic causes — in this context, multi-organ involvement in COVID-19 rather than primary liver disease.',
+      badge: 'CLINICAL',
+      badge_color: 'teal'
+    },
+    'cox-model': {
+      display: 'Cox Proportional Hazards Model',
+      definition: 'A regression method for survival analysis that estimates hazard ratios — the relative risk of an event (here, death) associated with each predictor variable. "Proportional hazards" assumes the ratio of hazard rates between groups stays constant over time.',
+      badge: 'CLINICAL',
+      badge_color: 'teal'
+    },
+    'adjusted-hazard-ratio': {
+      display: 'Adjusted Hazard Ratio',
+      definition: 'A hazard ratio from a multivariate model that controls for confounding variables. "Adjusted" means other predictors (here, age and gender) are held constant. An HR of 11.052 means an estimated 11-fold increase in mortality risk, but the wide confidence interval (1.441–84.770) indicates very low precision.',
+      badge: 'CLINICAL',
+      badge_color: 'teal'
+    },
+    'kaplan-meier': {
+      display: 'Kaplan-Meier Analysis',
+      definition: 'A non-parametric method for estimating survival probabilities over time. Unlike Cox regression (which models risk factors), Kaplan-Meier simply describes how a group\'s survival changes. The log-rank test compares survival curves between groups.',
+      badge: 'CLINICAL',
+      badge_color: 'teal'
+    },
+    'prisma': {
+      display: 'PRISMA',
+      definition: 'Preferred Reporting Items for Systematic Reviews and Meta-Analyses — a standardized checklist and flow diagram for reporting systematic reviews. PRISMA compliance signals methodological rigor in the search and selection process.',
+      badge: 'CLINICAL',
+      badge_color: 'teal'
+    },
+    'balthazar-score': {
+      display: 'Balthazar Score',
+      definition: 'A CT-based grading system for acute pancreatitis severity, ranging from A (normal) to E (multiple fluid collections). Grade ≥ D indicates moderate-to-severe radiologic involvement. In the Chen extraction, it creates a tension: symptom timing predicts imaging severity but not survival.',
+      badge: 'CLINICAL',
+      badge_color: 'teal'
+    },
+    'wbc': {
+      display: 'White Blood Cell Count',
+      definition: 'A standard blood marker of infection and inflammation. Elevated WBC (leukocytosis) in the Chen review was an independent predictor of mortality in COVID-19-induced pancreatitis, though with a modest hazard ratio (HR 1.013 per unit increase).',
+      badge: 'CLINICAL',
+      badge_color: 'teal'
+    },
+    'confounding-by-indication': {
+      display: 'Confounding by Indication',
+      definition: 'A bias where a treatment appears to cause an outcome, but the underlying condition drives both the treatment decision and the outcome. Surgical intervention predicts mortality not because surgery causes death, but because severe disease causes both the need for surgery and the risk of death.',
+      badge: 'CLINICAL',
+      badge_color: 'teal'
+    },
+    'atomic-decomposition': {
+      display: 'Atomic Decomposition',
+      definition: 'Breaking compound assertions into individually falsifiable propositions, each carrying its own statistical evidence, scope conditions, and failure modes. "X, Y, and Z are independent predictors" becomes three separate claims. You cannot track dependencies between claims you have not identified.',
+      badge: 'ARGUMENT',
+      badge_color: 'accent'
+    },
+    'warrant': {
+      display: 'Warrant',
+      definition: 'In Toulmin\'s model, the implicit or explicit reasoning that connects evidence to a claim. Warrants are where authors expect readers to fill in unstated reasoning — and where arguments are most structurally vulnerable. Surfacing unstated warrants makes inferential hazards auditable.',
+      badge: 'ARGUMENT',
+      badge_color: 'accent'
+    },
+    'transitive-closure': {
+      display: 'Transitive Closure',
+      definition: 'The complete set of claims reachable by following dependency edges from a given starting claim. If A depends on B and B depends on C, then C is in A\'s transitive closure — A is indirectly vulnerable to C\'s failure even without a direct dependency.',
+      badge: 'ARGUMENT',
+      badge_color: 'accent'
+    },
+    'invalidation-propagation': {
+      display: 'Invalidation Propagation',
+      definition: 'A graph operation that traces the consequences of overturning a claim: which downstream conclusions lose their foundation, which survive via alternative evidence paths, and which become undetermined. The structural bookkeeping that safety case maintenance currently does by hand.',
+      badge: 'ARGUMENT',
+      badge_color: 'accent'
+    },
+    'crux': {
+      display: 'Crux (Load-Bearing Claim)',
+      definition: 'A claim whose failure would collapse significant downstream structure in the dependency graph. Identified by the flip test: if this claim were overturned, would the conclusions that depend on it still hold? Different cruxes collapse different subsets of the argument — selective invalidation.',
+      badge: 'ARGUMENT',
+      badge_color: 'accent'
+    },
+    'absence-of-evidence': {
+      display: 'Absence of Evidence vs. Evidence of Absence',
+      definition: 'A non-significant p-value means the study failed to detect an effect — it does not mean no effect exists. With low statistical power (few events, small sample), non-significance is expected even if a real effect is present. Treating "no significant result" as "no real difference" is a logical error.',
+      badge: 'ARGUMENT',
+      badge_color: 'accent'
+    },
+    'flip-test': {
+      display: 'Flip Test',
+      definition: 'A method for identifying cruxes: hypothetically overturn a claim and trace what breaks. If flipping a claim\'s status from IN to OUT collapses significant downstream structure, it is a crux. If the downstream conclusions survive via alternative evidence paths, it is not load-bearing.',
+      badge: 'ARGUMENT',
+      badge_color: 'accent'
+    },
+    'safety-case': {
+      display: 'Safety Case',
+      definition: 'A structured argument that a system is acceptably safe to deploy, with explicit claims, evidence, and reasoning linking them. Originated in high-reliability industries (nuclear, aviation); now the emerging framework for AI deployment decisions.',
+      badge: 'SAFETY',
+      badge_color: 'blue'
+    },
+    'inability-argument': {
+      display: 'Inability Argument',
+      definition: 'A safety case argument pattern claiming that a model cannot perform a dangerous capability (e.g., cannot produce novel bioweapons, cannot autonomously replicate). Relies on evaluation evidence and interpretability findings to establish the negative claim — structurally vulnerable because proving inability is harder than proving ability.',
+      badge: 'SAFETY',
+      badge_color: 'blue'
+    },
+    'model-organisms': {
+      display: 'Model Organisms of Misalignment',
+      definition: 'An experimental methodology where researchers deliberately train a model to exhibit a specific dangerous behavior (e.g., deceptive alignment, reward hacking) to test whether detection and mitigation methods work. Analogous to model organisms in biology — a controlled instance of the phenomenon for study.',
+      badge: 'SAFETY',
+      badge_color: 'blue'
+    },
+    'gsn': {
+      display: 'Goal Structuring Notation',
+      definition: 'A graphical notation for safety arguments, using goals (claims), strategies (reasoning), contexts, and evidence nodes connected by "supported by" and "in context of" links. Standard in safety-critical industries; used by the UK AI Security Institute for AI safety case templates.',
+      badge: 'SAFETY',
+      badge_color: 'blue'
+    },
+    'superalignment': {
+      display: 'Superalignment',
+      definition: 'The problem of aligning AI systems that are more capable than their human overseers. Khan reframes this as a verification problem: the challenge is not specifying all desired behaviors but verifying the outputs of systems whose reasoning the verifier cannot fully reconstruct.',
+      badge: 'SAFETY',
+      badge_color: 'blue'
+    },
+    'scalable-oversight': {
+      display: 'Scalable Oversight',
+      definition: 'Methods for maintaining effective human oversight of AI systems as those systems become more capable. The core challenge: verification must scale without requiring the overseer to match the system\'s domain expertise. Debate, recursive reward modeling, and structural decomposition are candidate approaches.',
+      badge: 'SAFETY',
+      badge_color: 'blue'
+    }
+  },
+  references: {
+    'chen2025': {
+      title: 'COVID-19-Induced Acute Pancreatitis: A Systematic Review',
+      attribution: 'Chen et al., 2025',
+      summary: 'Systematic review of 87 case reports (111 patients) examining mortality predictors and symptom chronology in pancreatitis attributed to SARS-CoV-2 infection by exclusion of other etiologies.',
+      context: 'The first extraction target for Scholion\'s annotation schema, chosen to test generality outside the AI safety domain. Twenty-five claims extracted across two structurally distinct argument chains.',
+      url: null
+    },
+    'toulmin': {
+      title: 'The Uses of Argument',
+      attribution: 'Stephen Toulmin, 1958 (updated edition 2003)',
+      summary: 'Foundational work in argumentation theory proposing a six-part model (claim, data, warrant, backing, qualifier, rebuttal) as an alternative to formal logic for analyzing practical arguments.',
+      context: 'Scholion\'s annotation schema is organized around Toulmin\'s model. The warrant field — surfacing unstated reasoning — is the highest-value extraction target.',
+      url: 'https://www.cambridge.org/core/books/uses-of-argument/26CF801BC12004587B66778E69C267E9',
+      url_label: 'Cambridge University Press'
+    },
+    'khan2024': {
+      title: 'Safe Automated Research',
+      attribution: 'Akbir Khan, PhD dissertation, UCL, 2024',
+      summary: 'Dissertation investigating how multi-agent structure can compensate for capability gaps in AI oversight. Reframes superalignment as a verification problem. Key finding: in AI debates, optimizing debaters for persuasiveness increases judge accuracy via asymmetric access to verifiable evidence.',
+      context: 'Provides the empirical anchor for Scholion\'s scalable oversight argument. Khan demonstrates that structure compensates for capability gaps in debate; Scholion extends this to argument architecture.',
+      url: null
+    },
+    'anthropic-rsp': {
+      title: 'Responsible Scaling Policy (v3.0)',
+      attribution: 'Anthropic, February 2026',
+      summary: 'Replaced pre-specified AI Safety Levels with argument-based standards, requiring "analysis and arguments making a strong case for safety." Acknowledges the evaluation gap and requires external reviewers to assess "analytical rigor" and "key claims."',
+      context: 'The structural shift to argument-based standards is exactly the gap Scholion addresses. If safety arguments are the load-bearing artifact, there must be a method for evaluating argument quality at the structural level.',
+      url: 'https://www.anthropic.com/news/responsible-scaling-policy-v3',
+      url_label: 'Read RSP v3.0'
+    },
+    'uk-aisi': {
+      title: 'AI Safety Case Templates',
+      attribution: 'UK AI Security Institute (formerly AISI), 2025',
+      summary: 'Published safety case templates including inability arguments and end-to-end misuse safeguard cases using Goal Structuring Notation. Represents the UK regulatory approach to structured safety arguments for AI systems.',
+      context: 'One of several institutional convergences on structured safety arguments, alongside Anthropic\'s RSP and academic template frameworks.',
+      url: null
+    },
+    'lee2026': {
+      title: 'Reusable Safety Case Template Framework',
+      attribution: 'Lee et al., January 2026 (arXiv 2601.22773)',
+      summary: 'Proposes comprehensive taxonomies for safety case components: claim types (assertion-based, constraint-based, capability-based), argument types (demonstrative, comparative, causal, risk-based, normative), and evidence families.',
+      context: 'Representative of the academic convergence on structured safety arguments. The taxonomy of argument types parallels Scholion\'s dependency types but operates at the safety case level.',
+      url: 'https://arxiv.org/abs/2601.22773',
+      url_label: 'View on arXiv'
+    },
+    'sabotage-report': {
+      title: 'Sabotage Risk Report',
+      attribution: 'Anthropic Alignment Science, February 2026',
+      summary: 'Pilot safety case report assessing sabotage risk for Claude models. Central argument rests on four claims. Section 7 contains a hand-built invalidation table: load-bearing claims paired with conditions that would overturn them.',
+      context: 'Read in the essay as a concrete Scholion parallel — the alignment science team independently converged on dependency structure and invalidation propagation, doing it by hand because no tool exists for the structural bookkeeping.',
+      url: 'https://assets.anthropic.com/m/242eb662e8366da7/original/Sabotage-evaluations-for-frontier-models-2025-02-24.pdf',
+      url_label: 'Read Sabotage Report'
+    },
+    'arg-mining-survey': {
+      title: 'Large Language Models in Argument Mining: A Survey',
+      attribution: 'arXiv 2506.16383, July 2025',
+      summary: 'Survey finding that LLMs can perform argument component detection at levels rivaling supervised baselines but struggle with fine-grained structural reasoning — and tend to favor fluent but logically thin arguments over less polished but better-supported ones.',
+      context: 'The "fluent but logically thin" failure mode is precisely what structural representation neutralizes. A dependency graph is immune to rhetorical fluency.',
+      url: 'https://arxiv.org/abs/2506.16383',
+      url_label: 'View on arXiv'
+    }
+  },
+  links: {
+    'elicit': {
+      domain: 'elicit.com',
+      title: 'Elicit',
+      source: 'Elicit Research',
+      summary: 'AI research assistant that extracts structured data — effect sizes, sample sizes, study characteristics — across 138 million indexed papers. Answers "what did this paper find?" but not "which claim depends on which claim?"',
+      url: 'https://elicit.com',
+      cta: 'Visit Elicit'
+    },
+    'semantic-scholar': {
+      domain: 'semanticscholar.org',
+      title: 'Semantic Scholar',
+      source: 'Allen Institute for AI',
+      summary: 'Academic search engine that maps citation graphs at massive scale. Answers "which papers cite which?" but not "which specific claim in Paper A is challenged by which claim in Paper B?"',
+      url: 'https://www.semanticscholar.org',
+      cta: 'Visit Semantic Scholar'
+    },
+    'scite': {
+      domain: 'scite.ai',
+      title: 'scite.ai',
+      source: 'scite Inc.',
+      summary: 'Classifies citation context as supporting, contradicting, or mentioning. Closest to Scholion\'s territory, but operates on citation sentences rather than the internal argument structure of a paper.',
+      url: 'https://scite.ai',
+      cta: 'Visit scite'
+    }
+  }
+};
+
+// ─── POPOVER LOGIC ───
+const popover = document.querySelector('.popover');
+const backdrop = document.querySelector('.popover-backdrop');
+const closeButton = document.querySelector('.popover-close');
+let currentTrigger = null;
+
+function getPopoverContent(type, key) {
+  const content = document.querySelector('.popover-content');
+  content.innerHTML = '';
+
+  if (type === 'term') {
+    const term = annotationData.terms[key];
+    if (!term) return '';
+
+    const badgeClass = term.badge_color === 'teal' ? 'clinical'
+                     : term.badge_color === 'var(--accent)' ? 'argument'
+                     : 'safety';
+
+    content.innerHTML = `
+      <div class="popover-badge ${badgeClass}">${term.badge}</div>
+      <div class="popover-title">${term.display}</div>
+      <div class="popover-definition">${term.definition}</div>
+    `;
+  } else if (type === 'ref') {
+    const ref = annotationData.references[key];
+    if (!ref) return '';
+
+    content.innerHTML = `
+      <div class="popover-citation-title">${ref.title}</div>
+      <div class="popover-attribution">${ref.attribution}</div>
+      <div class="popover-summary">${ref.summary}</div>
+      <div class="popover-context">In this essay: ${ref.context}</div>
+      ${ref.url ? `<a href="${ref.url}" target="_blank" rel="noopener" class="popover-link">${ref.url_label} →</a>` : ''}
+    `;
+  } else if (type === 'link') {
+    const link = annotationData.links[key];
+    if (!link) return '';
+
+    content.innerHTML = `
+      <div class="popover-domain">${link.domain}</div>
+      <div class="popover-link-title">${link.title}</div>
+      <div class="popover-source">${link.source}</div>
+      <div class="popover-summary">${link.summary}</div>
+      <a href="${link.url}" target="_blank" rel="noopener" class="popover-cta">${link.cta} →</a>
+    `;
+  }
+}
+
+function positionPopover(trigger) {
+  const rect = trigger.getBoundingClientRect();
+  const popoverRect = popover.getBoundingClientRect();
+  const isDesktop = window.innerWidth > 640;
+
+  if (!isDesktop) {
+    // Mobile: bottom sheet, handled by CSS
+    return;
+  }
+
+  // Desktop: position near trigger
+  let top = rect.top + window.scrollY - popoverRect.height - 12;
+  let left = rect.left + (rect.width - popoverRect.width) / 2;
+
+  // Flip if near top of viewport
+  if (top < 0) {
+    top = rect.bottom + window.scrollY + 12;
+  }
+
+  // Clamp horizontal position
+  const minLeft = 12;
+  const maxLeft = window.innerWidth - popoverRect.width - 12;
+  left = Math.max(minLeft, Math.min(maxLeft, left));
+
+  popover.style.top = top + 'px';
+  popover.style.left = left + 'px';
+}
+
+function openPopover(trigger) {
+  const type = trigger.dataset.type;
+  const key = trigger.dataset.key;
+
+  getPopoverContent(type, key);
+  currentTrigger = trigger;
+
+  popover.classList.add('visible');
+  backdrop.classList.add('visible');
+
+  // Position on next frame (after layout)
+  requestAnimationFrame(() => positionPopover(trigger));
+}
+
+function closePopover() {
+  popover.classList.remove('visible');
+  backdrop.classList.remove('visible');
+  currentTrigger = null;
+}
+
+// ─── EVENT LISTENERS ───
+document.querySelectorAll('.ann').forEach(trigger => {
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentTrigger === trigger && popover.classList.contains('visible')) {
+      closePopover();
+    } else {
+      closePopover();
+      openPopover(trigger);
+    }
+  });
+
+  trigger.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      trigger.click();
+    } else if (e.key === 'Escape') {
+      closePopover();
+    }
+  });
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.popover') && !e.target.closest('.ann')) {
+    closePopover();
+  }
+});
+
+closeButton.addEventListener('click', closePopover);
+backdrop.addEventListener('click', closePopover);
+
+// ─── KEYBOARD ESCAPE ───
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closePopover();
+  }
+});
+
+// ─── REPOSITION ON RESIZE ───
+window.addEventListener('resize', () => {
+  if (currentTrigger && popover.classList.contains('visible')) {
+    positionPopover(currentTrigger);
+  }
+});
+</script>
+
+</body>
+</html>

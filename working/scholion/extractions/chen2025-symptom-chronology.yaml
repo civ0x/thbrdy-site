@@ -1,0 +1,663 @@
+# Scholion Extraction: Chen et al. (2025) — Symptom Chronology & Clinical Course
+# Second extraction from the same paper, validating schema v0.1 on a
+# structurally different argument type: negative finding (no survival effect)
+# via Kaplan-Meier, with a tension against positive severity-marker associations.
+#
+# Cross-references: This extraction shares foundational dependencies with
+# chen2025-mortality-predictors.yaml (method.1, method.2). Those claims are
+# referenced but not duplicated here.
+
+source:
+  paper_id: "chen2025"
+  title: "COVID-19-Induced Acute Pancreatitis: Clinical Profiles, Outcomes, and Prognostic Indicators From a Global Review-Based Synthesis"
+  authors: [Chen YJ, Chen TH, Seak CJ, Sung CM, Huang SW, Hsieh SY, Cheng HT]
+  year: 2025
+  doi: "10.1002/hsr2.71417"
+  pmid: "41163933"
+  source_type: systematic_review
+  domain: clinical_medicine
+
+extraction:
+  annotator: "claude-opus-4-6 + thomas-brady"
+  date: "2026-02-24"
+  section: "Symptom chronology, Balthazar associations, and survival by onset timing (Sections 3.3, 3.5, 3.7, Discussion)"
+  scope_note: >
+    Extraction covers the clinical course argument chain: from symptom
+    prevalence and temporal sequencing through Balthazar severity associations
+    to Kaplan-Meier survival analysis by onset timing. This is the paper's
+    second major argument — a negative finding (chronology does not predict
+    survival) that distinguishes "COVID-19-induced AP" from "concurrent
+    COVID-19 and AP." Structurally distinct from the mortality predictors
+    extraction: tests the schema on a negative-result argument with
+    Kaplan-Meier evidence and a tension between severity markers and
+    survival outcomes.
+
+claims:
+
+  # --- Symptom prevalence and temporal sequencing ---
+
+  - claim_id: "chen2025.chronology.1"
+    claim_text: >
+      Gastrointestinal symptoms consistent with AP were reported in 102
+      patients (91.9%), while respiratory symptoms were documented in 88
+      patients (79.3%). Among them, 34 patients (30.6%) experienced
+      gastrointestinal symptoms before admission, whereas 58 patients
+      (52.3%) presented with preceding respiratory symptoms.
+    atomic_proposition: >
+      In the study cohort, GI symptoms occurred in 91.9% and respiratory
+      symptoms in 79.3% of patients, with respiratory symptoms preceding
+      admission more frequently than GI symptoms (52.3% vs 30.6%).
+    warrant: >
+      High prevalence of both symptom domains establishes that COVID-19-
+      induced AP typically presents with overlapping GI and respiratory
+      involvement, enabling temporal sequencing analysis.
+    warrant_type: explicit
+    backing: "Direct tabulation from extracted patient-level data"
+    qualifier: >
+      Percentages are of 111 total patients. 3 patients (2.7%) had
+      concurrent onset; in 16 (14.4%) the sequence could not be determined.
+    rebuttal: >
+      Symptom onset dates rely on patient report and clinician documentation
+      in case reports. Recall bias and inconsistent documentation across
+      87 source articles may misclassify temporal sequences.
+    depends_on:
+      - "chen2025.method.1"
+      - "chen2025.method.2"
+    dependency_type: conditional
+    external_anchor: "PMID:41163933, Section 3.3 Symptoms"
+    crux: false
+    status: "IN"
+    confidence: high
+    external_anchor_type: contextual
+    claim_source: author_explicit
+    notes: >
+      This is descriptive groundwork, not itself a crux. But the 52.3%
+      respiratory-first figure is important context: it means the majority
+      of patients had COVID-19 respiratory illness before developing AP,
+      consistent with the "induced" mechanism (virus first, then pancreatic
+      injury) rather than coincident presentation.
+
+  - claim_id: "chen2025.chronology.2"
+    claim_text: >
+      Among patients who developed gastrointestinal symptoms first, the
+      median interval between gastrointestinal and respiratory symptom
+      onset was 5 days (IQR, 7; range, 2-20), and 21 patients (61.8%)
+      did not develop any respiratory symptoms. In contrast, among those
+      with preceding respiratory symptoms, the median interval to
+      gastrointestinal symptom onset was 9 days (IQR, 9; range, 1-30),
+      with only two patients remaining free of gastrointestinal manifestations.
+    atomic_proposition: >
+      GI-first patients had a shorter median interval to respiratory
+      symptoms (5 days) and 61.8% never developed respiratory symptoms,
+      whereas respiratory-first patients had a longer interval to GI
+      symptoms (9 days) and nearly all (96.6%) eventually developed GI
+      symptoms.
+    warrant: >
+      The asymmetry in cross-symptom development rates (61.8% of GI-first
+      never get respiratory vs. only 3.4% of respiratory-first never get
+      GI) suggests distinct clinical trajectories within the same
+      diagnostic category.
+    warrant_type: implicit
+    backing: "Descriptive epidemiology of symptom progression"
+    qualifier: >
+      GI-first group n=34, respiratory-first group n=58. Small subgroup
+      sizes limit precision of median estimates.
+    rebuttal: >
+      The asymmetry could reflect ascertainment bias: patients presenting
+      first with respiratory COVID-19 may have been more closely monitored
+      for subsequent GI symptoms than patients presenting first with AP.
+    depends_on:
+      - "chen2025.chronology.1"
+    dependency_type: causal
+    external_anchor: "PMID:41163933, Section 3.3 Symptoms"
+    crux: false
+    status: "IN"
+    confidence: high
+    external_anchor_type: contextual
+    claim_source: author_implicit
+    notes: >
+      The 61.8% figure (GI-first patients who never developed respiratory
+      symptoms) is notable — it suggests a subpopulation with isolated
+      pancreatic injury without significant respiratory involvement. This
+      raises an unaddressed question: does this subgroup have a different
+      mortality profile? The paper doesn't stratify survival by this
+      distinction. Flagging as a potential future extraction target if
+      the raw data were available.
+
+  # --- Clinical characteristics by onset timing ---
+
+  - claim_id: "chen2025.chronology.3"
+    claim_text: >
+      Patients who developed AP symptoms before admission were significantly
+      younger (mean, 36 vs. 50 years; p = 0.020), with lower absolute
+      lymphocyte counts (mean, 400/uL vs. 900/uL; p = 0.011), lower
+      neutrophil-to-lymphocyte ratios (mean, 4.9 vs. 13.4; p = 0.029),
+      and a higher prevalence of severe radiologic findings (Balthazar
+      score >= D: 56.9% vs. 27.3%; p = 0.027).
+    atomic_proposition: >
+      Patients with AP onset before hospital admission had significantly
+      different clinical profiles than those developing AP during
+      hospitalization: younger age, lower lymphocytes, lower N/L ratio,
+      and higher radiologic severity.
+    warrant: >
+      Statistically significant differences (p < 0.05) across multiple
+      parameters establish that onset timing is associated with distinct
+      clinical phenotypes, not merely random variation.
+    warrant_type: explicit
+    backing: "Mann-Whitney U test for continuous variables, chi-square/Fisher's for categorical (Section 2.3)"
+    qualifier: >
+      Before-admission group n=81 vs during-hospitalization n=21.
+      Imbalanced groups (4:1 ratio). Multiple comparisons without
+      correction increase false-positive risk.
+    rebuttal: >
+      The during-hospitalization group (n=21) is small, making
+      comparisons underpowered and p-values unstable. The four significant
+      results out of ~15 comparisons in Table 1 may include false
+      positives. No multiple comparison correction was applied.
+    depends_on:
+      - "chen2025.method.1"
+      - "chen2025.method.2"
+      - "chen2025.chronology.1"
+    dependency_type: conditional
+    external_anchor: "PMID:41163933, Table 1"
+    crux: false
+    status: "IN"
+    confidence: medium
+    external_anchor_type: contextual
+    claim_source: author_explicit
+    notes: >
+      The lower lymphocyte count and lower N/L ratio in the before-admission
+      group is counterintuitive — one might expect sicker patients (higher
+      inflammatory markers) to present earlier. The authors don't fully
+      explain this pattern. One interpretation: the before-admission group
+      represents patients whose AP was the presenting complaint (suggesting
+      direct viral pancreatic injury), while the during-hospitalization
+      group developed AP as a complication of already-severe systemic
+      COVID-19 (hence higher N/L ratio reflecting more systemic
+      inflammation). This interpretation would support the "induced" vs
+      "coincident" distinction that is the paper's central framing.
+
+  # --- Balthazar severity associations ---
+
+  - claim_id: "chen2025.chronology.4"
+    claim_text: >
+      Based on Balthazar scoring, no significant difference in the interval
+      between gastrointestinal and respiratory symptom onset was noted
+      across different severity groups (Figure 2A). However, higher
+      Balthazar scores were significantly associated with specific clinical
+      features, including gastrointestinal symptoms preceding respiratory
+      symptoms (p = 0.013), AP symptom onset before admission (p = 0.042),
+      initial WBC >= 14,000/uL (p = 0.032), and ICU admission (p = 0.025).
+    atomic_proposition: >
+      Radiologic severity (Balthazar score) is associated with GI-first
+      symptom sequence and pre-admission AP onset, but not with the
+      duration of the interval between GI and respiratory symptom onset.
+    warrant: >
+      The pattern of associations suggests that what predicts radiologic
+      severity is the sequence of symptom onset (GI preceding respiratory),
+      not how long the interval between symptom types lasts.
+    warrant_type: implicit
+    backing: "Chi-square analysis of Balthazar grade distribution across clinical subgroups (Figure 2B-E)"
+    qualifier: >
+      Balthazar scoring available for 95 of 111 patients (85.6%). The
+      threshold used is >= grade D, which collapses a graded scale into
+      a binary. The associated clinical features (WBC, ICU) are themselves
+      markers of severity, making these associations partially tautological.
+    rebuttal: >
+      If Balthazar severity is associated with GI-first presentation AND
+      GI-first patients are younger with different lab profiles, the
+      Balthazar association may be confounded by age or other baseline
+      characteristics rather than reflecting a direct relationship between
+      symptom sequence and pancreatic injury severity.
+    depends_on:
+      - "chen2025.chronology.1"
+      - "chen2025.chronology.3"
+    dependency_type: conditional
+    external_anchor: "PMID:41163933, Figure 2A-E, Section 3.5 Imaging Survey"
+    crux: false
+    status: "IN"
+    confidence: medium
+    external_anchor_type: contextual
+    claim_source: author_implicit
+    notes: >
+      This claim creates a tension with the survival findings (chronology.5
+      and chronology.6 below). Higher Balthazar scores are associated with
+      GI-first presentation and pre-admission onset, yet these timing
+      factors DON'T predict survival. This means either: (a) Balthazar
+      severity doesn't predict mortality in this cohort (contradicting
+      general clinical expectations), or (b) the survival analysis is
+      underpowered to detect a real difference, or (c) other factors
+      (treatment response, comorbidities) intervene between radiologic
+      severity and death. The paper doesn't address this tension directly.
+      This is a structural gap the schema makes visible — a hidden
+      counterfactual (schema limitation #5).
+
+  # --- Survival by symptom timing (the core negative findings) ---
+
+  - claim_id: "chen2025.chronology.5"
+    claim_text: >
+      Kaplan-Meier survival analysis with the log-rank test (Figure 3)
+      demonstrated no significant differences in survival between patients
+      with concurrent versus successive gastrointestinal and respiratory
+      symptom onset (p = 0.543).
+    atomic_proposition: >
+      The temporal sequence of GI vs respiratory symptom onset (concurrent,
+      GI-first, or respiratory-first) does not significantly predict
+      overall survival (log-rank p = 0.543).
+    warrant: >
+      A non-significant log-rank test indicates that the survival curves
+      for the different onset-sequence groups do not diverge beyond what
+      would be expected by chance.
+    warrant_type: explicit
+    backing: "Kaplan-Meier method with log-rank test (Section 2.3)"
+    qualifier: >
+      Three groups compared: respiratory-first (n=58), GI-first (n=34),
+      concurrent (n=3). The concurrent group is too small for meaningful
+      comparison. Only 11 total deaths across all groups, severely
+      limiting statistical power.
+    rebuttal: >
+      With only 11 events distributed across three groups, the analysis
+      is underpowered to detect clinically meaningful survival differences.
+      A true hazard ratio of 2.0 between groups would likely go undetected
+      at this sample size. The non-significant p-value is an absence of
+      evidence, not evidence of absence.
+    depends_on:
+      - "chen2025.method.2"
+      - "chen2025.chronology.1"
+      - "chen2025.mortality.1"
+    dependency_type: conditional
+    external_anchor: "PMID:41163933, Figure 3A, Section 3.7 Survival Outcomes"
+    crux: true
+    status: "IN"
+    confidence: low
+    external_anchor_type: contextual
+    claim_source: author_explicit
+    notes: >
+      First of the two core negative findings. Marked as crux because the
+      paper's central conclusion — that COVID-19-induced AP is distinct
+      from concurrent COVID-19+AP specifically because chronology doesn't
+      predict survival — rests on this result. But the crux is fragile:
+      11 events across 3 groups gives very low power. The authors interpret
+      p=0.543 as evidence that chronology doesn't matter, but this is the
+      classic absence-of-evidence problem. A larger cohort could find a
+      significant difference. The schema's binary IN/OUT doesn't capture
+      this nuance well — the claim is technically IN but epistemically
+      weak. Relevant to schema limitation #4 (weighted support).
+
+  - claim_id: "chen2025.chronology.6"
+    claim_text: >
+      Likewise, the timing of pancreatitis symptom onset, whether before
+      or after hospital admission, did not significantly affect survival
+      (p = 0.228).
+    atomic_proposition: >
+      Whether AP symptoms developed before or during hospitalization does
+      not significantly predict overall survival (log-rank p = 0.228).
+    warrant: >
+      A non-significant log-rank test on the before-admission (n=81)
+      versus during-hospitalization (n=21) groups indicates no detectable
+      survival difference by AP onset timing.
+    warrant_type: explicit
+    backing: "Kaplan-Meier method with log-rank test (Section 2.3)"
+    qualifier: >
+      Groups are imbalanced (81 vs 21). Only 11 total deaths. Table 1
+      shows mortality of 8.1% (before) vs 16.7% (during) — a twofold
+      difference that failed to reach significance, likely due to sample
+      size.
+    rebuttal: >
+      The raw mortality rates (8.1% vs 16.7%) actually suggest a clinically
+      meaningful difference that the study was underpowered to detect. With
+      81 vs 21 patients and only 11 deaths, the log-rank test has very
+      low power. This is NOT evidence that onset timing doesn't affect
+      survival — it is evidence that the study couldn't tell.
+    depends_on:
+      - "chen2025.method.2"
+      - "chen2025.chronology.1"
+      - "chen2025.mortality.1"
+    dependency_type: conditional
+    external_anchor: "PMID:41163933, Figure 3B, Section 3.7 Survival Outcomes"
+    crux: true
+    status: "IN"
+    confidence: low
+    external_anchor_type: contextual
+    claim_source: author_explicit
+    notes: >
+      Second core negative finding. The annotator notes a significant gap:
+      Table 1 shows the during-hospitalization group has DOUBLE the mortality
+      rate (16.7% vs 8.1%, p=0.251 by chi-square). The Kaplan-Meier
+      confirms non-significance (p=0.228) but the raw rates suggest a
+      potentially real effect masked by low power. The authors cite this
+      as evidence supporting the "no chronology effect" conclusion, but
+      a more cautious reading is "inconclusive." This is a case where the
+      warrant (non-significant p = no effect) is a well-known statistical
+      fallacy that the schema should flag. The crux designation reflects
+      that if a larger study DID find a significant chronology-survival
+      association, the paper's central distinction between "induced" and
+      "concurrent" AP would need substantial revision.
+
+  # --- Univariate Cox: symptom sequence and survival ---
+
+  - claim_id: "chen2025.chronology.7"
+    claim_text: >
+      Univariate Cox regression: Temporal sequence of symptom onset
+      (respiratory vs. gastrointestinal) — unadjusted HR 0.436
+      (95% CI 0.096-1.985), p = 0.283.
+    atomic_proposition: >
+      The temporal sequence of respiratory versus gastrointestinal symptom
+      onset is not a significant predictor of mortality in univariate Cox
+      regression (HR 0.436, p = 0.283).
+    warrant: >
+      A non-significant hazard ratio confirms the Kaplan-Meier finding
+      using a different analytical method, providing convergent evidence
+      that symptom sequence does not predict mortality.
+    warrant_type: explicit
+    backing: "Cox proportional hazards regression (Section 2.3)"
+    qualifier: >
+      Wide CI (0.096-1.985) spans both protective and harmful effects,
+      indicating the estimate is uninformative. Not entered into
+      multivariate model due to non-significance.
+    rebuttal: >
+      The CI includes HR values from 0.1 to 2.0, meaning the data are
+      consistent with symptom sequence being strongly protective, having
+      no effect, or being moderately harmful. The analysis is uninformative
+      rather than conclusive.
+    depends_on:
+      - "chen2025.method.3"
+      - "chen2025.chronology.5"
+    dependency_type: conditional
+    external_anchor: "PMID:41163933, Table 3"
+    crux: false
+    status: "IN"
+    confidence: low
+    external_anchor_type: contextual
+    claim_source: author_explicit
+    notes: >
+      This provides convergent evidence with chronology.5 (Kaplan-Meier)
+      but shares the same fundamental limitation: insufficient events for
+      stable estimation. The point estimate of 0.436 (suggesting possible
+      protective effect of respiratory-first presentation) is interesting
+      but unreliable. Marked "Not performed" for multivariate, correctly
+      — you don't enter non-significant univariate predictors.
+
+  # --- Synthesis: the "no chronology effect" conclusion ---
+
+  - claim_id: "chen2025.chronology.8"
+    claim_text: >
+      Unlike "concurrent COVID-19 and AP" (without excluding established
+      AP etiologies), "COVID-19-induced AP" showed no survival disparity
+      by symptom chronology. [...] In contrast to "concurrent COVID-19
+      and AP" without exclusion of established etiologies, the timing of
+      gastrointestinal or respiratory symptom onset — before or after
+      hospitalization — did not significantly influence survival in patients
+      with COVID-19-induced AP.
+    atomic_proposition: >
+      In true COVID-19-induced AP (defined by exclusion of alternative
+      etiologies), symptom chronology does not predict survival, unlike
+      in studies of "concurrent COVID-19 and AP" where comorbid etiologies
+      worsen outcomes.
+    warrant: >
+      The absence of survival differences by symptom timing in this
+      etiologically homogeneous cohort, contrasted with survival
+      differences in heterogeneous "concurrent" cohorts, supports the
+      conclusion that the two diagnostic categories represent distinct
+      clinical entities.
+    warrant_type: implicit
+    backing: >
+      Comparison with Dirweesh et al. [18], Inamdar et al. [20], and
+      Samanta et al. [27], who studied "concurrent COVID-19 and AP"
+      without etiological exclusion and found comorbidity-driven
+      severity differences.
+    qualifier: >
+      The comparison is across studies, not within a single controlled
+      analysis. The "concurrent" studies used different populations,
+      timeframes, and definitions. The absence of a head-to-head
+      comparison within one cohort limits the strength of the distinction.
+    rebuttal: >
+      The "no survival effect" conclusion rests on null findings in an
+      underpowered analysis (11 deaths across subgroups). The comparison
+      with concurrent-AP studies is indirect — the survival differences
+      in those studies may reflect different populations, healthcare
+      systems, or COVID-19 variants, not the etiological distinction
+      the authors emphasize. The argument requires the additional
+      assumption that etiological exclusion is the relevant difference
+      between the studies, rather than any of dozens of other
+      methodological differences.
+    depends_on:
+      - "chen2025.chronology.5"
+      - "chen2025.chronology.6"
+      - "chen2025.chronology.7"
+      - "chen2025.method.1"
+    dependency_type: conjunctive
+    external_anchor: "PMID:41163933, Section 5 Conclusion + Discussion"
+    crux: true
+    status: "IN"
+    confidence: medium
+    external_anchor_type: contextual
+    claim_source: author_implicit
+    notes: >
+      This is the paper's central thesis claim for the chronology argument.
+      It performs two argumentative moves simultaneously: (1) an internal
+      negative finding (our data show no chronology effect), and (2) an
+      external contrastive claim (other studies with looser definitions DO
+      show chronology effects, therefore the difference must be the
+      definition). Move (2) is where the warrant does the most work and
+      is the least supported — it's an implicit claim that etiological
+      rigor is the causal variable explaining the divergent findings
+      across studies. The schema captures this via the warrant and
+      rebuttal fields, but the cross-study comparison logic is a type
+      of reasoning the schema doesn't have a native field for. This is
+      a potential schema evolution point for Phase 1: do we need an
+      "external_comparison" or "cross-study_inference" field?
+
+  # --- The Balthazar-survival tension ---
+
+  - claim_id: "chen2025.chronology.9"
+    claim_text: >
+      Higher Balthazar scores were significantly associated with specific
+      clinical features, including gastrointestinal symptoms preceding
+      respiratory symptoms (p = 0.013), AP symptom onset before admission
+      (p = 0.042). [...] Kaplan-Meier survival analysis demonstrated no
+      significant differences in survival between patients with concurrent
+      versus successive gastrointestinal and respiratory symptom onset
+      (p = 0.543).
+    atomic_proposition: >
+      Symptom chronology is associated with radiologic severity (Balthazar
+      score) but not with survival, creating a disconnect between imaging
+      severity and mortality in this cohort.
+    warrant: >
+      If symptom timing predicts radiologic severity but not survival,
+      either radiologic severity does not translate to mortality in this
+      specific disease, or the survival analysis lacks power to detect
+      the downstream effect.
+    warrant_type: implicit
+    backing: "Juxtaposition of Figure 2 findings (significant Balthazar associations) with Figure 3 findings (non-significant survival differences)"
+    qualifier: >
+      This tension is not explicitly discussed by the authors. It is
+      a structural observation arising from the extraction process.
+    rebuttal: >
+      The disconnect could be explained by: (a) effective clinical
+      intervention mitigating the impact of severe imaging findings,
+      (b) Balthazar score predicting morbidity but not mortality in
+      COVID-19-induced AP specifically, or (c) insufficient power to
+      detect the survival effect of Balthazar-correlated chronology
+      patterns.
+    depends_on:
+      - "chen2025.chronology.4"
+      - "chen2025.chronology.5"
+      - "chen2025.chronology.6"
+    dependency_type: contrastive
+    external_anchor: "PMID:41163933, Figures 2 and 3 (annotator synthesis)"
+    crux: false
+    status: "UNDETERMINED"
+    confidence: low
+    external_anchor_type: contextual
+    claim_source: annotator_synthesized
+    notes: >
+      This is an annotator-synthesized claim — the paper does not explicitly
+      address this tension. It emerges from juxtaposing the Balthazar
+      association findings with the survival findings. The UNDETERMINED
+      status reflects that the paper provides no resolution. This is a
+      good test case for the schema: should annotator-synthesized
+      structural observations be included? The methodology docs (Claim
+      Decomposition.md) emphasize surfacing hidden assumptions and
+      structural gaps, which supports inclusion. But CLAUDE.md warns
+      against inferring dependencies not structurally present. Resolution:
+      include it, mark it clearly as annotator synthesis in notes, and
+      use UNDETERMINED status. This precedent should be logged in
+      DECISIONS.md if it becomes a pattern in Phase 1.
+
+  # --- External comparison claims ---
+
+  - claim_id: "chen2025.chronology.10"
+    claim_text: >
+      With respect to AP severity and outcomes, two retrospective studies
+      evaluated 189 [25] and 54 [26] patients presenting to the emergency
+      department with AP. In both cohorts, concurrent COVID-19 was
+      associated with increased AP severity and mortality. In patients
+      with comorbid COVID-19, Dirweesh et al. [18] reported higher
+      Charlson comorbidity indices, elevated BISAP scores, multiorgan
+      failure, and consequently increased mortality.
+    atomic_proposition: >
+      Studies of "concurrent COVID-19 and AP" (without etiological
+      exclusion) consistently find that COVID-19 comorbidity is associated
+      with increased AP severity and mortality.
+    warrant: >
+      Convergent findings across multiple studies of the "concurrent"
+      category establish a consistent pattern that contrasts with the
+      present study's null findings, supporting the claim that etiological
+      distinction matters.
+    warrant_type: explicit
+    backing: "Karaali & Topal [25], Miró et al. [26], Dirweesh et al. [18], Inamdar et al. [20]"
+    qualifier: >
+      The cited studies use different definitions, populations, and
+      timeframes. "Concurrent" is defined variously and may include
+      patients with biliary, alcoholic, or other established AP
+      etiologies complicated by COVID-19.
+    rebuttal: >
+      The cited studies' finding of worse outcomes in concurrent
+      COVID-19+AP could be driven entirely by the comorbidities that
+      the present study excludes (biliary disease, alcohol use), not
+      by any difference in the "induced" vs "concurrent" distinction
+      per se. The comparison conflates etiological category with
+      population heterogeneity.
+    depends_on:
+      - "chen2025.chronology.8"
+    dependency_type: purposive
+    external_anchor: "Karaali & Topal [25]; Miró et al. [26]; Dirweesh et al. [18]; Inamdar et al. [20]"
+    crux: false
+    status: "IN"
+    confidence: high
+    external_anchor_type: foundational
+    claim_source: author_explicit
+    notes: >
+      This claim provides the external evidence base for chronology.8's
+      contrastive argument. The dependency_type is purposive because
+      these external findings are marshaled as evidence FOR the
+      induced/concurrent distinction — they serve the argumentative
+      goal. The rebuttal captures the key weakness: the comparison is
+      confounded by population composition, not just diagnostic category.
+
+  # --- Limitations specific to chronology analysis ---
+
+  - claim_id: "chen2025.chronology.11"
+    claim_text: >
+      Reliance on patient-reported symptom onset and other clinical
+      details may increase recall bias. [...] Differences in healthcare
+      accessibility and national quarantine policies inevitably introduced
+      bias when using documented diagnosis time to estimate "true disease
+      onset." Therefore, reported symptom onset serves as a valuable proxy
+      for assessing the temporal course of illness.
+    atomic_proposition: >
+      Symptom onset timing relies on patient report and varies with
+      healthcare access and quarantine policies, making it a proxy for
+      true disease onset rather than an exact measure.
+    warrant: >
+      If the temporal sequencing data are imprecise, the Kaplan-Meier
+      analysis by onset timing inherits that imprecision, potentially
+      washing out real effects through measurement error.
+    warrant_type: explicit
+    backing: "Standard epidemiological assessment of information bias"
+    qualifier: >
+      The authors acknowledge this but argue symptom onset is still a
+      "valuable proxy." The degree of measurement error is unknown.
+    rebuttal: >
+      Non-differential measurement error in the exposure (onset timing)
+      biases toward the null — meaning the "no survival difference"
+      finding could be an artifact of imprecise timing data. This
+      strengthens the concern raised in chronology.5 and chronology.6
+      that the null findings may be false negatives.
+    depends_on:
+      - "chen2025.chronology.5"
+      - "chen2025.chronology.6"
+    dependency_type: contrastive
+    external_anchor: "PMID:41163933, Discussion - Limitations"
+    crux: false
+    status: "IN"
+    confidence: high
+    external_anchor_type: contextual
+    claim_source: author_explicit
+    notes: >
+      This limitation is particularly corrosive to the chronology argument
+      because the key finding IS the null result. Measurement error in
+      the exposure variable (onset timing) biases toward the null in
+      survival analysis. The authors acknowledge recall bias but don't
+      connect this directly to the implication for their central
+      conclusion — another structural gap the Toulmin decomposition
+      makes visible. In a well-powered study, this bias direction
+      wouldn't matter much. In a study with 11 events and already-
+      borderline comparisons, it substantially undermines the
+      "no effect" interpretation.
+
+# --- Dependency Graph Summary ---
+# Visual representation of the claim dependency structure:
+#
+# FROM MORTALITY EXTRACTION (cross-referenced, not duplicated):
+#   chen2025.method.1 (CRUX: induced vs coincident definition)
+#   chen2025.method.2 (patient population: 111 from 87 studies)
+#   chen2025.method.3 (Cox regression methodology)
+#   chen2025.mortality.1 (11 deaths, 9.9% mortality)
+#
+# THIS EXTRACTION:
+#   method.1 + method.2
+#     └── chronology.1 (symptom prevalence: 91.9% GI, 79.3% respiratory)
+#           ├── chronology.2 (temporal intervals: 5d GI-first, 9d resp-first)
+#           ├── chronology.3 (clinical profiles by onset timing, Table 1)
+#           │     └── chronology.4 (Balthazar associations with chronology)
+#           ├── chronology.5 (CRUX: K-M no survival diff by sequence, p=0.543)
+#           ├── chronology.6 (CRUX: K-M no survival diff by onset timing, p=0.228)
+#           └── chronology.7 (Cox univariate: sequence HR 0.436, p=0.283)
+#
+#   chronology.5 + chronology.6 + chronology.7 + method.1
+#     ──CONJUNCTIVE──> chronology.8 (CRUX: synthesis — no chronology effect
+#                                     distinguishes induced from concurrent AP)
+#
+#   chronology.4 vs chronology.5 + chronology.6
+#     ──CONTRASTIVE──> chronology.9 (UNDETERMINED: Balthazar-survival tension)
+#
+#   chronology.8
+#     └── chronology.10 (external evidence: concurrent AP studies show worse outcomes)
+#
+#   chronology.5 + chronology.6
+#     └── chronology.11 (limitation: recall bias biases toward null — CONTRASTIVE)
+#
+# Crux analysis: chronology.5 and chronology.6 are the load-bearing negative
+# findings. If either were overturned by a larger study showing significant
+# survival differences by chronology, the synthesis claim (chronology.8)
+# collapses. But both are epistemically weak (11 events, low power, measurement
+# error biasing toward null). The upstream crux from the mortality extraction
+# (method.1: induced/coincident definition) also applies — if the etiological
+# distinction is invalid, the entire "COVID-19-induced AP behaves differently"
+# argument has no foundation.
+#
+# Schema stress-test observations from this extraction:
+# 1. Cross-extraction dependencies work — referencing method.1/method.2 from
+#    the mortality extraction is clean and avoids duplication.
+# 2. Annotator-synthesized claims (chronology.9) need a convention. Proposed:
+#    include with UNDETERMINED status, clearly marked in notes.
+# 3. The "absence of evidence vs evidence of absence" problem is a recurring
+#    pattern with negative findings. The binary IN/OUT/UNDETERMINED status
+#    doesn't capture "IN but epistemically weak." Schema limitation #4
+#    (weighted support) is confirmed as a real issue for Phase 1.
+# 4. Cross-study comparison reasoning (chronology.8, chronology.10) is a
+#    distinct argument type not well captured by the five dependency types.
+#    Consider adding "comparative" as a sixth type, or document this as a
+#    recurring use of "purposive" in notes.
