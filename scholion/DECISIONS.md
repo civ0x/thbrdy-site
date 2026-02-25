@@ -59,6 +59,45 @@ Decisions are logged as they're made. Each entry records the decision, the reaso
 
 ---
 
+## DEC-006: Adopt site-wide interaction patterns for essay visualizations
+
+**Date:** 2026-02-25
+**Phase:** 0 (documenting conventions ahead of essay development)
+**Decision:** The Scholion essay ("The Circuitry of Science") inherits the interaction pattern conventions documented in `docs/interaction-patterns.md` at the project root. This covers: control-type selection (toggle, slider, scroll-driven, click-to-reveal), popover and detail panel visual treatment, SVG interaction (fat hit targets, edge highlighting), semantic color encoding, trigger indicators, animation specs, CSS specificity rules, mobile/accessibility requirements, and the prototype-first development workflow.
+**Reasoning:** These conventions were extracted from three VoD visualization redesigns and the annotation system (root Decisions 018, 019). They represent tested, stable patterns. Adopting them wholesale avoids reinventing visual treatment and interaction mechanics for Scholion's diagrams (which will include Toulmin argument visualizations and dependency graph views). The "form embodies argument" principle is directly aligned with Scholion's goal of making inferential structure experiential.
+**Alternatives considered:** Writing Scholion-specific interaction conventions from scratch (unnecessary — the patterns generalize), cherry-picking a subset (risks inconsistency with the rest of the site).
+**Revisit if:** Scholion's argument graph visualizations require interaction patterns not covered by the current vocabulary (e.g., graph traversal with expand/collapse, multi-selection for dependency comparison). In that case, extend the root document rather than forking.
+
+---
+
+## DEC-007: Inline annotation content architecture for Scholion essay
+
+**Date:** 2026-02-25
+**Phase:** 0 (documenting conventions ahead of essay development)
+**Decision:** The Scholion essay will use the inline annotation system (root Decision 018) for term definitions, reference summaries, and enriched links. Annotation content lives in a companion YAML file (`src/content/writing/circuitry-of-science.annotations.yaml`) alongside the MDX, with `terms`, `references`, and `links` sections. A remark plugin resolves explicit markers in MDX against the YAML data. The shared `Annotation.tsx` component (`src/components/islands/shared/`) handles rendering.
+**Reasoning:** The Scholion essay is dense with domain-specific vocabulary (Toulmin categories, Doyle's TMS, Lakatos's research programmes, dependency typing) and academic references. Inline annotations surface context at the point of need without breaking reading flow. The companion-file architecture keeps MDX prose clean — the annotation layer is a separable concern that can be batch-generated and independently reviewed. Explicit markers (rather than pattern-matching) give the author control over which occurrences get annotated.
+**Key conventions inherited from root Decision 018:**
+- Visual: `1.5px dashed var(--accent)` for term triggers, `var(--teal)` for link triggers
+- Popover content: three templates (term/definition, reference/citation, link preview) per `interaction-patterns.md`
+- Mobile: bottom sheets with semi-transparent backdrop, two-tap for links
+- Accessibility: `role="tooltip"`, `aria-describedby`, keyboard nav, `tabindex="0"`
+- Workflow: author adds reference metadata to YAML → agent generates summary and context fields → author reviews/edits → ships as static data. No runtime LLM calls.
+**Alternatives considered:** Footnotes (break reading flow), margin annotations (don't work on mobile, require wide viewports), inline parentheticals (clutter the prose).
+**Revisit if:** The annotation YAML becomes unwieldy for Scholion's density of terms — may need to split into multiple YAML files or adopt a different resolution strategy.
+
+---
+
+## DEC-008: Toulmin diagram — vertical flow with inline modifiers
+
+**Date:** 2026-02-25
+**Phase:** 0 (inherited from root Decision 011, documenting for Scholion essay context)
+**Decision:** Toulmin argument diagrams use a vertical flow layout: dominant Claim card at top with qualifier/rebuttal as inline modifiers, visible connection lines with labels ("supports", "on account of"), Data+Warrant side by side below, Backing aligned under Warrant via a 2-column grid wrapper with empty spacer. Connection lines use CSS divs (static structural connections), not SVG.
+**Reasoning:** The original grid layout (6 equal-weight cards, no connections) made relationships illegible. The Claim must be the center of gravity since everything else relates to it. Qualifier and Rebuttal are modifiers of the Claim, not independent entities — embedding them inside the Claim card reflects their logical role. Visible connector lines with labels make the inferential structure graspable without prior Toulmin knowledge. CSS div connectors are appropriate because these connections are structural, not interactive (per `interaction-patterns.md` SVG vs CSS decision criteria).
+**Constraint:** Layout collapses to single column at ≤640px. If the Scholion essay needs interactive Toulmin diagrams (hoverable nodes, animated dependency highlighting), upgrade connections to SVG with fat hit targets per `interaction-patterns.md`.
+**Revisit if:** The essay requires Toulmin diagrams where the reader manipulates the argument structure (e.g., toggling claim status IN/OUT and watching downstream propagation). That interaction model would need SVG edges and likely the scrub-controlled mechanism pattern.
+
+---
+
 <!-- Template for new decisions:
 
 ## DEC-NNN: [Short title]

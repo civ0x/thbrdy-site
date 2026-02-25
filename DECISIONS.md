@@ -108,6 +108,20 @@
 **Component:** `Annotation.tsx` in `src/components/islands/shared/` — cross-essay infrastructure, not essay-specific.
 **Constraint:** No external tooltip/popover libraries. No runtime API calls for content. Respects `prefers-reduced-motion`. Prototype: `prototype-annotations.html` in project root.
 
+## 019: Island interaction design conventions
+**Date:** 2026-02-25
+**Decision:** Extract reusable interaction patterns from the VoD visualization redesigns and annotation system into a standalone reference at `docs/interaction-patterns.md`. All island components should follow these conventions.
+**Rationale:** Three redesigns (SequentialFunnel, MaturitySwitch, LegibilityGap) and the annotation system produced a coherent set of patterns that kept being reinvented per-component: fat SVG hit targets, mode-sensitive explanations, popover visual treatment, detail panel styling, transformation animation, control-type selection, and a prototype-first workflow. Codifying them in one referenceable document prevents drift across components and gives future sessions a starting point instead of rediscovering these patterns.
+**Key conventions:**
+- **Form embodies argument:** The interaction model makes the reader experience the claim, not just observe a diagram. No default template — start from the argument, work backward to the interaction.
+- **Match control to argument structure:** Binary toggle for discrete-state arguments, continuous slider for spectrum arguments with meaningful middle zones, scroll-driven for temporal unfolding.
+- **Fat SVG hit targets:** 18px invisible companion lines behind 1.5px visible edges. Standard for any hoverable SVG.
+- **Mode-sensitive explanations:** Click-for-detail text changes based on current component state (toggle position, slider zone).
+- **Popover/detail panel consistency:** Shared visual treatment (bg-warm, border-mid, shadow, DM Sans typography) across annotations and diagram interactions. One popover at a time. Mobile → bottom sheets.
+- **Prototype-first workflow:** Standalone HTML in `prototypes/` → validate interaction → port to React TSX.
+**Reference:** `docs/interaction-patterns.md` for full specifications.
+**Constraint:** The reference document is authoritative for visual treatment and interaction mechanics. Individual components may extend but should not contradict these patterns without a new decision entry explaining why.
+
 ## 014: @resvg/resvg-js for OG image generation
 **Date:** 2026-02-22
 **Decision:** Use `@resvg/resvg-js` as a devDependency for generating the default Open Graph image (1200×630 PNG) from an SVG template. One-shot script in `scripts/generate-og-image.js`, not a build step.
