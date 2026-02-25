@@ -1,6 +1,6 @@
 # thbrdy.dev — Migration Status
 
-Last updated: 2026-02-24
+Last updated: 2026-02-25
 
 ## Migration Roadmap
 
@@ -180,13 +180,15 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] Inline annotation system (VoD essay; infrastructure reusable for other essays)
 - [x] Per-essay OG images — Tier 1 (session prompt: `session-og-tier1.md`)
 - [x] Pull quote share cards — Tier 2 (session prompt: `session-og-tier2.md`, depends on Tier 1)
+- [x] Fix Twitter card rendering on quote share pages (JS redirect instead of meta refresh)
+- [x] Add `twitter:site` meta tag (@thbrdy)
 - [ ] RSS feed
 - [ ] Lighthouse audit + performance pass
 - [ ] Potential about page condensation (full CV may be too long — judge after seeing it rendered)
 
 ## Current State
 
-Phase 4 complete, Phase 5 in progress. Per-essay OG images + per-quote card images generated at build time via `prebuild` hook (`scripts/generate-og-images.js` → `public/images/og/[slug].png` + `[slug]-quote-[n].png`). PullQuote share bar: X/Twitter intent + copy-link with checkmark feedback. Quote share target pages at `/writing/[slug]/quote/[n]/` with quote-specific OG meta tags and instant redirect to parent essay. 7 quote cards across 5 essays. Fonts: Cormorant Garamond SemiBold + Italic, JetBrains Mono Regular in `scripts/fonts/`. Seven published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands + 38 inline annotations. Circuitry of Science essay: 6 islands (CompetitiveGap, SchemaEvolution, DecompositionPipeline, Roadmap, SafetyCaseFragment, ChenDependencyGraph) + inline annotations; two diagram components use shared DiagramPopover infrastructure for node-level popovers. Annotation system infrastructure (`Annotation.tsx`, `remark-annotations.mjs`, companion YAML pattern) is reusable for other essays. `/now` page populated with first dated entry. Build produces 11 pages in ~1.2s.
+Phase 4 complete, Phase 5 in progress. Per-essay OG images + per-quote card images generated at build time via `prebuild` hook (`scripts/generate-og-images.js` → `public/images/og/[slug].png` + `[slug]-quote-[n].png`). PullQuote share bar: X/Twitter intent + copy-link with checkmark feedback. Quote share target pages at `/writing/[slug]/quote/[n]/` with quote-specific OG meta tags and JS redirect to parent essay (crawlers don't execute JS, so they read the quote-specific OG tags). `twitter:site` meta tag set to @thbrdy. 7 quote cards across 5 essays. Fonts: Cormorant Garamond SemiBold + Italic, JetBrains Mono Regular in `scripts/fonts/`. Seven published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands + 38 inline annotations. Circuitry of Science essay: 6 islands (CompetitiveGap, SchemaEvolution, DecompositionPipeline, Roadmap, SafetyCaseFragment, ChenDependencyGraph) + inline annotations; two diagram components use shared DiagramPopover infrastructure for node-level popovers. Annotation system infrastructure (`Annotation.tsx`, `remark-annotations.mjs`, companion YAML pattern) is reusable for other essays. `/now` page populated with first dated entry. Build produces 11 pages in ~1.2s.
 
 ### Phase 3 Notes
 - Essays use MDX format (`@astrojs/mdx`) to support future React island embeds
