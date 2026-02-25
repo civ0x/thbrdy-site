@@ -4,6 +4,8 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "generate:og": "node scripts/generate-og-images.js",
+    "prebuild": "node scripts/generate-og-images.js",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"

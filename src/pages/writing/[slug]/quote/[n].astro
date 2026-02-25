@@ -1,0 +1,48 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('writing');
+  const paths = [];
+
+  for (const post of posts) {
+    if (post.data.draft) continue;
+    const quoteRegex = /<PullQuote[^>]*>([\s\S]*?)<\/PullQuote>/g;
+    let match;
+    let index = 1;
+    while ((match = quoteRegex.exec(post.body ?? '')) !== null) {
+      const text = match[1].replace(/<[^>]*>/g, '').trim();
+      if (text) {
+        paths.push({
+          params: { slug: post.id, n: String(index) },
+          props: { post, quoteText: text, quoteIndex: index },
+        });
+        index++;
+      }
+    }
+  }
+  return paths;
+}
+
+const { post, quoteText, quoteIndex } = Astro.props;
+const essayUrl = new URL(`/writing/${post.id}/`, Astro.site ?? 'https://thbrdy.dev');
+const truncatedQuote = quoteText.length > 80 ? quoteText.slice(0, 80) + '…' : quoteText;
+---
+
+<Base
+  title={`"${truncatedQuote}" — ${post.data.title}`}
+  description={post.data.description}
+  type="article"
+  image={`/images/og/${post.id}-quote-${quoteIndex}.png`}
+>
+  <meta http-equiv="refresh" content={`0;url=${essayUrl.href}`} slot="head" />
+  <article style="max-width: 720px; margin: 8rem auto; padding: 0 2rem; text-align: center;">
+    <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-style: italic; color: var(--text); line-height: 1.6;">
+      &ldquo;{quoteText}&rdquo;
+    </p>
+    <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); margin-top: 2rem;">
+      From <a href={essayUrl.href} style="color: var(--accent);">{post.data.title}</a>
+    </p>
+  </article>
+</Base>

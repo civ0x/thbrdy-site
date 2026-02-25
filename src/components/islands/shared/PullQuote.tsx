@@ -1,13 +1,96 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { tokens } from "./tokens";
 import { useInView } from "./useInView";
 
 interface PullQuoteProps {
   children: ReactNode;
+  slug?: string;
+  quoteIndex?: number;
 }
 
-export function PullQuote({ children }: PullQuoteProps) {
+function XIcon({ hovered }: { hovered: boolean }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={hovered ? tokens.accent : tokens.textMuted}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ transition: "stroke 0.2s ease" }}
+    >
+      <path d="M4 4l6.5 8L4 20h2.5l5-6.2L16.5 20H20l-6.5-8L20 4h-2.5l-5 6.2L7.5 4H4z" />
+    </svg>
+  );
+}
+
+function LinkIcon({ hovered }: { hovered: boolean }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={hovered ? tokens.accent : tokens.textMuted}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ transition: "stroke 0.2s ease" }}
+    >
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={tokens.accent}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+export function PullQuote({ children, slug, quoteIndex }: PullQuoteProps) {
   const [ref, inView] = useInView(0.3);
+  const [xHovered, setXHovered] = useState(false);
+  const [linkHovered, setLinkHovered] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const hasShareData = slug && quoteIndex;
+  const shareUrl = hasShareData
+    ? `https://thbrdy.dev/writing/${slug}/quote/${quoteIndex}/`
+    : '';
+
+  function handleTweet() {
+    if (!hasShareData) return;
+    const el = ref.current;
+    const quoteText = el?.querySelector('.pq-text')?.textContent?.trim() ?? '';
+    const tweetUrl = `https://twitter.com/intent/tweet?${new URLSearchParams({
+      text: `"${quoteText}"`,
+      url: shareUrl,
+    }).toString()}`;
+    window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  function handleCopy() {
+    if (!shareUrl) return;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  }
 
   return (
     <div
@@ -31,6 +114,7 @@ export function PullQuote({ children }: PullQuoteProps) {
         }}
       />
       <p
+        className="pq-text"
         style={{
           fontFamily: tokens.serif,
           fontSize: "26px",
@@ -45,6 +129,55 @@ export function PullQuote({ children }: PullQuoteProps) {
       >
         {children}
       </p>
+      {hasShareData && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            marginTop: "16px",
+          }}
+        >
+          <button
+            onClick={handleTweet}
+            onMouseEnter={() => setXHovered(true)}
+            onMouseLeave={() => setXHovered(false)}
+            title="Share on X"
+            aria-label="Share on X"
+            style={{
+              background: "none",
+              border: "none",
+              padding: "4px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              lineHeight: 0,
+            }}
+          >
+            <XIcon hovered={xHovered} />
+          </button>
+          <span style={{ color: tokens.border, fontSize: "12px", lineHeight: 1 }}>&middot;</span>
+          <button
+            onClick={handleCopy}
+            onMouseEnter={() => setLinkHovered(true)}
+            onMouseLeave={() => setLinkHovered(false)}
+            title={copied ? "Copied!" : "Copy link"}
+            aria-label={copied ? "Link copied" : "Copy share link"}
+            style={{
+              background: "none",
+              border: "none",
+              padding: "4px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              lineHeight: 0,
+            }}
+          >
+            {copied ? <CheckIcon /> : <LinkIcon hovered={linkHovered} />}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

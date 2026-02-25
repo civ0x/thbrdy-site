@@ -25,6 +25,7 @@ const minutesRead = Math.max(1, Math.round(words / 250));
   tags={post.data.tags}
   connected_project={post.data.connected_project}
   minutesRead={minutesRead}
+  ogImage={`/images/og/${post.id}.png`}
 >
   <Content />
 </PostLayout>
