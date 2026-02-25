@@ -36,7 +36,6 @@ const truncatedQuote = quoteText.length > 80 ? quoteText.slice(0, 80) + '…' : 
   type="article"
   image={`/images/og/${post.id}-quote-${quoteIndex}.png`}
 >
-  <meta http-equiv="refresh" content={`0;url=${essayUrl.href}`} slot="head" />
   <article style="max-width: 720px; margin: 8rem auto; padding: 0 2rem; text-align: center;">
     <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-style: italic; color: var(--text); line-height: 1.6;">
       &ldquo;{quoteText}&rdquo;
@@ -45,4 +44,7 @@ const truncatedQuote = quoteText.length > 80 ? quoteText.slice(0, 80) + '…' : 
       From <a href={essayUrl.href} style="color: var(--accent);">{post.data.title}</a>
     </p>
   </article>
+  <script define:vars={{ redirectUrl: essayUrl.href }}>
+    window.location.replace(redirectUrl);
+  </script>
 </Base>
