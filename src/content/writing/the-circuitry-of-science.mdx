@@ -12,6 +12,7 @@ import ScholionSafetyCaseFragment from '../../components/islands/ScholionSafetyC
 import ScholionSchemaEvolution from '../../components/islands/ScholionSchemaEvolution.tsx'
 import ScholionCompetitiveGap from '../../components/islands/ScholionCompetitiveGap.tsx'
 import ScholionRoadmap from '../../components/islands/ScholionRoadmap.tsx'
+import { PullQuote } from '../../components/islands/shared/PullQuote.tsx'
 
 # The Circuitry of Science
 
@@ -45,6 +46,8 @@ The separation matters because it implies that the annotator does not need to ca
 
 This is not merely a workflow optimization. The absence of domain priors may be a structural advantage for the decomposition task. An expert annotating the Chen extraction fills in warrants from their own clinical knowledge — confounding by indication, the De Ritis ratio interpretation — producing richer annotations but also importing reasoning the paper does not contain. A non-expert, forced to work from the text, annotates what the argument *actually says* rather than what a knowledgeable reader *infers*. When the non-expert marks a warrant field as "unstated — the paper does not explain why surgery would predict mortality," they have identified the structural vulnerability just as precisely as the expert who fills in the mechanism, and without contaminating the extraction with external knowledge. The gap itself is the finding.
 
+<PullQuote client:visible slug="the-circuitry-of-science" quoteIndex={1}>The absence of domain priors may be a structural advantage for the decomposition task.</PullQuote>
+
 ## III. The Medical Demonstration
 
 The methodology was tested on Chen et al.'s 2025 systematic review of COVID-19-induced acute pancreatitis. The paper was chosen deliberately: a medical systematic review uses argument structures — statistical evidence, inclusion criteria, regression models, negative findings — that are remote from the AI safety domain where Scholion originated. If the schema works on clinical medicine, it is more credibly general than if tested only on the arguments it was designed for.
@@ -66,6 +69,8 @@ The Balthazar-survival tension is the most analytically interesting. Symptom chr
 The cross-study comparison problem is the most methodologically consequential. The paper's thesis depends on contrasting its own null findings with positive findings from other studies using looser etiological definitions. But those studies used different populations, timeframes, and healthcare systems. The argument requires the assumption that the etiological definition is the relevant variable, rather than any of dozens of other methodological differences between the studies. This inferential pattern — one of six documented schema failure modes — does not map cleanly to the schema's five dependency types.
 
 <ScholionChenDependencyGraph client:visible />
+
+<PullQuote client:visible slug="the-circuitry-of-science" quoteIndex={2}>A dependency graph is immune to rhetorical fluency in a way that prose evaluation is not.</PullQuote>
 
 ## IV. The Safety Case Application
 
@@ -93,9 +98,13 @@ Scholion extends this principle beyond the debate format. A dependency graph is 
 
 Combined with the two-layer annotation model described in Section II — structural decomposition by method-equipped non-specialists, substantive evaluation by domain experts, bridged by inline contextual scaffolding — this yields a specific version of [[term:scalable-oversight|scalable oversight]]. The structural layer is where the tractable, automatable, capability-independent verification happens. The substantive layer is where domain expertise remains necessary but is scoped to a specific, bounded task: reviewing warrants and cruxes that the structural layer has already identified as load-bearing. The overseer does not need to reconstruct the entire argument. They need to audit the joints.
 
+<PullQuote client:visible slug="the-circuitry-of-science" quoteIndex={3}>The overseer does not need to reconstruct the entire argument. They need to audit the joints.</PullQuote>
+
 This is the project's meta-crux: does structural verification of arguments preserve the asymmetric oversight property that Khan demonstrates in debate? The Chen extraction provides initial evidence. The confounding by indication, the absence-of-evidence fallacy, the Balthazar-survival tension — these structural vulnerabilities were visible in the dependency graph and obscured in the prose. They were identified by an annotator following method, not by a clinical epidemiologist applying domain knowledge. If this pattern holds for safety cases, then a structurally competent verifier can oversee a substantively stronger researcher — not by matching their domain expertise, but by auditing the logical scaffolding their arguments rest on.
 
 <ScholionSafetyCaseFragment client:visible />
+
+<PullQuote client:visible slug="the-circuitry-of-science" quoteIndex={4}>A structurally competent verifier can oversee a substantively stronger researcher — not by matching their domain expertise, but by auditing the logical scaffolding their arguments rest on.</PullQuote>
 
 ## V. What the Extraction Revealed About the Schema
 
