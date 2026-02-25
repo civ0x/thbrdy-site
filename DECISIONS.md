@@ -150,6 +150,17 @@
 **Rationale:** Twitterbot follows meta refresh redirects — it hit the quote page, followed the redirect to the parent essay, and read the parent's OG tags instead of the quote-specific ones. JS redirects solve this because crawlers don't execute JavaScript: Twitterbot reads the quote page's OG tags and stops, while real browsers execute JS and redirect as before. `window.location.replace()` (not `.href`) avoids creating a history entry, matching the original meta refresh UX. `define:vars` injects the Astro server-side URL into the client script cleanly. The `twitter:site` tag associates all cards with @thbrdy.
 **Alternatives considered:** Cloudflare Workers redirect (adds runtime infrastructure for a static site), canonical URL hints (Twitter doesn't reliably respect canonical for OG resolution), removing the redirect entirely (breaks the quote page UX — users would land on a sparse page instead of the essay).
 
+## 022: Repo file organization — sessions, working, prototypes
+**Date:** 2026-02-25
+**Decision:** Consolidate all non-source working files into three top-level directories: `sessions/` (session prompts organized by essay), `working/` (sub-project docs, research, PDFs), `prototypes/` (HTML prototypes organized by project). Delete duplicate content files where `src/content/writing/` is canonical.
+**Rationale:** 50+ session prompts accumulated at root, the `scholion/` sub-project had its own parallel structure with duplicate MDX/YAML files, prototypes were scattered across `prototypes/`, `working/vod-essay/`, and `scholion/prototypes/`, and orphaned directories (`coregulation-essay/`) contained only stale duplicates. The reorganization makes the repo navigable without changing anything under `src/`, `public/`, or the build pipeline.
+**Structure:**
+- `sessions/{ab,notice,lc,scholion,vod,coregulation,site-infra,pages}/` — session prompts grouped by essay or concern
+- `working/scholion/` — sub-project docs (CLAUDE.md, STATUS.md, DECISIONS.md), research PDFs, schema, extractions
+- `prototypes/{scholion,vod}/` — HTML prototypes grouped by project
+- `docs/` — design reference docs (interaction-patterns.md, design-annotation-system.md)
+**Constraint:** `src/content/writing/` is the sole canonical location for essay content. No duplicate MDX or annotation YAML files elsewhere.
+
 ## 016: Diagram popover approach — self-contained with shared component
 **Date:** 2026-02-24
 **Decision:** Create a shared `DiagramPopover.tsx` + `useDiagramPopover` hook in `islands/shared/` for diagram node popovers (SafetyCaseFragment, ChenDependencyGraph). Keep separate from `Annotation.tsx`.
