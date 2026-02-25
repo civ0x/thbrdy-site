@@ -98,6 +98,54 @@ Decisions are logged as they're made. Each entry records the decision, the reaso
 
 ---
 
+## DEC-009: Annotation marker syntax and content inventory for Scholion essay
+
+**Date:** 2026-02-25
+**Phase:** 0 (documenting conventions ahead of essay development)
+**Decision:** Use `<A t="key">`, `<A r="key">`, `<A l="key">` JSX tags in MDX for term, reference, and link annotations respectively. Companion YAML file (`circuitry-of-science.annotations.yaml`) contains 32 entries: 20 terms across 3 badge categories (CLINICAL/teal, ARGUMENT/accent, SAFETY/blue), 9 references, 3 links. Annotations cluster in Sections I (medical vocabulary) and IV (safety vocabulary) — the domain-crossing sections.
+**Reasoning:** `<A>` is maximally concise, mnemonic for "annotation," and case-sensitive distinct from `<a>` in JSX. Three badge categories (rather than 4) because statistical methods (Cox, Kaplan-Meier, hazard ratio) are clinical tools in this essay's context — splitting them out would fragment the visual grouping without adding signal. 32 annotations across ~4,170 words (~1 per 130 words) is within acceptable density; Section IV runs denser (~1 per 80 words) because that is where both domain vocabularies collide.
+**Key scope decisions:**
+- Doyle's TMS: omitted (not named in essay body; IN/OUT status is explained inline)
+- Lakatos: omitted (not named in essay body)
+- ASL levels: omitted (v4 RSP paragraph self-contextualizes the shift to argument-based standards; RSP reference popover provides institutional detail)
+- Confidence interval: omitted (widely understood across target audiences)
+- RSP direct quotes: not separately annotated (doing their work inline; `anthropic-rsp` reference popover provides institutional context)
+**Alternatives considered:** `<An>` or `<Ann>` tag (less ambiguous but verbose), remark-directive syntax `::term[text]{#key}` (cleaner in prose but requires custom plugin that doesn't exist yet), 4 badge categories with separate STATISTICAL (fragments visual grouping without added clarity).
+**Revisit if:** (1) Authoring confusion between `<A>` and `<a>` arises in practice — switch to `<An>`. (2) Section IV density feels visually overwhelming once rendered — thin `uk-aisi` and `lee2026` references first. (3) A second essay's annotations need a different badge taxonomy — generalize at that point.
+
+---
+
+## DEC-010: Diagram visual language — shared node vocabulary across all six components
+
+**Date:** 2026-02-25
+**Phase:** 0 (documenting conventions from prototyping)
+**Decision:** All six essay diagrams share a unified visual vocabulary prototyped across two sessions. The key conventions:
+
+- **Node types**: Crux nodes get accent (gold) left border + gradient background. Synthesis nodes get warm background. Limitation nodes get red left border. Standard claim nodes get white background with light border.
+- **Typed edges**: Dependency type labels (causal, conditional, contrastive, etc.) appear as small mono-font chips on connector lines. Color-coded by type (teal for causal, accent for conditional, blue for purposive, red for contrastive).
+- **Connectors**: CSS divs (not SVG) for structural connections. Vertical lines (`vert` class), horizontal branch bars for forking, with accent variant for crux paths.
+- **Popovers**: Desktop hover (120ms delay) with positioned popover cards. Mobile bottom sheet with semi-transparent backdrop. Content structure: plain-language explanation + "Structural significance" section.
+- **Scroll reveal**: IntersectionObserver with staggered entry delays (150ms between elements). `prefers-reduced-motion` compliance throughout.
+- **Typography split**: JetBrains Mono for structural labels (claim IDs, phase numbers, status chips). DM Sans for descriptions and popover content. Cormorant Garamond only for surrounding essay prose.
+- **Tone**: Safety case content uses collaborative framing — Scholion helps scale existing good work, not critique of existing approaches.
+
+**Reasoning:** Establishing the visual language on CompetitiveGapTable (simplest) and ChenDependencyGraph (most complex) first, then propagating to the remaining four, ensured consistency without premature commitment. The node vocabulary evolved through iterative feedback across both sessions — branch bars, legend sizing, chip placement, and column alignment were all refined through user review.
+**Alternatives considered:** GSN (Goal Structuring Notation) for SafetyCaseFragment (rejected — the dependency graph vocabulary is more natural for Scholion's typed-edge model), D3/charting libraries for ChenDependencyGraph (rejected per DEC-006 — CSS-only constraint), SVG connectors (rejected — connections are structural, not interactive).
+**Revisit if:** Porting to React islands reveals that the CSS-only connector approach doesn't scale to dynamic graph states (e.g., toggling claim status IN/OUT with downstream propagation). At that point, upgrade to SVG edges per the contingency noted in DEC-008.
+
+---
+
+## DEC-011: Annotation marker syntax — adopt site-wide `[[mode:key|text]]` over JSX `<A>` tags
+
+**Date:** 2026-02-24
+**Phase:** 0
+**Decision:** Convert all `<A t="key">text</A>`, `<A r="key">text</A>`, `<A l="key">text</A>` JSX markers in the Circuitry of Science MDX to the site-wide `[[term:key|text]]`, `[[ref:key|text]]`, `[[link:key|text]]` syntax used by `remark-annotations.mjs`. The companion YAML was also converted from object-keyed format to array format with `key` fields, matching the Valley of Death annotations structure.
+**Reasoning:** The existing remark plugin resolves `[[mode:key|text]]` markers and auto-injects the `Annotation` component import. The JSX `<A>` syntax specified in DEC-009 would require either extending the plugin to support a second syntax or maintaining two incompatible marker formats across essays. Consistency across all essays is more valuable than the marginally more concise JSX syntax. One syntax, one plugin, one resolution path.
+**Alternatives considered:** (a) Extend remark plugin to support both syntaxes (more code to maintain, two ways to do the same thing), (b) rewrite VoD markers to match Scholion JSX syntax (breaks working system, higher risk).
+**Revisit if:** A future essay needs marker features that the `[[]]` syntax cannot express (e.g., nested annotations, conditional display).
+
+---
+
 <!-- Template for new decisions:
 
 ## DEC-NNN: [Short title]

@@ -1,0 +1,392 @@
+# ──────────────────────────────────────────────────────────────────────
+# The Circuitry of Science — Annotation Companion File
+# Essay: "The Circuitry of Science"
+# Generated: 2026-02-24
+# ──────────────────────────────────────────────────────────────────────
+#
+# Three annotation modes:
+#   terms:      Domain vocabulary. Author-written definitions.
+#   references: Papers, books, reports. AI-generated summaries, author-reviewed.
+#   links:      External URLs with curated metadata.
+#
+# Three badge categories (term annotations):
+#   CLINICAL (teal): medical/statistical domain terms
+#   ARGUMENT (accent/gold): epistemology and argumentation terms
+#   SAFETY (blue): AI safety and governance terms
+#
+# Matching: explicit markers in MDX using [[term:key|text]] syntax.
+# ──────────────────────────────────────────────────────────────────────
+
+terms:
+
+  # ─── CLINICAL (badge: CLINICAL, color: var(--teal)) ───
+
+  - key: de-ritis-ratio
+    pattern: "De Ritis Ratio (AST/ALT)"
+    definition: >
+      The ratio of aspartate aminotransferase (AST) to alanine
+      aminotransferase (ALT), two liver enzymes. A ratio ≥ 2 is
+      classically associated with hepatocellular injury from non-hepatic
+      causes — in this context, multi-organ involvement in COVID-19
+      rather than primary liver disease.
+
+  - key: cox-model
+    pattern: "Cox Proportional Hazards Model"
+    definition: >
+      A regression method for survival analysis that estimates hazard
+      ratios — the relative risk of an event (here, death) associated
+      with each predictor variable. "Proportional hazards" assumes the
+      ratio of hazard rates between groups stays constant over time.
+
+  - key: adjusted-hazard-ratio
+    pattern: "Adjusted Hazard Ratio"
+    definition: >
+      A hazard ratio from a multivariate model that controls for
+      confounding variables. "Adjusted" means other predictors (here,
+      age and gender) are held constant. An HR of 11.052 means an
+      estimated 11-fold increase in mortality risk, but the wide
+      confidence interval (1.441–84.770) indicates very low precision.
+
+  - key: kaplan-meier
+    pattern: "Kaplan-Meier Analysis"
+    definition: >
+      A non-parametric method for estimating survival probabilities
+      over time. Unlike Cox regression (which models risk factors),
+      Kaplan-Meier simply describes how a group's survival changes.
+      The log-rank test compares survival curves between groups.
+
+  - key: prisma
+    pattern: "PRISMA"
+    definition: >
+      Preferred Reporting Items for Systematic Reviews and
+      Meta-Analyses — a standardized checklist and flow diagram for
+      reporting systematic reviews. PRISMA compliance signals
+      methodological rigor in the search and selection process.
+
+  - key: balthazar-score
+    pattern: "Balthazar Score"
+    definition: >
+      A CT-based grading system for acute pancreatitis severity,
+      ranging from A (normal) to E (multiple fluid collections).
+      Grade ≥ D indicates moderate-to-severe radiologic involvement.
+      In the Chen extraction, it creates a tension: symptom timing
+      predicts imaging severity but not survival.
+
+  - key: wbc
+    pattern: "White Blood Cell Count"
+    definition: >
+      A standard blood marker of infection and inflammation. Elevated
+      WBC (leukocytosis) in the Chen review was an independent
+      predictor of mortality in COVID-19-induced pancreatitis, though
+      with a modest hazard ratio (HR 1.013 per unit increase).
+
+  - key: confounding-by-indication
+    pattern: "Confounding by Indication"
+    definition: >
+      A bias where a treatment appears to cause an outcome, but the
+      underlying condition drives both the treatment decision and the
+      outcome. Surgical intervention predicts mortality not because
+      surgery causes death, but because severe disease causes both
+      the need for surgery and the risk of death.
+
+  # ─── ARGUMENT / EPISTEMOLOGY (badge: ARGUMENT, color: var(--accent)) ───
+
+  - key: toulmin-model
+    pattern: "Toulmin's Model of Argumentation"
+    definition: >
+      A framework from Stephen Toulmin's The Uses of Argument (1958)
+      that decomposes arguments into six components: claim, grounds
+      (data), warrant (the reasoning connecting data to claim), backing
+      (what authorizes the warrant), qualifier (scope conditions), and
+      rebuttal (conditions for failure). The warrant is the highest-value
+      extraction target — it is where arguments are most structurally
+      vulnerable.
+
+  - key: warrant
+    pattern: "Warrant"
+    definition: >
+      In Toulmin's model, the implicit or explicit reasoning that
+      connects evidence to a claim. Warrants are where authors expect
+      readers to fill in unstated reasoning — and where arguments are
+      most structurally vulnerable. Surfacing unstated warrants makes
+      inferential hazards auditable.
+
+  - key: crux
+    pattern: "Crux (Load-Bearing Claim)"
+    definition: >
+      A claim whose failure would collapse significant downstream
+      structure in the dependency graph. Identified by the flip test:
+      if this claim were overturned, would the conclusions that depend
+      on it still hold? Different cruxes collapse different subsets
+      of the argument — selective invalidation.
+
+  - key: invalidation-propagation
+    pattern: "Invalidation Propagation"
+    definition: >
+      A graph operation that traces the consequences of overturning a
+      claim: which downstream conclusions lose their foundation, which
+      survive via alternative evidence paths, and which become
+      undetermined. The structural bookkeeping that safety case
+      maintenance currently does by hand.
+
+  - key: transitive-closure
+    pattern: "Transitive Closure"
+    definition: >
+      The complete set of claims reachable by following dependency edges
+      from a given starting claim. If A depends on B and B depends on C,
+      then C is in A's transitive closure — A is indirectly vulnerable
+      to C's failure even without a direct dependency.
+
+  - key: flip-test
+    pattern: "Flip Test"
+    definition: >
+      A method for identifying cruxes: hypothetically overturn a claim
+      and trace what breaks. If flipping a claim's status from IN to OUT
+      collapses significant downstream structure, it is a crux. If the
+      downstream conclusions survive via alternative evidence paths,
+      it is not load-bearing.
+
+  - key: atomic-decomposition
+    pattern: "Atomic Decomposition"
+    definition: >
+      Breaking compound assertions into individually falsifiable
+      propositions, each carrying its own statistical evidence, scope
+      conditions, and failure modes. "X, Y, and Z are independent
+      predictors" becomes three separate claims. You cannot track
+      dependencies between claims you have not identified.
+
+  - key: absence-of-evidence
+    pattern: "Absence of Evidence vs. Evidence of Absence"
+    definition: >
+      A non-significant p-value means the study failed to detect an
+      effect — it does not mean no effect exists. With low statistical
+      power (few events, small sample), non-significance is expected
+      even if a real effect is present. Treating "no significant result"
+      as "no real difference" is a logical error.
+
+  # ─── AI SAFETY / GOVERNANCE (badge: SAFETY, color: var(--blue)) ───
+
+  - key: safety-case
+    pattern: "Safety Case"
+    definition: >
+      A structured argument that a system is acceptably safe to deploy,
+      with explicit claims, evidence, and reasoning linking them.
+      Originated in high-reliability industries (nuclear, aviation);
+      now the emerging framework for AI deployment decisions.
+
+  - key: inability-argument
+    pattern: "Inability Argument"
+    definition: >
+      A safety case argument pattern claiming that a model cannot
+      perform a dangerous capability (e.g., cannot produce novel
+      bioweapons, cannot autonomously replicate). Relies on evaluation
+      evidence and interpretability findings to establish the negative
+      claim — structurally vulnerable because proving inability is
+      harder than proving ability.
+
+  - key: superalignment
+    pattern: "Superalignment"
+    definition: >
+      The problem of aligning AI systems that are more capable than
+      their human overseers. Khan reframes this as a verification
+      problem: the challenge is not specifying all desired behaviors
+      but verifying the outputs of systems whose reasoning the
+      verifier cannot fully reconstruct.
+
+  - key: model-organisms
+    pattern: "Model Organisms of Misalignment"
+    definition: >
+      An experimental methodology where researchers deliberately train
+      a model to exhibit a specific dangerous behavior (e.g., deceptive
+      alignment, reward hacking) to test whether detection and
+      mitigation methods work. Analogous to model organisms in biology —
+      a controlled instance of the phenomenon for study.
+
+  - key: gsn
+    pattern: "Goal Structuring Notation"
+    definition: >
+      A graphical notation for safety arguments, using goals (claims),
+      strategies (reasoning), contexts, and evidence nodes connected
+      by "supported by" and "in context of" links. Standard in
+      safety-critical industries; used by the UK AI Security Institute
+      for AI safety case templates.
+
+  - key: scalable-oversight
+    pattern: "Scalable Oversight"
+    definition: >
+      Methods for maintaining effective human oversight of AI systems
+      as those systems become more capable. The core challenge:
+      verification must scale without requiring the overseer to match
+      the system's domain expertise. Debate, recursive reward modeling,
+      and structural decomposition are candidate approaches.
+
+
+references:
+
+  - key: chen2025
+    title: "COVID-19-Induced Acute Pancreatitis: Clinical Profiles, Outcomes, and Prognostic Indicators"
+    authors: "Chen et al."
+    year: 2025
+    venue: "Health Science Reports"
+    url: "https://onlinelibrary.wiley.com/doi/10.1002/hsr2.71417"
+    summary: >
+      Systematic review of 87 case reports (111 patients) examining
+      mortality predictors and symptom chronology in pancreatitis
+      attributed to SARS-CoV-2 infection by exclusion of other etiologies.
+    context: >
+      The first extraction target for Scholion's annotation schema,
+      chosen to test generality outside the AI safety domain. Twenty-five
+      claims extracted across two structurally distinct argument chains.
+
+  - key: toulmin
+    title: "The Uses of Argument"
+    authors: "Stephen Toulmin"
+    year: 1958
+    venue: "Cambridge University Press (updated edition 2003)"
+    url: "https://www.cambridge.org/core/books/uses-of-argument/26CF801BC12004587B66778E69C267E9"
+    summary: >
+      Foundational work in argumentation theory proposing a six-part
+      model (claim, data, warrant, backing, qualifier, rebuttal) as an
+      alternative to formal logic for analyzing practical arguments.
+    context: >
+      Scholion's annotation schema is organized around Toulmin's model.
+      The warrant field — surfacing unstated reasoning — is the
+      highest-value extraction target.
+
+  - key: khan2024
+    title: "Safe Automated Research"
+    authors: "Akbir Khan"
+    year: 2025
+    venue: "PhD dissertation, UCL"
+    url: "https://discovery.ucl.ac.uk/id/eprint/10210531/"
+    summary: >
+      Dissertation investigating how multi-agent structure can compensate
+      for capability gaps in AI oversight. Reframes superalignment as
+      a verification problem. Key finding: in AI debates, optimizing
+      debaters for persuasiveness increases judge accuracy via
+      asymmetric access to verifiable evidence. Stronger single-advisor
+      consultants decrease judge accuracy — the adversarial structure
+      does epistemic work consultancy cannot.
+    context: >
+      Provides the empirical anchor for Scholion's scalable oversight
+      argument. Khan demonstrates that structure compensates for
+      capability gaps in debate; Scholion extends this to argument
+      architecture.
+
+  - key: anthropic-rsp
+    title: "Responsible Scaling Policy (v3.0)"
+    authors: "Anthropic"
+    year: 2026
+    venue: "Anthropic Policy Publication"
+    url: "https://www.anthropic.com/news/responsible-scaling-policy-v3"
+    summary: >
+      Replaced pre-specified AI Safety Levels with argument-based
+      standards, requiring "analysis and arguments making a strong case
+      for safety." Acknowledges the evaluation gap — "one actor's view"
+      may differ from another's — and requires external reviewers to
+      assess "analytical rigor" and "key claims."
+    context: >
+      The structural shift to argument-based standards is exactly the
+      gap Scholion addresses. If safety arguments are the load-bearing
+      artifact, there must be a method for evaluating argument quality
+      at the structural level.
+
+  - key: sabotage-report
+    title: "Sabotage Risk Report"
+    authors: "Anthropic Alignment Science"
+    year: 2026
+    venue: "Anthropic Safety Publication"
+    url: "https://assets.anthropic.com/m/242eb662e8366da7/original/Sabotage-evaluations-for-frontier-models-2025-02-24.pdf"
+    summary: >
+      Pilot safety case report assessing sabotage risk for Claude models.
+      Central argument rests on four claims (prior expectations,
+      alignment assessment, inability to undermine assessment, limited
+      opaque reasoning). Section 7 contains a hand-built invalidation
+      table: load-bearing claims paired with conditions that would
+      overturn them.
+    context: >
+      Read in the essay as a concrete Scholion parallel — the alignment
+      science team independently converged on dependency structure and
+      invalidation propagation, doing it by hand because no tool exists
+      for the structural bookkeeping.
+
+  - key: uk-aisi
+    title: "AI Safety Case Templates"
+    authors: "UK AI Security Institute (formerly AISI)"
+    year: 2025
+    venue: "UK Government Publication"
+    summary: >
+      Published safety case templates including inability arguments
+      and end-to-end misuse safeguard cases using Goal Structuring
+      Notation. Represents the UK regulatory approach to structured
+      safety arguments for AI systems.
+    context: >
+      One of several institutional convergences on structured safety
+      arguments, alongside Anthropic's RSP and academic template
+      frameworks.
+
+  - key: lee2026
+    title: "Reusable Safety Case Template Framework"
+    authors: "Lee et al."
+    year: 2026
+    venue: "arXiv 2601.22773"
+    url: "https://arxiv.org/abs/2601.22773"
+    summary: >
+      Proposes comprehensive taxonomies for safety case components:
+      claim types (assertion-based, constraint-based, capability-based),
+      argument types (demonstrative, comparative, causal, risk-based,
+      normative), and evidence families.
+    context: >
+      Representative of the academic convergence on structured safety
+      arguments. The taxonomy of argument types parallels Scholion's
+      dependency types but operates at the safety case level rather
+      than the individual paper level.
+
+  - key: arg-mining-survey
+    title: "Large Language Models in Argument Mining: A Survey"
+    authors: "arXiv 2506.16383"
+    year: 2025
+    venue: "arXiv"
+    url: "https://arxiv.org/abs/2506.16383"
+    summary: >
+      Survey finding that LLMs can perform argument component detection
+      at levels rivaling supervised baselines but struggle with
+      fine-grained structural reasoning — and tend to favor fluent
+      but logically thin arguments over less polished but
+      better-supported ones.
+    context: >
+      The "fluent but logically thin" failure mode is precisely what
+      structural representation neutralizes. A dependency graph is
+      immune to rhetorical fluency.
+
+
+links:
+
+  - key: elicit
+    url: "https://elicit.com"
+    title: "Elicit"
+    source: "Elicit Research"
+    summary: >
+      AI research assistant that extracts structured data — effect sizes,
+      sample sizes, study characteristics — across 138 million indexed
+      papers. Answers "what did this paper find?" but not "which claim
+      depends on which claim?"
+
+  - key: semantic-scholar
+    url: "https://www.semanticscholar.org"
+    title: "Semantic Scholar"
+    source: "Allen Institute for AI"
+    summary: >
+      Academic search engine that maps citation graphs at massive scale.
+      Answers "which papers cite which?" but not "which specific claim
+      in Paper A is challenged by which claim in Paper B?"
+
+  - key: scite
+    url: "https://scite.ai"
+    title: "scite.ai"
+    source: "scite Inc."
+    summary: >
+      Classifies citation context as supporting, contradicting, or
+      mentioning. Closest to Scholion's territory, but operates on
+      citation sentences rather than the internal argument structure
+      of a paper.
