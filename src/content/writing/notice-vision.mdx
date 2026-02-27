@@ -1,0 +1,185 @@
+---
+title: "The Body Knows First"
+date: 2026-02-27
+description: "A biofeedback-assisted state navigation app that trains interoceptive awareness — helping you notice what your body already knows, in the middle of a life."
+tags: ["Interoception", "Contemplative Technology", "Apple Watch", "AI Architecture", "Vision"]
+connected_project: "Notice"
+draft: true
+---
+
+import { SectionDivider } from '../../components/islands/shared/SectionDivider.tsx'
+import { PullQuote } from '../../components/islands/shared/PullQuote.tsx'
+import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitiveGap.tsx'
+import { NoticeArchitectureDiagram } from '../../components/islands/NoticeArchitectureDiagram.tsx'
+import { NoticeInteractionFlow } from '../../components/islands/NoticeInteractionFlow.tsx'
+import NoticeVisionTextureGrid from '../../components/islands/NoticeVisionTextureGrid.tsx'
+import NoticeVisionLeadTime from '../../components/islands/NoticeVisionLeadTime.tsx'
+import NoticeVisionScaffoldingDecay from '../../components/islands/NoticeVisionScaffoldingDecay.tsx'
+import NoticeVisionExpansionRings from '../../components/islands/NoticeVisionExpansionRings.tsx'
+import NoticeVisionTimeline from '../../components/islands/NoticeVisionTimeline.tsx'
+
+<SectionDivider client:visible number="01" label="The Gap" />
+
+## The Gap
+
+You have felt this before. Your shoulders are tight for twenty minutes before you notice you are bracing. Your heart rate climbs through a conversation you tell yourself is fine. Your breathing shallows during a meeting and you only register it when someone asks if you are okay.
+
+The body leads. The story follows. There is always a gap.
+
+The gap is measurable. Heart rate variability drops before conscious anxiety arrives. Heart rate rises before excitement registers. Skin conductance shifts before you can name the feeling. Bud Craig's work on insular cortex mapping shows that interoceptive signals — the body's report on its own internal state — travel a dedicated neural pathway, but conscious access to those signals varies enormously between individuals. The core finding: interoceptive accuracy is not a fixed trait. It is a skill. And it is trainable.
+
+Notice exists to train that skill.
+
+&gt; The most valuable structures in our lives — emotional patterns, somatic intelligence, relational dynamics — are invisible until something makes them navigable.
+
+This is part of a broader thesis I have been developing across two projects. [Scholion](https://thbrdy.dev/writing/the-circuitry-of-science/) makes the dependency structure of scientific claims visible and navigable — the hidden load-bearing walls behind published findings. Notice does the same thing for the dependency structure of your inner life: the connections between what your body is doing, what you are feeling, and how you are relating to it all. Different domains, same problem. The structures that matter most are the ones you cannot see.
+
+<SectionDivider client:visible number="02" label="What Notice Is" />
+
+## What Notice Is
+
+The core interaction is called a **Frame Snap**. When you notice something shifting — a tightening in your chest, a surge of energy, a settling you cannot quite name — you tap your Watch or phone. That tap captures a biometric snapshot: heart rate, heart rate variability, and contextual signals assembled by on-device intelligence. Then you debrief.
+
+<NoticeInteractionFlow client:visible />
+
+The debrief is not a form. It is a felt-sense encounter. An emotion picker organized by somatic texture invites you to name what you notice. Six groups, three labels each, organized by where you feel them in your body:
+
+<NoticeVisionTextureGrid client:visible />
+
+The taxonomy is sized to a research sweet spot. Lieberman et al. (2007) showed that affect labeling — the act of putting feelings into words — downregulates amygdala reactivity via right ventrolateral prefrontal cortex activation. But the effect depends on granularity. Six labels are too coarse. Unrestricted free text is too effortful on a Watch screen. Eighteen labels, organized by somatic texture and grounded in Gendlin's Focusing tradition, hits the range where the intervention works. Every Frame Snap is a micro-dose of a well-documented regulatory technique, embedded in a gesture that takes three seconds.
+
+Then Claude — Anthropic's AI — generates a contemplative reflection. Not advice. Not a diagnosis. A mirror. The reflection orients toward *relation* — how you are meeting your experience — never toward *object* — what the experience supposedly is.
+
+&gt; "You said calm, but your heart rate variability was lower than usual. That is not a contradiction — it is information. What happens when you hold both?"
+
+This distinction, drawn from Barrett's constructed emotion theory and Jhourney's contemplative pedagogy, is the deepest design constraint in the product. Emotion labels are frames, not facts. The app's job is to support noticing without grasping.
+
+Claude reflects at three timescales: a brief sentence at snap time — a small act of witnessing; an exploratory paragraph during debrief — an invitation toward curiosity; and daily and weekly synthesis — longitudinal pattern detection that surfaces what you cannot see from inside a single moment. The weekly reflections consume daily syntheses hierarchically, so the AI reasons over compressed patterns rather than re-aggregating raw data. Over weeks and months, these syntheses surface the recurring shapes of your inner life — the patterns you did not know you had.
+
+<SectionDivider client:visible number="03" label="What's Built" />
+
+## What's Built
+
+Notice is not a concept. It is a working product in closed beta via TestFlight with eight testers from the Jhourney contemplative community. Fifteen development sessions have produced a complete end-to-end experience — about 24 hours of build time, starting from zero iOS experience.
+
+The full snap-debrief-reflection loop works on both Watch and iPhone. Voice-initiated snaps via Siri and AirPods let you capture a moment without looking at a screen. On-device intelligence handles context assembly — HealthKit trends, calendar, location, recent snaps — without any data leaving the device.
+
+<SectionDivider client:visible number="04" label="Privacy by Architecture" />
+
+## Privacy by Architecture
+
+Notice's privacy model is not a policy. It is an architecture.
+
+<NoticeArchitectureDiagram client:visible />
+
+Tier 1 reads everything. Raw heart rate, calendar entries, GPS coordinates, contacts. It assembles a structured summary, stripping absolute values, timestamps, and identifying details. Tier 2 — Claude via the cloud — sees only those summaries. "HRV lower than your baseline." "Back-to-back meetings this morning." Never a heart rate number. Never a location. Never a name.
+
+A stateless Cloudflare Worker proxy holds the API key server-side and validates device identity via Apple's App Attest before forwarding any request.
+
+This is not just a privacy choice. It is a regulatory strategy. The FDA's General Wellness Guidance classifies Notice as non-invasive wellness only if it avoids disease claims — one diagnostic-sounding phrase could trigger FDA jurisdiction. The FTC's Health Breach Notification Rule applies because Notice combines biometric data with emotional self-reports: any unauthorized third-party disclosure triggers breach notification at $53,000 per violation. By keeping raw health data on-device and sending only structured summaries through the proxy, the architecture *is* the compliance strategy.
+
+<SectionDivider client:visible number="05" label="What the Science Says" />
+
+## What the Science Says
+
+Three research threads converge in the product.
+
+### Affect Labeling
+
+The act of putting feelings into words is not just expressive. It is neurologically active. Affect labeling activates the right ventrolateral prefrontal cortex and downregulates amygdala reactivity — a specific regulatory mechanism distinct from cognitive reappraisal or suppression. The emotion picker is an affect labeling intervention. Every Frame Snap is a micro-dose of this technique.
+
+### Emotional Granularity
+
+Barrett's research shows that people who make finer distinctions between emotional states — distinguishing *irritated* from *frustrated* from *exasperated* — demonstrate better emotion regulation. This is emotional granularity, and it is trainable. Notice measures it: label diversity over time is a behavioral proxy for granularity development. As users' felt-sense vocabulary expands, their regulatory capacity should expand with it. The data can show whether it does.
+
+### Interoceptive Lead Time
+
+This is the metric I am most excited about, and as far as I can tell, no one else is measuring it.
+
+Notice already collects both data streams: continuous biometric samples from HealthKit running in the background, and discrete conscious reports from Frame Snaps — the moment you notice a shift. The temporal gap between when your body shifts and when you consciously register it is your interoceptive lead time. And it is trainable. Shrinking that gap *is* interoceptive development.
+
+<PullQuote client:visible slug="notice-vision" quoteIndex={1}>A month ago, your body would shift 40 minutes before you snapped. Now it is 15 minutes. You are noticing sooner.</PullQuote>
+
+<NoticeVisionLeadTime client:visible />
+
+That is a training outcome you can feel — not a score on a dashboard, but a mirror that shows you something true about your own development. If interoceptive lead time reduction correlates with MAIA-2 score improvement across beta users, Notice has demonstrated measurable interoceptive training. That is a peer-reviewable finding and the strongest possible evidence for the product's core claim.
+
+<SectionDivider client:visible number="06" label="An App That Gets Quieter" />
+
+## An App That Gets Quieter
+
+Most apps optimize for engagement. More time on screen. More sessions. More data. Notice is designed to do the opposite.
+
+**Scaffolding decay** is the deliberate, progressive reduction of app support as you develop independent interoceptive capacity. The app starts rich and present. As your capacity grows, it steps back.
+
+<NoticeVisionScaffoldingDecay client:visible />
+
+**Full support:** reflections after every snap, active felt-sense suggestions, full biometric context. This is the current app. **Reduced:** reflections shift to on-demand, suggestions fade, biometric display simplifies to trend arrows. **Minimal:** no automatic reflections, the app becomes a quiet archive you consult when you choose to. Your interoceptive capacity is the primary instrument. Notice is documentation.
+
+Phase transitions are triggered by behavioral signals — snap count thresholds, vocabulary stabilization, biometric-label convergence — and confirmed by the user. The app never decides for you that you are ready. It notices, and invites.
+
+This is a genuine commercial bet. An app that trains its users to need it less sounds counterintuitive in an industry built on retention metrics. But the value of Notice is not in the screen time it captures. It is in the capacity it builds. Users do not churn because they are bored. They graduate because they have developed the skill. And the on-device AI model that personalizes to their practice over months creates a switching cost no competitor can replicate.
+
+<SectionDivider client:visible number="07" label="The On-Device Future" />
+
+## The On-Device Future
+
+The Claude API is powerful, but it introduces ongoing cost, latency, and a data pathway outside the phone. The north star is every reflection tier running locally. No API dependency. No data disclosure. No marginal cost per reflection.
+
+On-device LoRA adaptation means the model learns *your* phenomenological vocabulary, *your* somatic patterns, *your* characteristic ways of relating to experience. Not a generic wellness model shaped by population averages — a contemplative mirror that becomes more precise the longer you practice with it. The personalized weights never leave the phone. The privacy-maximizing architecture turns out to be the quality-maximizing architecture too — a rare alignment.
+
+Timeline: on-device brief reflections are days away from shipping. Exploratory reflections on-device are plausible within weeks. Daily and weekly synthesis may require a generation of model capability improvement. The cloud API remains available as fallback throughout.
+
+<SectionDivider client:visible number="08" label="The Market" />
+
+## The Market
+
+Three product categories surround the space Notice occupies. None connect all three layers.
+
+<NoticeCompetitiveGap client:visible />
+
+Calm and Headspace own guided meditation. WHOOP and Oura own biometric tracking. How We Feel and Daylio own mood logging. Rosebud owns AI journaling. None connect all three layers. Notice is not a meditation app that added HRV, or a tracker that added journaling. It is a new thing.
+
+The window to establish this position is narrowing. Calm is adding HRV biofeedback. Headspace is integrating with Oura Ring. WHOOP is publishing peer-reviewed mental health research and adding journal prompts. Each competitor is extending toward the triad from their corner. None have arrived yet, but the trajectories are visible. Time-to-market for the core loop matters more than feature completeness.
+
+Premium, anchored against WHOOP and Oura, not meditation apps.
+
+<SectionDivider client:visible number="09" label="The Larger Vision" />
+
+## The Larger Vision
+
+Notice's trajectory follows a natural widening of the aperture of awareness — mirroring the developmental arc of contemplative practice itself.
+
+<NoticeVisionExpansionRings client:visible />
+
+### Individual Interoception — Now
+
+The current product. You learn to read your own internal states: noticing shifts, labeling felt sense, seeing patterns in how you relate to experience. The mirror faces inward.
+
+### Relational Attunement — Later
+
+Co-regulation expands the mirror to face the space *between* two people. The research basis is Feldman's bio-behavioral synchrony: mothers and infants synchronize heart rhythms, partners' respiration converges during empathetic touch. The engineering question is whether you can transmit one person's breathing rate — derived from Apple Watch accelerometers — to a partner in real-time via spatial audio and haptics, and whether the body responds to that mediated signal the way it responds to another body.
+
+The research program is staged with kill criteria at each phase. Phase 0: can the hardware extract breathing rate within ±2 BPM? Phase 1: a sham-controlled study with 30 dyads to distinguish real entrainment from placebo. Phase 2: at-home ecological validation. Phase 3: regulatory pathway assessment. Polyvagal theory faces empirical criticism, individual variability is high, the hardware cost per couple is $3,600+. These are load-bearing constraints, not footnotes.
+
+### Collective Field Awareness — Speculative
+
+The furthest horizon. If dyadic co-regulation works, the same architecture extends to small groups — a meditation sangha, a therapy group, a team. Group physiological coherence is measurable. Notice could surface how a collective field forms and dissolves, who anchors it, how individual states propagate. This is genuinely speculative. But it is the logical terminus of the thesis: making invisible structures visible and navigable, applied to the most invisible structure of all — the felt sense of being in a room together.
+
+Each expansion is gated by the one before it. At the individual level, Notice competes with mood trackers and meditation apps. At the relational level, there are no competitors. At the collective level, the field does not exist yet. Each expansion widens the moat.
+
+<SectionDivider client:visible number="10" label="What Comes Next" />
+
+## What Comes Next
+
+<NoticeVisionTimeline client:visible />
+
+The on-device reflection model is the key technical milestone. Brief reflections moving on-device eliminates the largest cost center, makes the Core tier economically viable at zero marginal cost, and delivers the privacy promise in its fullest form — "nothing leaves your phone" becomes literally true for the most common interaction.
+
+---
+
+Notice is built on a conviction I keep returning to: the most important thing you can learn is how to read your own experience with honesty and precision. Not to fix it. Not to optimize it. To see it clearly enough that you can choose how to respond rather than being carried by reflex.
+
+The technology is in service of that learning. A temporary scaffold that builds a permanent capacity. The biometric data is a mirror for the body you already have. The emotion label is a frame for the feeling you already feel. The AI reflection is an invitation to look at what you already know but have not yet noticed.
+
+*The app gets quieter as you get better. That is the design.*

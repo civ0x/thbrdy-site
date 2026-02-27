@@ -1,0 +1,23 @@
+---
+import { getEntry, render } from 'astro:content';
+import PostLayout from '../layouts/PostLayout.astro';
+
+const post = await getEntry('writing', 'notice-vision');
+if (!post) throw new Error('notice-vision entry not found');
+const { Content } = await render(post);
+
+const words = post.body?.split(/\s+/).length ?? 0;
+const minutesRead = Math.max(1, Math.round(words / 250));
+---
+
+<PostLayout
+  title={post.data.title}
+  description={post.data.description}
+  date={post.data.date}
+  tags={post.data.tags}
+  connected_project={post.data.connected_project}
+  minutesRead={minutesRead}
+  ogImage={`/images/og/${post.id}.png`}
+>
+  <Content />
+</PostLayout>
