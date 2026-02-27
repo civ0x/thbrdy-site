@@ -108,6 +108,17 @@ terms:
       The core insight (autonomic state shapes social capacity) is
       better supported than the specific neural mechanism proposed.
 
+  - key: jhourney
+    pattern: "Jhourney"
+    section: "02"
+    definition: >
+      A contemplative community and pedagogy founded on the integration
+      of jhāna (deep meditative absorption) practice with modern
+      psychotherapy and relational work. Notice's beta testers come
+      from this community, and its pedagogical orientation — relation
+      over object, felt sense over diagnosis — is a core design
+      constraint in the product.
+
   # ─── PRODUCT (badge: PRODUCT, color: var(--accent)) ───
 
   - key: frame-snap
