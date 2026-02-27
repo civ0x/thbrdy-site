@@ -1,0 +1,374 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base title="Notice — Roadmap" description="What's shipped, what's next, and where Notice is headed. A living document.">
+  <section class="roadmap">
+    <header class="roadmap-header">
+      <div class="eyebrow">NOTICE</div>
+      <h1 class="title">Roadmap</h1>
+      <p class="subtitle">A biofeedback-assisted state navigation app for Apple Watch + iPhone — training interoceptive awareness through contemplative AI reflection.</p>
+      <div class="last-updated">Last updated February 26, 2026</div>
+      <a class="back-link" href="/notice/">← The Body Knows First</a>
+    </header>
+
+    <!-- 01 WHAT'S SHIPPED -->
+    <div class="section-divider">
+      <span class="section-number">01 What's Shipped</span>
+      <hr />
+    </div>
+
+    <h2>The working product</h2>
+
+    <p>Notice is in closed beta via TestFlight with 8+ testers from the <a href="https://www.jhourney.io/" target="_blank" rel="noopener">Jhourney</a> contemplative community. The core loop works end-to-end: tap your Watch (or phone) when you notice a shift &rarr; the app captures biometric context &rarr; you debrief with a felt-sense emotion picker &rarr; Claude generates a contemplative reflection grounded in your patterns.</p>
+
+    <p>Fifteen development sessions have produced:</p>
+
+    <p><strong>The core snap-debrief-reflection loop.</strong> Watch tap or phone floating action button captures a Frame Snap with heart rate and HRV from HealthKit. The phone FAB (iOS 26 liquid glass) means you don't need a Watch to use Notice &mdash; it's a full-loop experience on iPhone alone. Debrief screen features a description-first layout and a two-layer felt-sense picker organized by somatic texture (Alive, Settled, Open, Heavy, Stirred, Tight &mdash; six groups &times; three emotion labels each, grounded in Gendlin's Focusing). Claude streams a contemplative reflection using a system prompt built on Jhourney pedagogy &mdash; orienting toward how you're relating to experience, never prescribing what to feel.</p>
+
+    <p><strong>Three tiers of AI reflection.</strong> Brief reflections at snap time (one sentence, oriented toward conductivity). Exploratory reflections during debrief (a paragraph, oriented toward curiosity). Daily and weekly synthesis reflections that surface longitudinal patterns across snaps &mdash; built hierarchically so weekly reflections consume daily syntheses rather than re-aggregating raw data.</p>
+
+    <p><strong>On-device intelligence via Apple Foundation Models.</strong> A two-tier AI architecture: Tier 1 (Apple Foundation Models, on-device) handles context assembly &mdash; reading HealthKit trends, calendar, location, recent snaps, and producing a structured summary that strips all absolute values and identifying details. Tier 2 (Claude via cloud) sees only those summaries. The on-device interpreter runs in under a second. Context assembly completes in under three seconds. Nothing raw leaves the phone.</p>
+
+    <p><strong>Voice-initiated snaps.</strong> Siri and AirPods integration for hands-free capture. &ldquo;Hey Siri, I noticed something&rdquo; triggers a Frame Snap without looking at a screen &mdash; critical for capturing shifts during activities where pulling out a phone breaks the moment.</p>
+
+    <p><strong>Stateless API proxy.</strong> A Cloudflare Worker sits between the app and the Claude API, holding the API key server-side and validating device identity via Apple's App Attest before forwarding any request. No on-device key storage, rotation without app updates, per-device rate limiting.</p>
+
+    <p><strong>Privacy architecture as compliance strategy.</strong> Raw health data stays on-device. Only structured summaries transit through the proxy. This isn't just a privacy choice &mdash; it's a regulatory strategy that keeps Notice within the FDA's General Wellness Guidance and limits FTC Health Breach Notification Rule exposure.</p>
+
+    <!-- 02 NOW -->
+    <div class="section-divider">
+      <span class="section-number">02 Now</span>
+      <hr />
+    </div>
+
+    <h2>Immediate priorities</h2>
+
+    <h3>On-Device Reflection Model</h3>
+
+    <p>The highest-leverage technical milestone. Moving <code>.brief</code> reflections on-device eliminates the largest cost center (~80% of API calls), makes the Core pricing tier viable at zero marginal cost, and delivers the privacy promise in its fullest form.</p>
+
+    <p><strong>Runtime reality.</strong> MLX is currently blocked for 3B models on iPhone due to memory overhead (~15 GB for Llama 3.2 3B 4-bit vs. llama.cpp's ~3.67 GB). Two viable paths: llama.cpp for 3B models (4&ndash;8 second generation, higher quality) or MLX for 1B&ndash;1.7B models (under 2 seconds, lower ceiling).</p>
+
+    <p><strong>Model candidates.</strong> SmolLM3-3B is the leading candidate &mdash; purpose-built for on-device, strong instruction-following, Apache 2.0. Llama 3.2 3B is the safe default. Qwen3 1.7B for the MLX/small-model path. Recommendation: benchmark SmolLM3-3B via llama.cpp against Qwen3 1.7B via MLX on target hardware.</p>
+
+    <p><strong>Training pipeline.</strong> Teacher-student distillation from Claude API. Target: 1,200 reflection examples plus 150 correction examples that demonstrate constraint boundaries. The correction examples are critical &mdash; LoRA fine-tuning on domain-specific output degrades general instruction-following without them.</p>
+
+    <p><strong>Hybrid routing.</strong> <code>.brief</code> reflections: on-device primary, cloud fallback. <code>.exploratory</code>: cloud primary for now. <code>.daily</code> and <code>.weekly</code> synthesis: always cloud. On-device <code>.brief</code> covers ~80% of API calls.</p>
+
+    <p><strong>Three-tier evaluation.</strong> Tier 1: automated constraint gate (no diagnostic language, no raw biometric values, no prescriptive framing). Tier 2: LLM-as-judge scoring relational orientation, phenomenological precision, novelty, tone. Tier 3: blind A/B with experienced practitioners. Ship threshold: Tier 1 &gt;99% pass, Tier 2 within 15% of Claude baseline, Tier 3 preference &gt;40%.</p>
+
+    <h3>Foundation Models Integration</h3>
+
+    <p>Apple's on-device Foundation Models need hardware validation. The interpreter should complete in under one second, context assembly in under three seconds &mdash; on physical devices, not simulators. If latency exceeds budget, fallback to direct framework calls is straightforward. Adapted Tool infrastructure exists for HealthKit, Calendar, Location, and recent snap retrieval. The key unknown: how the interpreter performs with complex multi-source assembly instructions on A17/A18 silicon under real memory pressure from HealthKit background delivery.</p>
+
+    <h3>Beta Support and Feedback</h3>
+
+    <p><strong>Structured feedback capture.</strong> TestFlight's built-in mechanism loses context. A lightweight in-app mechanism (shake to report, or a prompt after the 5th snap) captures context-rich feedback at the moment of use. The taxonomy resonance question &mdash; &ldquo;which words do you actually reach for?&rdquo; &mdash; is both a research question and an explicit feedback prompt.</p>
+
+    <p><strong>Tester segmentation.</strong> Not all testers are the same. Experienced meditators push the felt-sense vocabulary hard; newer practitioners surface onboarding friction. A simple tracking table (practice background, device/Watch pairing, Apple Intelligence availability) lets you interpret feedback correctly.</p>
+
+    <p><strong>Lapsed tester outreach.</strong> The most valuable beta data isn't what active users do &mdash; it's why people stop. A simple email (not push notification) to lapsed testers surfaces the mundane friction that kills adoption. One lapsed-tester interview is worth twenty active-user feature requests.</p>
+
+    <p><strong>Bug reproduction context.</strong> A lightweight diagnostic log (stored locally, shared only on user-initiated report) capturing app state transitions and error codes &mdash; never snap content, emotion labels, or biometric data.</p>
+
+    <h3>Engineering Resilience</h3>
+
+    <p><strong>Degraded and offline behavior.</strong> What happens when the Claude API is unreachable? When HealthKit returns no recent samples? When the Watch disconnects mid-snap? Snaps must capture and persist regardless. Each failure mode needs an explicit design: no-network (queue reflections), no-HealthKit-data (snap without biometrics), Watch-disconnect (phone-side snap still works), API-error (retry with backoff).</p>
+
+    <p><strong>API cost control.</strong> Per-user usage budgets, a soft daily cap on exploratory reflections, batching daily synthesis to a single API call, and monitoring token usage per user during beta to establish the cost curve before setting prices.</p>
+
+    <p><strong>Crash reporting under privacy constraints.</strong> Most third-party crash reporting SDKs are risky under the FTC Health Breach Notification Rule. Apple's built-in crash reports via Xcode Organizer are the path of least resistance &mdash; no third-party SDK, data stays within Apple's ecosystem. MetricKit for performance diagnostics. No third-party analytics or crash reporting SDKs unless they can be proven to never exfiltrate health-adjacent data.</p>
+
+    <p><strong>SwiftData schema migration planning.</strong> Document the expected schema evolution now &mdash; future features will require new model fields and relationships. SwiftData lightweight migrations handle additive changes, but anything more complex needs explicit migration plans.</p>
+
+    <p><strong>API proxy and key management</strong> <span class="resolved-tag">(resolved)</span><strong>.</strong> Cloudflare Worker proxy with App Attest attestation. Eliminates all on-device key storage, enables rotation without app updates, provides per-device rate limiting and abuse detection, adds a server-side kill switch.</p>
+
+    <!-- 03 LATER -->
+    <div class="section-divider">
+      <span class="section-number">03 Later</span>
+      <hr />
+    </div>
+
+    <h2>On the horizon</h2>
+
+    <details class="roadmap-detail">
+      <summary>Deepening the Reflection Layer</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Scaffolding decay.</strong> The central design challenge beyond the MVP. Three phases: Full support (reflections after every snap, active suggestions, full biometric context), Reduced (reflections on-demand, simplified biometric display, suggestions fade), Minimal (no automatic reflections, the app becomes a quiet archive). Phase transitions triggered by behavioral signals &mdash; snap count thresholds, label diversity ceiling, biometric-label convergence &mdash; and confirmed by the user. The app never decides for you that you're ready.</div>
+        <div class="detail-para"><strong>Snap depth calibration.</strong> Claude adapts reflection depth based on accumulated data density. Three tiers: Sparse (1&ndash;3 snaps, no pattern claims), Thin (4&ndash;15 snaps, tentative pattern observations), Rich (20+, full vocabulary). Prevents the most common failure mode: making confident claims about patterns that don't exist in the data.</div>
+        <div class="detail-para"><strong>Biometric-label divergence detection.</strong> When the user's subjective label diverges from biometric data, the gap itself is information. Claude treats the user's felt sense as primary and frames the biometric data as a mirror. Over time, divergence patterns may reveal interoceptive blind spots or growing precision.</div>
+        <div class="detail-para"><strong>Dam Model pattern detection.</strong> Claude's system prompt includes vocabulary for suppression-explosion oscillation, narrow emotional range, absence patterns, and rigidity. The deeper work is calibrating sensitivity.</div>
+        <div class="detail-para"><strong>Memory reconsolidation support.</strong> Notice shouldn't guide active reconsolidation &mdash; that's clinical work. But the app may quietly build prerequisite capacities: mapping dams, developing relational stance, training felt-sense precision.</div>
+        <div class="detail-para"><strong>View interventions.</strong> Beyond frame-spotting, Claude can surface the meta-level view users bring to the practice itself. Detection signals: asymmetric emotion distribution, fix/solve/manage language in notes, absence of snaps during neutral states.</div>
+      </div>
+    </details>
+
+    <details class="roadmap-detail">
+      <summary>Expanding the Emotion Taxonomy</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Custom emotion labels.</strong> The 18-word taxonomy is scaffolding designed to eventually feel inadequate. When users start adding notes that contradict their label, that's the decay signal. Custom labels let advanced practitioners add their own vocabulary &mdash; contemplative-specific terms like p&#x012B;ti, vedan&#x0101;, somatic descriptors. Tagged as user-generated in the data model so Claude can handle them.</div>
+      </div>
+    </details>
+
+    <details class="roadmap-detail">
+      <summary>UI/UX Evolution</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Floating emotion labels &mdash; the lazy river.</strong> The current grid treats emotion labeling as a selection task. The contemplative reframe: labeling is a noticing task. Labels float across the screen in a gentle drift. The user watches and taps when one resonates. Based on Shinzen Young's See Hear Feel noting system. The philosophical difference: the grid says &ldquo;what are you feeling? choose one.&rdquo; The lazy river says &ldquo;what do you notice passing through?&rdquo;</div>
+        <div class="detail-para"><strong>Buttons as first-class interaction.</strong> The debrief screen should lead with tappable elements, not text entry. Emotion picker as hero, note field secondary.</div>
+        <div class="detail-para"><strong>Design language.</strong> Warm, reflective, unhurried. Type scale with serif for reflections (contemplative voice) and sans for labels (instrument voice). Dark mode that feels like candlelight, not a dashboard.</div>
+        <div class="detail-para"><strong>Debrief screen evolution.</strong> Three horizons: near-term (fix keyboard default, make emotion picker hero), mid-term (lazy river, subtle texture-group animations), long-term (debrief as contemplative micro-ritual).</div>
+      </div>
+    </details>
+
+    <details class="roadmap-detail">
+      <summary>Measuring What Matters</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Interoceptive lead time.</strong> The single most innovative metric Notice could surface. The temporal gap between biometric shift and conscious noticing is measurable and trainable. Shrinking that gap is interoceptive development. This gives Notice: a training outcome that isn't a score, a scaffolding decay signal grounded in what the app actually trains, a data moat no competitor can replicate, and a research contribution validatable against MAIA-2 assessments.</div>
+        <div class="detail-para"><strong>Outcome measurement.</strong> Behavioral proxies already implicit in the data: emotion label diversity, snap frequency patterns, biometric-label convergence. Formal validated assessments (MAIA-2, FFMQ-15) as optional periodic check-ins.</div>
+      </div>
+    </details>
+
+    <details class="roadmap-detail">
+      <summary>System-Initiated Awareness</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Passive biometric anomaly detection.</strong> When background HRV monitoring detects a significant shift, surface a Smart Stack widget: &ldquo;Your body shifted &mdash; did you notice something?&rdquo; Philosophically delicate &mdash; the app trains self-initiated noticing, not dependency on prompts.</div>
+      </div>
+    </details>
+
+    <details class="roadmap-detail">
+      <summary>Anticipatory State Navigation</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Bidirectional awareness.</strong> Longitudinal snap data combined with calendar context enables a prospective mode. Pattern-informed prompts based on the user's own snap history &mdash; not generic calendar-triggered wellness reminders. The user learns to read their own anticipatory body states. Scaffolding decay applies with particular force here: if the user develops the capacity to feel upcoming shifts independently, the prompts should reduce and stop.</div>
+      </div>
+    </details>
+
+  </section>
+</Base>
+
+<style>
+  .roadmap {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 8rem 2rem 6rem;
+  }
+
+  .roadmap-header {
+    margin-bottom: 3rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    color: var(--text);
+    margin: 0 0 1rem;
+    line-height: 1.15;
+  }
+
+  .subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--text-light);
+    max-width: 560px;
+    margin: 0 0 1rem;
+  }
+
+  .last-updated {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .back-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s ease;
+  }
+
+  .back-link:hover {
+    opacity: 0.7;
+  }
+
+  /* Section dividers */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 3.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .section-divider hr {
+    flex: 1;
+    border: none;
+    border-top: 1px solid var(--border-mid);
+  }
+
+  /* Section headings */
+  h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0.75rem 0 1.5rem;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 2.5rem 0 1rem;
+  }
+
+  /* Prose */
+  .roadmap > p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin: 0 0 1.25rem;
+  }
+
+  .roadmap > p a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-glow);
+    transition: border-color 0.2s ease;
+  }
+
+  .roadmap > p a:hover {
+    border-bottom-color: var(--accent);
+  }
+
+  .roadmap > p strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .roadmap > p code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--accent-dim);
+    padding: 0.15em 0.35em;
+    border-radius: 3px;
+  }
+
+  /* Resolved tag */
+  .resolved-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  /* Details / Summary (Later section) */
+  .roadmap-detail {
+    border-top: 1px solid var(--border-mid);
+  }
+
+  .roadmap-detail:last-child {
+    border-bottom: 1px solid var(--border-mid);
+  }
+
+  .roadmap-detail summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-mid);
+    list-style: none;
+    transition: color 0.2s ease;
+  }
+
+  .roadmap-detail summary:hover {
+    color: var(--accent);
+  }
+
+  .roadmap-detail summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .roadmap-detail summary::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%234A3D30' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 2l5 5-5 5'/%3E%3C/svg%3E") no-repeat center;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .roadmap-detail[open] summary::before {
+    transform: rotate(90deg);
+  }
+
+  .detail-content {
+    padding: 0 0 24px 26px;
+  }
+
+  .detail-para {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-mid);
+    margin-bottom: 0.75rem;
+  }
+
+  .detail-para:last-child {
+    margin-bottom: 0;
+  }
+
+  .detail-para strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .roadmap {
+      padding: 8rem 1.25rem 4rem;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .roadmap-detail summary::before {
+      transition-duration: 0.01s;
+    }
+  }
+</style>
