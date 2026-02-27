@@ -2,494 +2,253 @@
 import Base from '../layouts/Base.astro';
 ---
 
-<Base title="About — Thomas Brady" description="Path, instruments, marks, and lineage.">
-  <section class="about">
-    <!-- 01 — PATH -->
-    <div class="section-divider reveal">
-      <span class="section-number">01 — Path</span>
-      <hr />
+<Base title="About — Thomas Brady" description="The long way around to making invisible structures visible.">
+  <article class="about">
+    <!-- Photo: SFRC staff -->
+    <figure class="about__photo about__photo--full reveal">
+      <img src="/images/about/sfrc-staff-2001.jpg" alt="Senate Foreign Relations Committee staff photo, 2001" loading="eager" />
+      <figcaption>Senate Foreign Relations Committee staff, 2001.</figcaption>
+    </figure>
+
+    <!-- Prose block 1: NC, Senate, 9/11 -->
+    <div class="about__prose reveal">
+      <p>I'm from a small town in North Carolina. My first real job was on the Senate Foreign Relations Committee — I was eighteen, still in college, studying Chinese and working Asia-Pacific policy for Chairman Jesse Helms. In 2000 I took a semester at Peking University and traveled to Lhasa. By twenty-two I was running foreign policy portfolios for Senator Sam Brownback, observing elections in Nigeria, and crossing Central Asia and the Middle East as his advisor.</p>
+      <p>On September 11, 2001, my apartment was across the highway from the Pentagon. It filled with smoke. A month later, my office building was the one in the anthrax attack — shuttered for six months. The world I'd been analyzing from committee hearing rooms had come home.</p>
     </div>
 
-    <!-- Pando Industries -->
-    <div class="exp-card reveal">
-      <div class="exp-card__header">
-        <div>
-          <h3 class="exp-card__role">Founder</h3>
-          <div class="exp-card__org">Pando Industries</div>
-        </div>
-        <div class="exp-card__date">2022–Present</div>
-      </div>
-      <ul class="exp-card__details">
-        <li>Built <strong>Notice</strong>, an iOS app for interoceptive awareness training, in 3 days using Claude Code — designed two-tier AI architecture integrating Apple's on-device Foundation Models for real-time context capture with Claude API for longitudinal pattern analysis; first iOS app, learned Swift/SwiftUI through AI-accelerated development</li>
-        <li>Developed <strong>Scholion</strong>, an interactive argument visualization tool mapping epistemic dependencies in scientific reasoning — grounded in Toulmin argumentation theory, Doyle's truth-maintenance systems, and Lakatos's research programme methodology; built working prototype and published thesis at thbrdy.dev</li>
-        <li>Authored 10,000-word research framework on coordination infrastructure under AI acceleration, synthesizing formal results on superlinear coordination costs with Weick's sensemaking theory and Scott's legibility framework to articulate a novel "legibility inversion" thesis</li>
-        <li>Won 1st place at AI in Motion Lab Automation Hackathon (50 builders, 24 hours) — built "Close the Loop," a multi-agent system with live integration between Opentrons liquid handler and Cephla microscope, using LLM orchestration to generate protocols from meeting discussions and close feedback loops with imaging data</li>
-        <li>Assembled team and attracted investor interest for biopharma venture building multi-agent systems for automated lab protocols on robotic platforms</li>
-      </ul>
-      <div class="exp-card__tags">
-        <span>Claude Code</span><span>Multi-Agent Systems</span><span>SwiftUI</span><span>Research</span>
-      </div>
+    <!-- Photo: Dharamsala -->
+    <figure class="about__photo about__photo--inset reveal">
+      <img src="/images/about/dharamsala-2004.jpg" alt="With the Dalai Lama in Dharamsala, India, 2004" loading="lazy" />
+      <figcaption>Dharamsala, India, 2004.</figcaption>
+    </figure>
+
+    <!-- Prose block 2: Dharamsala, DIA, enlistment -->
+    <div class="about__prose reveal">
+      <p>A Congressional trip to Dharamsala in 2004 put me in front of the Dalai Lama. Something about that encounter stayed — not as a practice yet, but as a question. The idea that the mind could be studied from the inside with the same rigor you'd bring to any other system. It would take fifteen years before I sat down to actually do it.</p>
+      <p>I went to the Defense Intelligence Agency after that, writing strategic assessments of Chinese military leadership. It was good work. But the world had changed, and I'd changed with it. So at twenty-five I quit and enlisted in the United States Army with the intent of joining Special Forces.</p>
     </div>
 
-    <!-- H2O.ai -->
-    <div class="exp-card reveal">
-      <div class="exp-card__header">
-        <div>
-          <h3 class="exp-card__role">Senior Director, Product Management</h3>
-          <div class="exp-card__org">H2O.ai</div>
-        </div>
-        <div class="exp-card__date">2021–2022</div>
-      </div>
-      <ul class="exp-card__details">
-        <li>Led product strategy for H2O.ai's core portfolio representing <strong>85% of revenue</strong>, driving 40% customer base growth and $400K increase in average deal size</li>
-        <li>Co-developed H2O Feature Store with AT&T through daily hands-on technical collaboration — led the co-development effort, built all demo notebooks and example use cases, validated prototypes through iterative customer feedback; attracted <strong>$50M+ pipeline</strong> including Workday, PayPal, and Bank of America</li>
-        <li>Transformed Driverless AI into cloud-native service, reducing deployment time 10x; developed hybrid deployment strategy meeting enterprise security requirements while expanding into pharmaceuticals, supply chain, and business planning verticals</li>
-        <li>Ran AutoML experiments alongside CTO Arno Candel, testing features directly with customers and presenting strategic vision to Gartner and Forrester analysts</li>
-      </ul>
-      <div class="exp-card__tags">
-        <span>AutoML</span><span>Feature Store</span><span>Cloud-Native</span><span>Enterprise ML</span>
-      </div>
+    <!-- Photo: Iraq turret (LEAD) -->
+    <figure class="about__photo about__photo--full reveal">
+      <img src="/images/about/iraq-turret-2007.jpg" alt="Iraq, 2007, 1st Special Forces Group" loading="lazy" />
+      <figcaption>Iraq, 2007. 1st Special Forces Group.</figcaption>
+    </figure>
+
+    <!-- Prose block 3: SF pipeline, Nepal, Philippines -->
+    <div class="about__prose reveal">
+      <p>Basic training. Airborne school. Special Forces Assessment and Selection. Two years of pipeline — 18E, Special Forces communications sergeant: satellite systems, cryptography, a year of intensive Mandarin. Iraq in 2007. On a JCET to Nepal, I used computer modeling to simulate atmospheric conditions and bounced an HF radio signal 7,000 miles from Kathmandu to Fort Lewis — five times the equipment's rated range. Then I cross-trained to 18F, intelligence sergeant, and in 2010 spent nine months on the island of Jolo in the Philippines, which was as wild as it sounds.</p>
     </div>
 
-    <!-- AWS -->
-    <div class="exp-card reveal">
-      <div class="exp-card__header">
-        <div>
-          <h3 class="exp-card__role">Amazon Web Services — Product Management</h3>
-          <div class="exp-card__org">AWS</div>
-        </div>
-        <div class="exp-card__date">2018–2021</div>
-      </div>
-
-      <div class="exp-card__subrole">Product Lead, HPC & Elastic Fabric Adapter (2021)</div>
-      <ul class="exp-card__details">
-        <li>Authored HPC/EFA strategy positioning AWS against Azure/Oracle in <strong>$10B market</strong>; launched multi-slot instances and RDMA GPU enabling 100K+ core clusters</li>
-        <li>Designed Hpc6a pricing/ring-fencing strategy balancing $2B addressable market vs cannibalization risk; drove wins with Rescale ($45M), Siemens ($112M), Rivian, Maxar, and Boom Aerospace</li>
-      </ul>
-
-      <div class="exp-card__subrole">Product Lead, AI & Machine Learning Research (2020–2021)</div>
-      <ul class="exp-card__details">
-        <li>Worked directly with researchers across graph ML, causality, LLMs, and deep learning compilers to identify which research capabilities had product potential; authored research-to-product strategy for <strong>$20M org (200 people)</strong></li>
-        <li>Shaped AWS's first LLM (M5/M*) with Alex Smola, George Karypis, and Trishul Chilimbi — worked in notebooks alongside research teams, defined use cases for Ads/Alexa/Search that grounded the research in commercial applications</li>
-        <li>Built evaluation framework that <strong>doubled research commercialization rate</strong> — assessed real-world applicability, technical readiness, and market potential through structured notional press releases, working prototypes, and customer validation</li>
-        <li>Launched <strong>Neptune ML</strong> from research concept to production service, now powering RAG applications; drove distributed training framework delivering 4x performance improvement at 7x cost reduction</li>
-        <li>Created multi-dimensional model deployment system enabling instant global deployment for Amazon's catalog and ads teams, reducing operational costs by 100x</li>
-        <li>Drove turnaround of AWS deep learning toolchain (now <strong>Neuron SDK</strong>) through unified approach, reducing inference latency and operational costs by 60%</li>
-      </ul>
-
-      <div class="exp-card__subrole">Product Manager, Solutions Architecture (2018–2020)</div>
-      <ul class="exp-card__details">
-        <li>Scaled technical workshop program from pilot to <strong>40K+ events</strong> generating $3.4B pipeline; wrote Python/SQL to automate reporting and track conversion metrics</li>
-        <li>Built automated resource provisioning platform enabling 4K+ solutions architects to deliver workshops across 175+ AWS services; maintained 4.4/5.0 satisfaction</li>
-      </ul>
-
-      <div class="exp-card__tags">
-        <span>Neptune ML</span><span>Neuron SDK</span><span>HPC</span><span>LLMs</span><span>Graph ML</span>
-      </div>
+    <!-- Photos: 2-up cluster -->
+    <div class="about__photo-pair reveal">
+      <figure class="about__photo">
+        <img src="/images/about/philippines-sniper-school.jpg" alt="Teaching sniper school, Philippines" loading="lazy" />
+        <figcaption>Jolo, Philippines, 2010.</figcaption>
+      </figure>
+      <figure class="about__photo">
+        <img src="/images/about/iraq-standing-2007.jpg" alt="Iraq, 2007" loading="lazy" />
+        <figcaption>Iraq, 2007.</figcaption>
+      </figure>
     </div>
 
-    <!-- Senate Armed Services -->
-    <div class="exp-card reveal">
-      <div class="exp-card__header">
-        <div>
-          <h3 class="exp-card__role">Defense Policy Advisor</h3>
-          <div class="exp-card__org">United States Senate Armed Services Committee</div>
-        </div>
-        <div class="exp-card__date">2015–2017</div>
-      </div>
-      <ul class="exp-card__details">
-        <li>Architected transformation of Army's <strong>$3B intelligence enterprise</strong> (DCGS-A) — evaluated competing technical approaches, developed new requirements and procurement strategy that cut yearly dev/ops costs by 65%</li>
-        <li>Created investment framework for evaluating emerging defense technologies (IT systems, advanced materials, autonomous systems), guiding multi-billion dollar Congressional investment decisions</li>
-        <li>Drove adoption of 30+ legislative initiatives spanning military IT modernization and commercial technology integration; led Stryker vehicle modernization initiative, increasing investment 4x and accelerating delivery by 18 months</li>
-      </ul>
-      <div class="exp-card__tags">
-        <span>Defense Policy</span><span>Procurement</span><span>Legislative Strategy</span>
-      </div>
+    <!-- Prose block 4: SF lesson -->
+    <div class="about__prose reveal">
+      <p>Special Forces taught me the thing I keep coming back to: systems under real pressure reveal their actual structure. The doctrine, the org chart, the plan — those are approximations. What matters is the dependency structure underneath: who needs what from whom, what breaks first. <em>Slow is smooth, smooth is fast</em> isn't a slogan. It's an epistemological claim.</p>
     </div>
 
-    <!-- UW Emergency Management -->
-    <div class="exp-card reveal">
-      <div class="exp-card__header">
-        <div>
-          <h3 class="exp-card__role">Program Manager</h3>
-          <div class="exp-card__org">University of Washington Emergency Management</div>
-        </div>
-        <div class="exp-card__date">2013–2014</div>
-      </div>
-      <ul class="exp-card__details">
-        <li>Developed first comprehensive seismic resiliency policy for UW campus; built cross-functional working groups spanning 12 university units and multiple municipal/county agencies</li>
-        <li>Secured three years of seed funding through data-driven risk assessment; authored seismic resiliency report accepted by UW Board of Regents</li>
-      </ul>
-      <div class="exp-card__tags">
-        <span>Emergency Management</span><span>Seismic Resiliency</span>
-      </div>
+    <!-- Photo: Rugby -->
+    <figure class="about__photo about__photo--inset reveal">
+      <img src="/images/about/uw-rugby-2013.jpg" alt="University of Washington Rugby, 2013" loading="lazy" />
+      <figcaption>University of Washington Rugby, 2013.</figcaption>
+    </figure>
+
+    <!-- Prose block 5: UW, Cotton, tech -->
+    <div class="about__prose reveal">
+      <p>I left the Army at thirty-four. Back to UW — finished my degree, picked up Chinese again, played rugby, collected black eyes with my buddy Shane, a former Ranger. Then back to Washington one last time: defense policy for Senator Tom Cotton, Armed Services Committee, traveling Korea, Taiwan, and Singapore in the middle of the biggest national security debates of the mid-2010s.</p>
+      <p>After that I left the Hill for good. The technology chapter — AWS, then H2O.ai — was where the pattern became undeniable. Whether I was translating ML research into products or helping shape early LLM efforts, the hardest problem was never the technology. It was making invisible dependencies legible to the people who needed to act on them.</p>
     </div>
 
-    <!-- Special Forces -->
-    <div class="exp-card reveal">
-      <div class="exp-card__header">
-        <div>
-          <h3 class="exp-card__role">United States Army Special Forces</h3>
-          <div class="exp-card__org">U.S. Army</div>
-        </div>
-        <div class="exp-card__date">2004–2012</div>
-      </div>
+    <!-- Photo: Post-hospitalization (smaller) -->
+    <figure class="about__photo about__photo--small reveal">
+      <img src="/images/about/post-hospital-2024.jpg" alt="November 2024" loading="lazy" />
+      <figcaption>November 2024.</figcaption>
+    </figure>
 
-      <div class="exp-card__subrole">Senior Manager, Operations & Intelligence (2010–2012)</div>
-      <ul class="exp-card__details">
-        <li>Orchestrated operational support across six Special Forces teams executing diverse missions throughout Asia, leading 12-person team managing logistics, comms, and resource allocation with <strong>$3M budget</strong></li>
-        <li>Coordinated complex plans across teams in multiple countries, optimizing resource allocation based on varying local conditions; built scalable systems for sharing operational intelligence despite varying infrastructure and security constraints</li>
-      </ul>
-
-      <div class="exp-card__subrole">Communications Program Manager (2007–2010)</div>
-      <ul class="exp-card__details">
-        <li>Engineered 2,500-mile HF radio transmission from Nepal to Japan using computer modeling to simulate atmospheric conditions and design custom antenna configuration, exceeding equipment specifications by 5x</li>
-        <li>Built integrated communications architecture combining vehicle-mounted radios, satellite systems, and encryption for 60+ missions in austere environments</li>
-        <li>Stood up broadband satellite communications centers supporting five multinational deployments; managed $2M+ portfolio of advanced comms equipment with zero losses</li>
-      </ul>
-
-      <div class="exp-card__subrole">Special Forces Candidate / Infantryman (2004–2007)</div>
-      <ul class="exp-card__details">
-        <li>Selected from top 5% of candidates (400+) for Special Forces Qualification Course; completed two-year pipeline combining advanced combat training, communications specialization, and Mandarin Chinese fluency</li>
-        <li>Completed 52-week intensive Mandarin immersion program; technical training in satellite communications, radio theory, cryptography, and field operations</li>
-      </ul>
-
-      <div class="exp-card__tags">
-        <span>Special Forces</span><span>Operations</span><span>Communications</span><span>Mandarin</span>
-      </div>
+    <!-- Prose block 6: Stop, crisis -->
+    <div class="about__prose reveal">
+      <p>In 2022 I stopped. Twenty years of nonstop work — Senate, Special Forces, Iraq, the Philippines, the Senate again, AWS, H2O. I started my own thing. Then in 2024, severe acute necrotizing pancreatitis put me in the ICU for four months. Twenty-four blood transfusions. Dialysis. A hundred pounds lost.</p>
     </div>
 
-    <!-- DIA -->
-    <div class="exp-card reveal">
-      <div class="exp-card__header">
-        <div>
-          <h3 class="exp-card__role">Intelligence Analyst</h3>
-          <div class="exp-card__org">Defense Intelligence Agency</div>
-        </div>
-        <div class="exp-card__date">2004</div>
-      </div>
-      <ul class="exp-card__details">
-        <li>Authored strategic assessments of Chinese military leadership — backgrounds, decision-making patterns, and strategic priorities — used by senior defense and policy leaders</li>
-        <li>Analyzed emerging trends in Chinese military strategy and doctrine to inform U.S. defense planning and modernization decisions</li>
-      </ul>
-      <div class="exp-card__tags">
-        <span>Intelligence Analysis</span><span>China</span><span>Strategic Assessment</span>
-      </div>
+    <!-- Photo: Today -->
+    <figure class="about__photo about__photo--full reveal">
+      <img src="/images/about/oakland-2026.jpg" alt="Oakland, 2026" loading="lazy" />
+      <figcaption>Oakland, 2026.</figcaption>
+    </figure>
+
+    <!-- Prose block 7: Now, meditation, close -->
+    <div class="about__prose reveal">
+      <p>I came out lighter — in every sense.</p>
+      <p>Now I build tools. <a href="/writing/scholion/">Scholion</a> maps epistemic dependencies in scientific reasoning. <a href="/notice/">Notice</a> trains interoceptive awareness through the Apple Watch. Both do what I've been doing in every chapter: making invisible structures visible and navigable.</p>
+      <p>The seed from Dharamsala finally took root about five years ago. I meditate daily. I'm not a Buddhist scholar, but the practice is central to how I think and build — studying the mind from the inside turns out to be the same work as mapping dependencies in a paper or tracking states on a watch face.</p>
+      <p>I still play rugby. I live in Oakland. I'm restoring a Vanagon named Kalavajra.</p>
     </div>
 
-    <!-- Senate Foreign Relations -->
-    <div class="exp-card reveal">
-      <div class="exp-card__header">
-        <div>
-          <h3 class="exp-card__role">United States Senate Foreign Relations Committee</h3>
-          <div class="exp-card__org">U.S. Senate</div>
-        </div>
-        <div class="exp-card__date">1998–2004</div>
-      </div>
+    <!-- Photo: Kalavajra (the van) -->
+    <figure class="about__photo about__photo--full reveal">
+      <img src="/images/about/kalavajra.jpg" alt="Kalavajra, a dark grey Vanagon with roof rack, parked on an Oakland street" loading="lazy" />
+      <figcaption>Kalavajra, Oakland.</figcaption>
+    </figure>
 
-      <div class="exp-card__subrole">Manager, Foreign Policy (2001–2004)</div>
-      <ul class="exp-card__details">
-        <li>Spearheaded development and passage of Sudan Peace Act, managing complex stakeholder relationships across State Department, Commerce, and USAID</li>
-        <li>Served as lead Asia-Pacific policy expert providing strategic analysis on international economics, counter-terrorism, and foreign assistance programs</li>
-      </ul>
-
-      <div class="exp-card__subrole">Research Analyst (1998–2001)</div>
-      <ul class="exp-card__details">
-        <li>Led research on critical foreign policy issues including technology export controls and international broadcasting; coordinated Congressional hearings and senior staff briefings</li>
-      </ul>
-
-      <div class="exp-card__tags">
-        <span>Foreign Policy</span><span>Asia-Pacific</span><span>Legislation</span>
-      </div>
+    <!-- Resume link -->
+    <div class="about__resume reveal">
+      <a href="/Thomas_Brady_CV.pdf" target="_blank" rel="noopener">Résumé (PDF)</a>
     </div>
-
-    <!-- 02 — INSTRUMENTS -->
-    <div class="section-divider reveal">
-      <span class="section-number">02 — Instruments</span>
-      <hr />
-    </div>
-
-    <div class="skills-grid reveal">
-      <div class="skill-group">
-        <h3>Languages & Data</h3>
-        <ul>
-          <li>Python</li>
-          <li>SQL</li>
-          <li>Data Visualization</li>
-          <li>A/B Testing</li>
-        </ul>
-      </div>
-      <div class="skill-group">
-        <h3>AI / ML Systems</h3>
-        <ul>
-          <li>Claude Code</li>
-          <li>LLM Orchestration</li>
-          <li>Multi-Agent Systems</li>
-          <li>AutoML Systems</li>
-          <li>Graph Algorithms</li>
-        </ul>
-      </div>
-      <div class="skill-group">
-        <h3>Infrastructure</h3>
-        <ul>
-          <li>AWS SageMaker</li>
-          <li>Neptune</li>
-          <li>Trainium / Neuron</li>
-          <li>Cloud-Native Architecture</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 03 — MARKS -->
-    <div class="section-divider reveal">
-      <span class="section-number">03 — Marks</span>
-      <hr />
-    </div>
-
-    <div class="marks reveal">
-      <div class="mark-item">
-        <span class="mark-year">2024</span>
-        <span class="mark-label">1st Place, AI in Motion Lab Automation Hackathon, San Francisco</span>
-      </div>
-      <div class="mark-item">
-        <span class="mark-year">2020</span>
-        <span class="mark-label">AWS Certified Machine Learning – Specialty</span>
-      </div>
-      <div class="mark-item">
-        <span class="mark-year">2019</span>
-        <span class="mark-label">AWS Certified Solutions Architect – Associate</span>
-      </div>
-    </div>
-
-    <!-- 04 — LINEAGE -->
-    <div class="section-divider reveal">
-      <span class="section-number">04 — Lineage</span>
-      <hr />
-    </div>
-
-    <div class="lineage reveal">
-      <h3 class="lineage__school">University of Washington</h3>
-      <p class="lineage__degree">B.A. International Studies (Asian Studies)</p>
-      <p class="lineage__note">Mandarin Chinese fluency</p>
-    </div>
-  </section>
+  </article>
 </Base>
 
 <style>
   .about {
     position: relative;
     z-index: 1;
-    max-width: 800px;
+    max-width: 720px;
     margin: 0 auto;
     padding: 8rem 2rem 6rem;
   }
 
-  /* ── Section Dividers ── */
-  .section-divider {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: 4rem 0 2rem;
+  /* ── Prose blocks ── */
+  .about__prose {
+    margin: 2.5rem 0;
   }
 
-  .section-divider:first-child {
-    margin-top: 0;
+  .about__prose p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 1.25rem;
   }
 
-  .section-number {
+  .about__prose p:last-child {
+    margin-bottom: 0;
+  }
+
+  .about__prose em {
+    font-style: italic;
+  }
+
+  .about__prose a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-glow);
+    padding-bottom: 1px;
+  }
+
+  .about__prose a:hover {
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── Shared photo styles ── */
+  .about__photo {
+    margin: 2.5rem 0;
+  }
+
+  .about__photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: sepia(0.08) saturate(0.9);
+  }
+
+  .about__photo figcaption {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-
-  .section-divider hr {
-    flex: 1;
-    border: none;
-    border-top: 1px solid var(--border-mid);
-  }
-
-  /* ── Experience Cards ── */
-  .exp-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .exp-card__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-    gap: 1rem;
-  }
-
-  .exp-card__role {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 600;
-    font-size: 1.3rem;
-    color: var(--text);
-  }
-
-  .exp-card__org {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 0.85rem;
-    color: var(--accent);
-    margin-top: 0.25rem;
-  }
-
-  .exp-card__date {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-
-  .exp-card__subrole {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 0.8rem;
-    color: var(--text-mid);
-    margin: 1.5rem 0 0.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .exp-card__details {
-    list-style: none;
-    padding: 0;
-  }
-
-  .exp-card__details li {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 0.95rem;
-    color: var(--text-light);
-    line-height: 1.7;
-    padding: 0.4rem 0;
-    padding-left: 1rem;
-    position: relative;
-  }
-
-  .exp-card__details li::before {
-    content: '–';
-    position: absolute;
-    left: 0;
-    color: var(--text-muted);
-  }
-
-  .exp-card__details li :global(strong) {
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  .exp-card__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 1.25rem;
-  }
-
-  .exp-card__tags span {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.55rem;
     letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    border: 1px solid var(--accent-glow);
-    padding: 0.15rem 0.5rem;
-    border-radius: 2px;
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+    text-align: center;
   }
 
-  /* ── Skills Grid ── */
-  .skills-grid {
+  /* Full-width photos */
+  .about__photo--full {
+    margin: 3rem -2rem;
+  }
+
+  .about__photo--full img {
+    width: calc(100% + 4rem);
+    max-width: none;
+  }
+
+  /* Inset photos — centered, not full width */
+  .about__photo--inset {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Small photos — intimate scale */
+  .about__photo--small {
+    max-width: 320px;
+    margin-left: 0;
+  }
+
+  /* 2-up photo cluster */
+  .about__photo-pair {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    margin-bottom: 2rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 2.5rem 0;
   }
 
-  .skill-group h3 {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    font-size: 0.8rem;
-    color: var(--accent);
+  .about__photo-pair .about__photo {
+    margin: 0;
+  }
+
+  /* ── Resume link ── */
+  .about__resume {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .about__resume a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.75rem;
-  }
-
-  .skill-group ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .skill-group li {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--text-mid);
-    padding: 0.3rem 0;
-  }
-
-  /* ── Marks ── */
-  .marks {
-    margin-bottom: 2rem;
-  }
-
-  .mark-item {
-    display: flex;
-    gap: 1.5rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .mark-year {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
     color: var(--accent);
-    white-space: nowrap;
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-glow);
+    padding-bottom: 2px;
   }
 
-  .mark-label {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1rem;
-    color: var(--text-light);
-  }
-
-  /* ── Lineage ── */
-  .lineage {
-    margin-bottom: 2rem;
-  }
-
-  .lineage__school {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 600;
-    font-size: 1.3rem;
-    color: var(--text);
-  }
-
-  .lineage__degree {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1rem;
-    color: var(--text-light);
-    margin-top: 0.25rem;
-  }
-
-  .lineage__note {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-top: 0.5rem;
+  .about__resume a:hover {
+    border-bottom-color: var(--accent);
   }
 
   /* ── Responsive ── */
   @media (max-width: 640px) {
-    .about { padding: 6rem 1.5rem 4rem; }
-    .exp-card { padding: 1.5rem; }
-    .exp-card__header { flex-direction: column; }
-    .skills-grid { grid-template-columns: 1fr; }
+    .about {
+      padding: 6rem 1.5rem 4rem;
+    }
+
+    .about__photo--full {
+      margin: 2rem -1.5rem;
+    }
+
+    .about__photo--full img {
+      width: calc(100% + 3rem);
+    }
+
+    .about__photo--inset {
+      max-width: 100%;
+    }
+
+    .about__photo--small {
+      max-width: 260px;
+    }
+
+    .about__photo-pair {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
