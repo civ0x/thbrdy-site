@@ -181,6 +181,13 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] Expansion rings prototype fixed: reduced ring sizes (radiusPct 28/48/68 → 20/38/56), container shrunk (480px → 380px), inner label centered, subtitle reworded to avoid orphan
 - [x] Build passes on local machine, deployed to Cloudflare Pages
 
+**Notice vision appendices (2026-02-27):**
+- [x] Session prompt authored (`session-notice-appendices.md`): CollapsibleAppendix shared component spec + 5 appendix content sections (Pricing & Unit Economics, Go-to-Market, On-Device Technical Path, Operational Timeline, App Store Discovery)
+- [x] Component prototype (`prototype-collapsible-appendix.tsx`) — disclosure with chevron, expand/collapse, DM Sans for structural content, `useInView` scroll animation, aria attributes, reduced-motion aware
+- [x] Content drafted from 5 source documents: original vision doc (pricing/GTM), roadmap (timeline/milestones), competitive landscape analysis (ASO/discovery), on-device reflection models research (runtime, training pipeline, evaluation), MLX vs llama.cpp analysis (memory overhead anatomy)
+- [x] Session executed: `CollapsibleAppendix.tsx` shared component created (disclosure with chevron rotation, max-height transition, DM Sans, `nv-appendix-*` scoped classes, `useInView` scroll animation, aria attributes, reduced-motion aware). Five appendix sections added to `notice-vision.mdx` after emotional close (Pricing & Unit Economics, Go-to-Market Strategy, On-Device Technical Path, Operational Timeline, App Store Discovery). All content as JSX with `<div>` paragraphs and HTML tables.
+- [x] Build passes clean (24 pages, ~1.4s, zero errors)
+
 **Other remaining content:**
 - [ ] Pando essay (source file doesn't exist yet — `pando_research_report.md` is a research report, not an essay)
 - [x] `/now` page content — first entry ("What Is Code?" rebuild), weekly-update convention established
@@ -202,7 +209,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 complete, Phase 5 in progress. Per-essay OG images + per-quote card images generated at build time via `prebuild` hook (`scripts/generate-og-images.js` → `public/images/og/[slug].png` + `[slug]-quote-[n].png`). PullQuote share bar: X/Twitter intent + copy-link with checkmark feedback. Quote share target pages at `/writing/[slug]/quote/[n]/` with quote-specific OG meta tags and JS redirect to parent essay (crawlers don't execute JS, so they read the quote-specific OG tags). `twitter:site` meta tag set to @thbrdy. 7 quote cards across 5 essays. Fonts: Cormorant Garamond SemiBold + Italic, JetBrains Mono Regular in `scripts/fonts/`. Seven published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands + 38 inline annotations. Circuitry of Science essay: 6 islands + inline annotations; two diagram components use shared DiagramPopover infrastructure for node-level popovers. **Notice vision page ("The Body Knows First"):** 5 new islands + 3 reused, 18 inline annotations, dedicated `/notice/` route (not under `/writing/`), linked from homepage Notice project card. Annotation system infrastructure (`Annotation.tsx`, `remark-annotations.mjs`, companion YAML pattern) now used by three pages (VoD, Circuitry of Science, Notice vision). `/now` page populated with first dated entry. Build produces 12 pages.
+Phase 4 complete, Phase 5 in progress. Per-essay OG images + per-quote card images generated at build time via `prebuild` hook (`scripts/generate-og-images.js` → `public/images/og/[slug].png` + `[slug]-quote-[n].png`). PullQuote share bar: X/Twitter intent + copy-link with checkmark feedback. Quote share target pages at `/writing/[slug]/quote/[n]/` with quote-specific OG meta tags and JS redirect to parent essay (crawlers don't execute JS, so they read the quote-specific OG tags). `twitter:site` meta tag set to @thbrdy. 7 quote cards across 5 essays. Fonts: Cormorant Garamond SemiBold + Italic, JetBrains Mono Regular in `scripts/fonts/`. Seven published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands + 38 inline annotations. Circuitry of Science essay: 6 islands + inline annotations; two diagram components use shared DiagramPopover infrastructure for node-level popovers. **Notice vision page ("The Body Knows First"):** 5 new islands + 3 reused, 18 inline annotations, dedicated `/notice/` route (not under `/writing/`), linked from homepage Notice project card. Annotation system infrastructure (`Annotation.tsx`, `remark-annotations.mjs`, companion YAML pattern) now used by three pages (VoD, Circuitry of Science, Notice vision). Notice vision page now includes 5 collapsible appendices (Pricing, GTM, On-Device, Timeline, App Store Discovery) via shared `CollapsibleAppendix.tsx` component. `/now` page populated with first dated entry. Build produces 24 pages.
 
 **Repo reorganization (2026-02-25):** All session prompts consolidated into `sessions/` by essay (ab, notice, lc, scholion, vod, coregulation, site-infra, pages). Scholion sub-project docs/PDFs/extractions moved to `working/scholion/`. Prototypes organized into `prototypes/{scholion,vod}/`. Duplicate MDX/YAML files deleted (`src/content/writing/` is canonical). Orphaned `coregulation-essay/` directory removed. Root is clean — only `session-repo-cleanup.md` remains as the session prompt for this operation.
 
@@ -228,7 +235,7 @@ Phase 4 complete, Phase 5 in progress. Per-essay OG images + per-quote card imag
 | Visual reference (layout/canvas only) | `reference/index.html` |
 | Architectural decisions | `DECISIONS.md` |
 | Migration status | This file |
-| Session prompts | `sessions/{ab,notice,lc,scholion,vod,coregulation,site-infra,pages}/` + `session-notice-vision-page.md` |
+| Session prompts | `sessions/{ab,notice,lc,scholion,vod,coregulation,site-infra,pages}/` + `session-notice-vision-page.md` + `session-notice-appendices.md` |
 | Scholion sub-project docs | `working/scholion/` |
 | HTML prototypes | `prototypes/{scholion,vod}/` |
 | Interaction design patterns | `docs/interaction-patterns.md` |

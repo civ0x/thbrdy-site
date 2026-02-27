@@ -17,6 +17,7 @@ import NoticeVisionLeadTime from '../../components/islands/NoticeVisionLeadTime.
 import NoticeVisionScaffoldingDecay from '../../components/islands/NoticeVisionScaffoldingDecay.tsx'
 import NoticeVisionExpansionRings from '../../components/islands/NoticeVisionExpansionRings.tsx'
 import NoticeVisionTimeline from '../../components/islands/NoticeVisionTimeline.tsx'
+import { CollapsibleAppendix } from '../../components/islands/shared/CollapsibleAppendix.tsx'
 
 <SectionDivider client:visible number="01" label="The Gap" />
 
@@ -183,3 +184,122 @@ Notice is built on a conviction I keep returning to: the most important thing yo
 The technology is in service of that learning. A temporary scaffold that builds a permanent capacity. The biometric data is a mirror for the body you already have. The emotion label is a frame for the feeling you already feel. The AI reflection is an invitation to look at what you already know but have not yet noticed.
 
 *The app gets quieter as you get better. That is the design.*
+
+<div style={{ marginTop: '64px' }}>
+  <div style={{
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '10px',
+    fontWeight: 600,
+    letterSpacing: '2.5px',
+    textTransform: 'uppercase',
+    color: 'var(--accent)',
+    marginBottom: '24px',
+  }}>
+    APPENDICES
+  </div>
+
+  <CollapsibleAppendix client:visible id="pricing" title="Pricing & Unit Economics">
+    <div style={{ marginBottom: '12px' }}>Tiered model anchored against biometric wearables, not meditation apps.</div>
+    <div className="nv-appendix-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Core</th>
+            <th>Full</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Price</td>
+            <td>~$80/year</td>
+            <td>$149–199/year</td>
+          </tr>
+          <tr>
+            <td>Reflection tiers</td>
+            <td>Brief (on-device)</td>
+            <td>Brief + Exploratory + Daily + Weekly synthesis</td>
+          </tr>
+          <tr>
+            <td>AI runtime</td>
+            <td>On-device model (zero marginal cost)</td>
+            <td>Claude API (cloud)</td>
+          </tr>
+          <tr>
+            <td>Biometric context</td>
+            <td>Basic</td>
+            <td>Full enrichment via Foundation Models</td>
+          </tr>
+          <tr>
+            <td>Anchor comparison</td>
+            <td>Oura ($70/yr + $300 hardware)</td>
+            <td>WHOOP ($239/yr)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style={{ marginBottom: '12px' }}>The economic logic: once the on-device model ships brief reflections, the Core tier costs nothing to serve at scale. The premium tier gates longitudinal pattern analysis — daily and weekly synthesis reflections that require Claude's reasoning capacity — not the core snap-debrief loop. A 7-day free trial with full features is the conversion mechanism. Gate nothing during the aha window.</div>
+    <div>Willingness-to-pay research suggests 2–4% conversion at the premium tier from a qualified audience. This is viable if the funnel delivers contemplative practitioners and serious quantified-self trackers, not casual meditation-curious downloaders.</div>
+  </CollapsibleAppendix>
+
+  <CollapsibleAppendix client:visible id="gtm" title="Go-to-Market Strategy">
+    <div style={{ marginBottom: '12px' }}>Three-phase channel sequence, ordered by community-product fit and cost per qualified user.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Phase 1 — Community validation (now).</strong> Jhourney contemplative community: 1,000–3,000 practitioners, high philosophical alignment, produces testimonial quality needed to seed other channels. Simultaneously: r/quantifiedself and r/ouraring — technically literate, wearable-native, actively seeking what Notice does in different vocabulary ("HRV-correlated emotional pattern tracking"). Highest ROI per post of any channel.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Phase 2 — Niche amplification (post-launch).</strong> Podcasts: Buddhist Geeks, Technology for Mindfulness, Quantified Self podcast, Ten Percent Happier. Contemplative press: Tricycle Magazine. Communities: r/biohackers, Oura partner program, QS local meetups. Beta-listing sites (Product Hunt, BetaList) timed to App Store launch.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Phase 3 — Adjacent expansion (months 3–6).</strong> Insight Timer community, Waking Up / Sam Harris community, r/meditation. Each community requires segment-specific vocabulary: contemplative practitioners hear "noticing practice," biohackers hear "biometric-emotional correlation," the QS audience hears "interoceptive accuracy training." The product doesn't change; the framing does.</div>
+    <div>Key insight from competitive analysis: the QS/biohacker audience may be the faster growth channel, not just the later one. They're already tracking HRV, already frustrated by the numbers-without-meaning problem, and already primed for exactly the layer Notice adds.</div>
+  </CollapsibleAppendix>
+
+  <CollapsibleAppendix client:visible id="on-device" title="On-Device Technical Path">
+    <div style={{ marginBottom: '12px' }}>The north star is every reflection tier running locally — no API dependency, no data disclosure, no marginal cost per reflection.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Runtime reality.</strong> MLX is blocked for 3B models on iPhone. MLX's memory overhead (~15 GB for Llama 3.2 3B 4-bit vs. llama.cpp's ~3.67 GB) stems from three architectural decisions: no memory-mapped weight loading, an aggressive buffer cache that never returns memory to the OS, and per-operation Metal buffer allocation for intermediates. The theoretical minimum for Llama 3.2 3B at 4-bit with 1K context is ~1.95 GB; llama.cpp gets within 25–50% of this floor. Two viable paths: llama.cpp for 3B models (4–8 second generation, higher quality) or MLX for 1B–1.7B models (under 2 seconds, lower ceiling).</div>
+    <div style={{ marginBottom: '12px' }}><strong>Model candidates.</strong> SmolLM3-3B is the leading candidate — purpose-built for on-device, strong instruction-following, Apache 2.0. Llama 3.2 3B is the safe default. Qwen3 1.7B for the MLX/small-model path. Recommendation: benchmark SmolLM3-3B via llama.cpp against Qwen3 1.7B via MLX on target hardware. Let quality evaluation decide.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Training pipeline.</strong> Teacher-student distillation from Claude API. Target: 1,200 reflection examples covering diverse snap sequences plus 150 correction examples that demonstrate constraint boundaries — what the model should not say. The correction examples are critical: LoRA fine-tuning on domain-specific output degrades general instruction-following if training data doesn't include instruction-following examples alongside contemplative reflections.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Hybrid routing.</strong> <code>.brief</code> reflections: on-device primary, cloud fallback. <code>.exploratory</code>: cloud primary for now, on-device plausible for 3B models as training data accumulates. <code>.daily</code> and <code>.weekly</code> synthesis: always cloud — requires analytical reasoning over variable-length sequences that exceeds small model capability. On-device <code>.brief</code> covers ~80% of API calls.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Three-tier evaluation before shipping.</strong> Tier 1: automated constraint gate (no diagnostic language, no raw biometric values, no prescriptive framing). Tier 2: LLM-as-judge scoring relational orientation, phenomenological precision, novelty, tone. Tier 3: blind A/B with experienced practitioners. Ship threshold: Tier 1 &gt;99% pass, Tier 2 within 15% of Claude baseline, Tier 3 preference &gt;40%.</div>
+    <div><strong>Long-term differentiator.</strong> On-device LoRA adaptation: the model learns your phenomenological vocabulary, your somatic patterns, your ways of relating to experience. The personalized weights never leave the phone. This is architecturally impossible with a cloud API and represents a genuine moat — the value increases monotonically with use, tied to your specific device and practice history.</div>
+  </CollapsibleAppendix>
+
+  <CollapsibleAppendix client:visible id="timeline" title="Operational Timeline">
+    <div className="nv-appendix-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Week</th>
+            <th>Milestone</th>
+            <th>Key Deliverables</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Foundation &amp; Feedback</td>
+            <td>Validate Foundation Models on physical hardware (interpreter &lt;1s, context assembly &lt;3s). Incorporate beta taxonomy feedback. Deploy Cloudflare Worker proxy with App Attest. Push new TestFlight build (sessions 11–15). Begin synthetic training corpus generation.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>On-Device &amp; Measurement</td>
+            <td>Ship on-device brief reflections via llama.cpp or MLX (runtime fork resolved by benchmark). Implement scaffolding decay phase 1 triggers. Begin measuring interoceptive lead time across beta cohort. Fix keyboard drawer default on debrief screen.</td>
+          </tr>
+          <tr>
+            <td>3+</td>
+            <td>Launch Preparation</td>
+            <td>Expand beta beyond Jhourney (QS/Reddit channels). Launch notice.tools landing page. Finalize App Store metadata and screenshots (FDA-compliant language). Privacy settings view. App Store submission.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style={{ marginTop: '12px' }}>Each week's deliverables are gated by the previous week's outcomes. If Foundation Models latency exceeds budget, the fallback to direct framework calls is straightforward. If the on-device model doesn't meet the three-tier evaluation threshold, cloud reflections remain the primary path with no user-visible degradation.</div>
+  </CollapsibleAppendix>
+
+  <CollapsibleAppendix client:visible id="discovery" title="App Store Discovery">
+    <div style={{ marginBottom: '12px' }}>Keyword strategy targets low-competition, high-fit terms that no major competitor owns.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Primary keywords:</strong> "interoception," "somatic awareness," "HRV journal," "biofeedback journal," "felt sense." These are high-intent, low-competition — the contemplative-tech and quantified-self audiences search for them, but Calm and Headspace don't target them.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Secondary keywords:</strong> "body awareness," "emotional awareness," "mindful HRV."</div>
+    <div style={{ marginBottom: '12px' }}><strong>Avoid:</strong> "mindfulness" and "meditation" — saturated, dominated by competitors with 8-figure marketing budgets.</div>
+    <div style={{ marginBottom: '12px' }}><strong>App Store subtitle (30 chars):</strong> "Body Awareness &amp; HRV Journal" or "Somatic Awareness Training."</div>
+    <div style={{ marginBottom: '12px' }}><strong>Screenshot story:</strong> Lead with wisdom, not dashboard. First screenshot: a reflection that names something the user didn't consciously know. Second: the emotion picker with biometric context. Third: the privacy architecture diagram. The aha moment sells; the data display supports.</div>
+    <div style={{ marginBottom: '12px' }}><strong>Category:</strong> Health &amp; Fitness (primary), Lifestyle (secondary).</div>
+    <div><strong>Critical constraint:</strong> No disease-specific language anywhere in metadata, descriptions, or screenshots. The FDA General Wellness Guidance classification depends on what the app says, not just what it measures.</div>
+  </CollapsibleAppendix>
+</div>
