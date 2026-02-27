@@ -108,17 +108,6 @@ terms:
       The core insight (autonomic state shapes social capacity) is
       better supported than the specific neural mechanism proposed.
 
-  - key: jhourney
-    pattern: "Jhourney"
-    section: "02"
-    definition: >
-      A contemplative community and pedagogy founded on the integration
-      of jhāna (deep meditative absorption) practice with modern
-      psychotherapy and relational work. Notice's beta testers come
-      from this community, and its pedagogical orientation — relation
-      over object, felt sense over diagnosis — is a core design
-      constraint in the product.
-
   # ─── PRODUCT (badge: PRODUCT, color: var(--accent)) ───
 
   - key: frame-snap
@@ -303,6 +292,19 @@ links:
       design, and the contemplative framework behind the product. Goes
       deeper on the Frame Snap interaction, emotion taxonomy design,
       and the AI reflection system.
+
+  - key: jhourney
+    pattern: "Jhourney's"
+    section: "02"
+    url: "https://jhourney.io"
+    title: "Jhourney"
+    source: "jhourney.io · Contemplative Community"
+    summary: >
+      A contemplative community and pedagogy integrating jhāna
+      (deep meditative absorption) practice with modern psychotherapy
+      and relational work. Notice's beta testers come from this
+      community, and its pedagogical orientation — relation over
+      object, felt sense over diagnosis — is a core design constraint.
 
   - key: coregulation-essay
     pattern: "coregulation-essay-link"
