@@ -168,6 +168,19 @@ Sequential — do NOT parallelize. Use Plan mode.
 - [x] Build passes clean (11 pages, ~1.16s, zero errors)
 - [x] No new dependencies added
 
+**Notice vision page (2026-02-27):**
+- [x] Session prompt authored (`session-notice-vision-page.md`): section-by-section content spec, 5 new component specs, 3 reused components, voice pass edits, technical constraints, verification checklist
+- [x] Session executed: 5 new island components created (`NoticeVisionTextureGrid`, `NoticeVisionLeadTime`, `NoticeVisionScaffoldingDecay`, `NoticeVisionExpansionRings`, `NoticeVisionTimeline`), 3 existing reused (`NoticeCompetitiveGap`, `NoticeArchitectureDiagram`, `NoticeInteractionFlow`)
+- [x] MDX content (`notice-vision.mdx`) with all 8 islands integrated, 10 section dividers, 1 PullQuote
+- [x] Title: "The Body Knows First"
+- [x] Route: dedicated `src/pages/notice.astro` at `/notice/` (not under `/writing/`). MDX set to `draft: true` so it's excluded from writing index
+- [x] Homepage project card updated: Notice card `href` changed from `/writing/notice/` → `/notice/`
+- [x] Timeline compressed: 5 milestones across 12 months → 3 milestones across ~2 weeks (Week 1 / Week 2 / Week 3+)
+- [x] Inline annotations: `notice-vision.annotations.yaml` companion file with 16 terms (SCIENCE + PRODUCT categories), 6 references, 2 internal links. 18 `[[term:]]` and `[[ref:]]` markers in MDX
+- [x] Cross-links to existing Notice essays: inline prose links to `/writing/notice/` (Section 01) and `/writing/coregulation/` (Section 09)
+- [x] Expansion rings prototype fixed: reduced ring sizes (radiusPct 28/48/68 → 20/38/56), container shrunk (480px → 380px), inner label centered, subtitle reworded to avoid orphan
+- [x] Build passes on local machine, deployed to Cloudflare Pages
+
 **Other remaining content:**
 - [ ] Pando essay (source file doesn't exist yet — `pando_research_report.md` is a research report, not an essay)
 - [x] `/now` page content — first entry ("What Is Code?" rebuild), weekly-update convention established
@@ -189,7 +202,7 @@ Sequential — do NOT parallelize. Use Plan mode.
 
 ## Current State
 
-Phase 4 complete, Phase 5 in progress. Per-essay OG images + per-quote card images generated at build time via `prebuild` hook (`scripts/generate-og-images.js` → `public/images/og/[slug].png` + `[slug]-quote-[n].png`). PullQuote share bar: X/Twitter intent + copy-link with checkmark feedback. Quote share target pages at `/writing/[slug]/quote/[n]/` with quote-specific OG meta tags and JS redirect to parent essay (crawlers don't execute JS, so they read the quote-specific OG tags). `twitter:site` meta tag set to @thbrdy. 7 quote cards across 5 essays. Fonts: Cormorant Garamond SemiBold + Italic, JetBrains Mono Regular in `scripts/fonts/`. Seven published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands + 38 inline annotations. Circuitry of Science essay: 6 islands (CompetitiveGap, SchemaEvolution, DecompositionPipeline, Roadmap, SafetyCaseFragment, ChenDependencyGraph) + inline annotations; two diagram components use shared DiagramPopover infrastructure for node-level popovers. Annotation system infrastructure (`Annotation.tsx`, `remark-annotations.mjs`, companion YAML pattern) is reusable for other essays. `/now` page populated with first dated entry. Build produces 11 pages in ~1.2s.
+Phase 4 complete, Phase 5 in progress. Per-essay OG images + per-quote card images generated at build time via `prebuild` hook (`scripts/generate-og-images.js` → `public/images/og/[slug].png` + `[slug]-quote-[n].png`). PullQuote share bar: X/Twitter intent + copy-link with checkmark feedback. Quote share target pages at `/writing/[slug]/quote/[n]/` with quote-specific OG meta tags and JS redirect to parent essay (crawlers don't execute JS, so they read the quote-specific OG tags). `twitter:site` meta tag set to @thbrdy. 7 quote cards across 5 essays. Fonts: Cormorant Garamond SemiBold + Italic, JetBrains Mono Regular in `scripts/fonts/`. Seven published essays have interactive islands. AB essay: 2 islands. Notice essay: 4 islands + ensō header; two deferred. LC essay: 5 islands. Scholion essay: 6 islands. CoRegulation essay: 2 islands. VoD essay: 6 islands + 38 inline annotations. Circuitry of Science essay: 6 islands + inline annotations; two diagram components use shared DiagramPopover infrastructure for node-level popovers. **Notice vision page ("The Body Knows First"):** 5 new islands + 3 reused, 18 inline annotations, dedicated `/notice/` route (not under `/writing/`), linked from homepage Notice project card. Annotation system infrastructure (`Annotation.tsx`, `remark-annotations.mjs`, companion YAML pattern) now used by three pages (VoD, Circuitry of Science, Notice vision). `/now` page populated with first dated entry. Build produces 12 pages.
 
 **Repo reorganization (2026-02-25):** All session prompts consolidated into `sessions/` by essay (ab, notice, lc, scholion, vod, coregulation, site-infra, pages). Scholion sub-project docs/PDFs/extractions moved to `working/scholion/`. Prototypes organized into `prototypes/{scholion,vod}/`. Duplicate MDX/YAML files deleted (`src/content/writing/` is canonical). Orphaned `coregulation-essay/` directory removed. Root is clean — only `session-repo-cleanup.md` remains as the session prompt for this operation.
 
@@ -215,7 +228,7 @@ Phase 4 complete, Phase 5 in progress. Per-essay OG images + per-quote card imag
 | Visual reference (layout/canvas only) | `reference/index.html` |
 | Architectural decisions | `DECISIONS.md` |
 | Migration status | This file |
-| Session prompts | `sessions/{ab,notice,lc,scholion,vod,coregulation,site-infra,pages}/` |
+| Session prompts | `sessions/{ab,notice,lc,scholion,vod,coregulation,site-infra,pages}/` + `session-notice-vision-page.md` |
 | Scholion sub-project docs | `working/scholion/` |
 | HTML prototypes | `prototypes/{scholion,vod}/` |
 | Interaction design patterns | `docs/interaction-patterns.md` |

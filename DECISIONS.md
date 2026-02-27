@@ -161,6 +161,22 @@
 - `docs/` — design reference docs (interaction-patterns.md, design-annotation-system.md)
 **Constraint:** `src/content/writing/` is the sole canonical location for essay content. No duplicate MDX or annotation YAML files elsewhere.
 
+## 023: Notice vision page as dedicated route, not essay
+**Date:** 2026-02-27
+**Decision:** The Notice vision document ("The Body Knows First") lives at `/notice/` via a dedicated `src/pages/notice.astro` rather than under `/writing/notice-vision/`. The MDX remains in the content collection (for build-time rendering via `getEntry`) but is marked `draft: true` to exclude it from the writing index. The homepage Notice project card links to `/notice/`.
+**Rationale:** The vision document is investor-facing, not editorial. Mixing it into the `/writing` index dilutes both the essay stream and the document's purpose. A top-level route (`/notice`) signals project identity. The MDX stays in the content collection because the build pipeline (remark annotations, island hydration, PostLayout) is already wired for it — creating a parallel rendering path would duplicate infrastructure. `draft: true` is the minimal change that hides it from the writing index while preserving all existing build mechanics.
+**Alternatives considered:** Custom `type` frontmatter field with writing index filter (more complex, no immediate benefit). Separate Astro page with inline content (loses remark plugin, annotation system, PostLayout rendering). Flat file outside content collection (loses content collection schema validation).
+
+## 024: Vision document timeline compressed to sprint cadence
+**Date:** 2026-02-27
+**Decision:** Compress the NoticeVisionTimeline from 5 milestones across 12 months (Now / Months 1–3 / Months 3–6 / Months 6–12 / January 2027) to 3 milestones across ~2 weeks (Week 1 / Week 2 / Week 3+).
+**Rationale:** The original timeline reflected conservative estimates from zero. Actual velocity — 15 development sessions, ~24 hours of build time, complete end-to-end product from zero iOS experience — makes the compressed timeline credible. The document should reflect the builder's real cadence, not a padded estimate. An investor reads a 12-month timeline as "this person doesn't know how fast they move."
+
+## 025: Vision document annotation density — moderate, two categories
+**Date:** 2026-02-27
+**Decision:** 16 annotated terms in two badge categories (SCIENCE in teal, PRODUCT in gold), 6 references, 2 internal links. ~18 markers total in a ~2,500-word document.
+**Rationale:** The vision document's audience (investors, capital sources) differs from the academic essay audience. Annotation density should be lighter — enough to provide context for domain terms an investor may not know (interoception, affect labeling, LoRA, MAIA-2), not so dense it feels like a textbook. Two categories (SCIENCE for neuroscience/psychophysiology terms, PRODUCT for Notice-specific vocabulary) map cleanly to the document's two layers: the research basis and the product mechanics. References annotate the specific citations that appear in prose (Craig, Lieberman, Barrett, Feldman, FDA guidance, FTC rule) — the minimum needed for an investor to verify claims.
+
 ## 016: Diagram popover approach — self-contained with shared component
 **Date:** 2026-02-24
 **Decision:** Create a shared `DiagramPopover.tsx` + `useDiagramPopover` hook in `islands/shared/` for diagram node popovers (SafetyCaseFragment, ChenDependencyGraph). Keep separate from `Annotation.tsx`.

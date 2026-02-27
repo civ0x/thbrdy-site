@@ -26,19 +26,19 @@ You have felt this before. Your shoulders are tight for twenty minutes before yo
 
 The body leads. The story follows. There is always a gap.
 
-The gap is measurable. Heart rate variability drops before conscious anxiety arrives. Heart rate rises before excitement registers. Skin conductance shifts before you can name the feeling. Bud Craig's work on insular cortex mapping shows that interoceptive signals — the body's report on its own internal state — travel a dedicated neural pathway, but conscious access to those signals varies enormously between individuals. The core finding: interoceptive accuracy is not a fixed trait. It is a skill. And it is trainable.
+The gap is measurable. Heart rate variability drops before conscious anxiety arrives. Heart rate rises before excitement registers. Skin conductance shifts before you can name the feeling. [[ref:craig-2002|Bud Craig's]] work on [[term:insular-cortex|insular cortex mapping]] shows that [[term:interoception|interoceptive signals]] — the body's report on its own internal state — travel a dedicated neural pathway, but conscious access to those signals varies enormously between individuals. The core finding: interoceptive accuracy is not a fixed trait. It is a skill. And it is trainable.
 
 Notice exists to train that skill.
 
 &gt; The most valuable structures in our lives — emotional patterns, somatic intelligence, relational dynamics — are invisible until something makes them navigable.
 
-This is part of a broader thesis I have been developing across two projects. [Scholion](https://thbrdy.dev/writing/the-circuitry-of-science/) makes the dependency structure of scientific claims visible and navigable — the hidden load-bearing walls behind published findings. Notice does the same thing for the dependency structure of your inner life: the connections between what your body is doing, what you are feeling, and how you are relating to it all. Different domains, same problem. The structures that matter most are the ones you cannot see.
+This is part of a broader thesis I have been developing across two projects. [Scholion](https://thbrdy.dev/writing/the-circuitry-of-science/) makes the dependency structure of scientific claims visible and navigable — the hidden load-bearing walls behind published findings. Notice does the same thing for the dependency structure of your inner life: the connections between what your body is doing, what you are feeling, and how you are relating to it all. The full technical essay — [You're Already Feeling Something You Haven't Noticed Yet](/writing/notice/) — covers the architecture and interaction design in depth. Different domains, same problem. The structures that matter most are the ones you cannot see.
 
 <SectionDivider client:visible number="02" label="What Notice Is" />
 
 ## What Notice Is
 
-The core interaction is called a **Frame Snap**. When you notice something shifting — a tightening in your chest, a surge of energy, a settling you cannot quite name — you tap your Watch or phone. That tap captures a biometric snapshot: heart rate, heart rate variability, and contextual signals assembled by on-device intelligence. Then you debrief.
+The core interaction is called a **[[term:frame-snap|Frame Snap]]**. When you notice something shifting — a tightening in your chest, a surge of energy, a settling you cannot quite name — you tap your Watch or phone. That tap captures a biometric snapshot: heart rate, [[term:hrv|heart rate variability]], and contextual signals assembled by on-device intelligence. Then you debrief.
 
 <NoticeInteractionFlow client:visible />
 
@@ -46,13 +46,13 @@ The debrief is not a form. It is a felt-sense encounter. An emotion picker organ
 
 <NoticeVisionTextureGrid client:visible />
 
-The taxonomy is sized to a research sweet spot. Lieberman et al. (2007) showed that affect labeling — the act of putting feelings into words — downregulates amygdala reactivity via right ventrolateral prefrontal cortex activation. But the effect depends on granularity. Six labels are too coarse. Unrestricted free text is too effortful on a Watch screen. Eighteen labels, organized by somatic texture and grounded in Gendlin's Focusing tradition, hits the range where the intervention works. Every Frame Snap is a micro-dose of a well-documented regulatory technique, embedded in a gesture that takes three seconds.
+The taxonomy is sized to a research sweet spot. [[ref:lieberman-2007|Lieberman et al. (2007)]] showed that [[term:affect-labeling|affect labeling]] — the act of putting feelings into words — downregulates amygdala reactivity via right ventrolateral prefrontal cortex activation. But the effect depends on granularity. Six labels are too coarse. Unrestricted free text is too effortful on a Watch screen. Eighteen labels, organized by somatic texture and grounded in Gendlin's [[term:focusing|Focusing tradition]], hits the range where the intervention works. Every Frame Snap is a micro-dose of a well-documented regulatory technique, embedded in a gesture that takes three seconds.
 
 Then Claude — Anthropic's AI — generates a contemplative reflection. Not advice. Not a diagnosis. A mirror. The reflection orients toward *relation* — how you are meeting your experience — never toward *object* — what the experience supposedly is.
 
 &gt; "You said calm, but your heart rate variability was lower than usual. That is not a contradiction — it is information. What happens when you hold both?"
 
-This distinction, drawn from Barrett's constructed emotion theory and Jhourney's contemplative pedagogy, is the deepest design constraint in the product. Emotion labels are frames, not facts. The app's job is to support noticing without grasping.
+This distinction, drawn from [[ref:barrett-2017|Barrett's]] [[term:constructed-emotion|constructed emotion theory]] and Jhourney's contemplative pedagogy, is the deepest design constraint in the product. Emotion labels are frames, not facts. The app's job is to support noticing without grasping.
 
 Claude reflects at three timescales: a brief sentence at snap time — a small act of witnessing; an exploratory paragraph during debrief — an invitation toward curiosity; and daily and weekly synthesis — longitudinal pattern detection that surfaces what you cannot see from inside a single moment. The weekly reflections consume daily syntheses hierarchically, so the AI reasons over compressed patterns rather than re-aggregating raw data. Over weeks and months, these syntheses surface the recurring shapes of your inner life — the patterns you did not know you had.
 
@@ -74,9 +74,9 @@ Notice's privacy model is not a policy. It is an architecture.
 
 Tier 1 reads everything. Raw heart rate, calendar entries, GPS coordinates, contacts. It assembles a structured summary, stripping absolute values, timestamps, and identifying details. Tier 2 — Claude via the cloud — sees only those summaries. "HRV lower than your baseline." "Back-to-back meetings this morning." Never a heart rate number. Never a location. Never a name.
 
-A stateless Cloudflare Worker proxy holds the API key server-side and validates device identity via Apple's App Attest before forwarding any request.
+A stateless Cloudflare Worker proxy holds the API key server-side and validates device identity via Apple's [[term:app-attest|App Attest]] before forwarding any request.
 
-This is not just a privacy choice. It is a regulatory strategy. The FDA's General Wellness Guidance classifies Notice as non-invasive wellness only if it avoids disease claims — one diagnostic-sounding phrase could trigger FDA jurisdiction. The FTC's Health Breach Notification Rule applies because Notice combines biometric data with emotional self-reports: any unauthorized third-party disclosure triggers breach notification at $53,000 per violation. By keeping raw health data on-device and sending only structured summaries through the proxy, the architecture *is* the compliance strategy.
+This is not just a privacy choice. It is a regulatory strategy. The [[ref:fda-wellness|FDA's General Wellness Guidance]] classifies Notice as non-invasive wellness only if it avoids disease claims — one diagnostic-sounding phrase could trigger FDA jurisdiction. The [[ref:ftc-hbnr|FTC's Health Breach Notification Rule]] applies because Notice combines biometric data with emotional self-reports: any unauthorized third-party disclosure triggers breach notification at $53,000 per violation. By keeping raw health data on-device and sending only structured summaries through the proxy, the architecture *is* the compliance strategy.
 
 <SectionDivider client:visible number="05" label="What the Science Says" />
 
@@ -90,19 +90,19 @@ The act of putting feelings into words is not just expressive. It is neurologica
 
 ### Emotional Granularity
 
-Barrett's research shows that people who make finer distinctions between emotional states — distinguishing *irritated* from *frustrated* from *exasperated* — demonstrate better emotion regulation. This is emotional granularity, and it is trainable. Notice measures it: label diversity over time is a behavioral proxy for granularity development. As users' felt-sense vocabulary expands, their regulatory capacity should expand with it. The data can show whether it does.
+Barrett's research shows that people who make finer distinctions between emotional states — distinguishing *irritated* from *frustrated* from *exasperated* — demonstrate better emotion regulation. This is [[term:emotional-granularity|emotional granularity]], and it is trainable. Notice measures it: label diversity over time is a behavioral proxy for granularity development. As users' felt-sense vocabulary expands, their regulatory capacity should expand with it. The data can show whether it does.
 
 ### Interoceptive Lead Time
 
 This is the metric I am most excited about, and as far as I can tell, no one else is measuring it.
 
-Notice already collects both data streams: continuous biometric samples from HealthKit running in the background, and discrete conscious reports from Frame Snaps — the moment you notice a shift. The temporal gap between when your body shifts and when you consciously register it is your interoceptive lead time. And it is trainable. Shrinking that gap *is* interoceptive development.
+Notice already collects both data streams: continuous biometric samples from HealthKit running in the background, and discrete conscious reports from Frame Snaps — the moment you notice a shift. The temporal gap between when your body shifts and when you consciously register it is your [[term:interoceptive-lead-time|interoceptive lead time]]. And it is trainable. Shrinking that gap *is* interoceptive development.
 
 <PullQuote client:visible slug="notice-vision" quoteIndex={1}>A month ago, your body would shift 40 minutes before you snapped. Now it is 15 minutes. You are noticing sooner.</PullQuote>
 
 <NoticeVisionLeadTime client:visible />
 
-That is a training outcome you can feel — not a score on a dashboard, but a mirror that shows you something true about your own development. If interoceptive lead time reduction correlates with MAIA-2 score improvement across beta users, Notice has demonstrated measurable interoceptive training. That is a peer-reviewable finding and the strongest possible evidence for the product's core claim.
+That is a training outcome you can feel — not a score on a dashboard, but a mirror that shows you something true about your own development. If interoceptive lead time reduction correlates with [[term:maia-2|MAIA-2]] score improvement across beta users, Notice has demonstrated measurable interoceptive training. That is a peer-reviewable finding and the strongest possible evidence for the product's core claim.
 
 <SectionDivider client:visible number="06" label="An App That Gets Quieter" />
 
@@ -110,7 +110,7 @@ That is a training outcome you can feel — not a score on a dashboard, but a mi
 
 Most apps optimize for engagement. More time on screen. More sessions. More data. Notice is designed to do the opposite.
 
-**Scaffolding decay** is the deliberate, progressive reduction of app support as you develop independent interoceptive capacity. The app starts rich and present. As your capacity grows, it steps back.
+**[[term:scaffolding-decay|Scaffolding decay]]** is the deliberate, progressive reduction of app support as you develop independent interoceptive capacity. The app starts rich and present. As your capacity grows, it steps back.
 
 <NoticeVisionScaffoldingDecay client:visible />
 
@@ -126,7 +126,7 @@ This is a genuine commercial bet. An app that trains its users to need it less s
 
 The Claude API is powerful, but it introduces ongoing cost, latency, and a data pathway outside the phone. The north star is every reflection tier running locally. No API dependency. No data disclosure. No marginal cost per reflection.
 
-On-device LoRA adaptation means the model learns *your* phenomenological vocabulary, *your* somatic patterns, *your* characteristic ways of relating to experience. Not a generic wellness model shaped by population averages — a contemplative mirror that becomes more precise the longer you practice with it. The personalized weights never leave the phone. The privacy-maximizing architecture turns out to be the quality-maximizing architecture too — a rare alignment.
+On-device [[term:lora|LoRA adaptation]] means the model learns *your* phenomenological vocabulary, *your* somatic patterns, *your* characteristic ways of relating to experience. Not a generic wellness model shaped by population averages — a contemplative mirror that becomes more precise the longer you practice with it. The personalized weights never leave the phone. The privacy-maximizing architecture turns out to be the quality-maximizing architecture too — a rare alignment.
 
 Timeline: on-device brief reflections are days away from shipping. Exploratory reflections on-device are plausible within weeks. Daily and weekly synthesis may require a generation of model capability improvement. The cloud API remains available as fallback throughout.
 
@@ -158,9 +158,9 @@ The current product. You learn to read your own internal states: noticing shifts
 
 ### Relational Attunement — Later
 
-Co-regulation expands the mirror to face the space *between* two people. The research basis is Feldman's bio-behavioral synchrony: mothers and infants synchronize heart rhythms, partners' respiration converges during empathetic touch. The engineering question is whether you can transmit one person's breathing rate — derived from Apple Watch accelerometers — to a partner in real-time via spatial audio and haptics, and whether the body responds to that mediated signal the way it responds to another body.
+Co-regulation expands the mirror to face the space *between* two people. The full research program is documented in [What If You Could Feel Someone Breathing From Across the Room](/writing/coregulation/). The research basis is [[ref:feldman-2007|Feldman's]] [[term:bio-behavioral-synchrony|bio-behavioral synchrony]]: mothers and infants synchronize heart rhythms, partners' respiration converges during empathetic touch. The engineering question is whether you can transmit one person's breathing rate — derived from Apple Watch accelerometers — to a partner in real-time via spatial audio and haptics, and whether the body responds to that mediated signal the way it responds to another body.
 
-The research program is staged with kill criteria at each phase. Phase 0: can the hardware extract breathing rate within ±2 BPM? Phase 1: a sham-controlled study with 30 dyads to distinguish real entrainment from placebo. Phase 2: at-home ecological validation. Phase 3: regulatory pathway assessment. Polyvagal theory faces empirical criticism, individual variability is high, the hardware cost per couple is $3,600+. These are load-bearing constraints, not footnotes.
+The research program is staged with kill criteria at each phase. Phase 0: can the hardware extract breathing rate within ±2 BPM? Phase 1: a sham-controlled study with 30 dyads to distinguish real entrainment from placebo. Phase 2: at-home ecological validation. Phase 3: regulatory pathway assessment. [[term:polyvagal|Polyvagal theory]] faces empirical criticism, individual variability is high, the hardware cost per couple is $3,600+. These are load-bearing constraints, not footnotes.
 
 ### Collective Field Awareness — Speculative
 

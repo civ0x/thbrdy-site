@@ -1,0 +1,305 @@
+# ──────────────────────────────────────────────────────────────────────
+# The Body Knows First — Annotation Companion File
+# Essay: "The Body Knows First" (Notice Vision Document)
+# Generated: 2026-02-27
+# ──────────────────────────────────────────────────────────────────────
+#
+# Three annotation modes:
+#   terms:      Domain vocabulary. Author-written definitions.
+#   references: Papers, books, reports. AI-generated summaries, author-reviewed.
+#   links:      External URLs with curated metadata.
+#
+# Two badge categories (term annotations):
+#   SCIENCE (teal): neuroscience, psychophysiology, and clinical terms
+#   PRODUCT (accent/gold): product-specific vocabulary and design concepts
+#
+# Matching: explicit markers in MDX using [[term:key|text]] syntax.
+# ──────────────────────────────────────────────────────────────────────
+
+terms:
+
+  # ─── SCIENCE (badge: SCIENCE, color: var(--teal)) ───
+
+  - key: interoception
+    pattern: "interoceptive signals"
+    section: "01"
+    definition: >
+      The sense of the body's internal state — heart rate, breathing,
+      gut feelings, muscle tension. A distinct sensory pathway, not
+      reducible to emotion or proprioception. Accuracy varies between
+      individuals and is trainable.
+
+  - key: insular-cortex
+    pattern: "insular cortex mapping"
+    section: "01"
+    definition: >
+      The insular cortex is the brain region that maps interoceptive
+      signals into conscious awareness. Bud Craig's research showed it
+      constructs a moment-by-moment representation of the body's
+      physiological condition — the neural basis of "how you feel."
+
+  - key: affect-labeling
+    pattern: "affect labeling"
+    section: "05"
+    definition: >
+      The act of putting a feeling into words. Neuroimaging shows this
+      activates right ventrolateral prefrontal cortex and downregulates
+      amygdala reactivity — a specific regulatory mechanism distinct
+      from cognitive reappraisal or suppression. The effect is stronger
+      with more granular labels.
+
+  - key: emotional-granularity
+    pattern: "emotional granularity"
+    section: "05"
+    definition: >
+      The ability to make fine-grained distinctions between emotional
+      states — distinguishing irritated from frustrated from exasperated.
+      Higher granularity predicts better emotion regulation, fewer
+      maladaptive coping strategies, and lower depression risk. It is
+      trainable through practice.
+
+  - key: hrv
+    pattern: "heart rate variability"
+    section: "02"
+    definition: >
+      The variation in time between successive heartbeats. Higher HRV
+      generally indicates greater autonomic flexibility and stress
+      resilience. HRV drops reliably before conscious anxiety registers,
+      making it a useful biometric marker for interoceptive lead time.
+
+  - key: constructed-emotion
+    pattern: "constructed emotion theory"
+    section: "02"
+    definition: >
+      Lisa Feldman Barrett's framework: emotions are not hardwired
+      circuits triggered by stimuli, but predictions constructed by the
+      brain from interoceptive signals, prior experience, and context.
+      Emotion categories are learned, not innate — which means they can
+      be refined through practice.
+
+  - key: maia-2
+    pattern: "MAIA-2"
+    section: "05"
+    definition: >
+      Multidimensional Assessment of Interoceptive Awareness, version 2.
+      A validated 37-item self-report questionnaire measuring eight
+      dimensions of interoceptive awareness including noticing, attention
+      regulation, emotional awareness, and trusting. The standard
+      research instrument for measuring interoceptive development.
+
+  - key: bio-behavioral-synchrony
+    pattern: "bio-behavioral synchrony"
+    section: "09"
+    definition: >
+      Ruth Feldman's framework for how biological and behavioral rhythms
+      align between individuals in close contact. Documented in
+      mother-infant dyads (heart rate synchrony), romantic partners
+      (respiratory coupling), and therapist-client pairs. The
+      physiological basis for co-regulation.
+
+  - key: polyvagal
+    pattern: "Polyvagal theory"
+    section: "09"
+    definition: >
+      Stephen Porges's theory linking autonomic nervous system states
+      to social engagement. Influential in therapy and somatic practice,
+      but faces empirical criticism — particularly the claim that the
+      ventral vagal branch mediates social engagement independently.
+      The core insight (autonomic state shapes social capacity) is
+      better supported than the specific neural mechanism proposed.
+
+  # ─── PRODUCT (badge: PRODUCT, color: var(--accent)) ───
+
+  - key: frame-snap
+    pattern: "Frame Snap"
+    section: "02"
+    definition: >
+      Notice's core interaction. A single tap on the Watch or phone
+      captures a biometric snapshot (heart rate, HRV, context) at
+      the moment you notice an internal shift. The tap is both a data
+      capture event and a micro-intervention — the act of noticing
+      is itself regulatory.
+
+  - key: scaffolding-decay
+    pattern: "Scaffolding decay"
+    section: "06"
+    definition: >
+      The deliberate, progressive reduction of app support as the user
+      develops independent interoceptive capacity. Reflections, suggestions,
+      and biometric displays fade in three phases (full → reduced → minimal)
+      triggered by behavioral signals and confirmed by the user.
+
+  - key: interoceptive-lead-time
+    pattern: "interoceptive lead time"
+    section: "05"
+    definition: >
+      The temporal gap between when your body shifts (measurable via
+      biometrics) and when you consciously register the shift (measured
+      by a Frame Snap). Shrinking this gap is the primary training
+      outcome Notice measures. As far as we can determine, no other
+      product captures both data streams needed to compute it.
+
+  - key: lora
+    pattern: "LoRA adaptation"
+    section: "07"
+    definition: >
+      Low-Rank Adaptation — a parameter-efficient fine-tuning technique
+      that learns a small set of weights on top of a frozen base model.
+      On-device LoRA means the personalization layer stays on the phone:
+      the model learns your vocabulary and patterns without transmitting
+      training data.
+
+  - key: app-attest
+    pattern: "App Attest"
+    section: "04"
+    definition: >
+      Apple's device attestation service. Generates cryptographic
+      assertions proving a request originates from a legitimate,
+      unmodified copy of the app running on genuine Apple hardware.
+      Notice uses it to validate device identity before the Cloudflare
+      proxy forwards any API request.
+
+  - key: focusing
+    pattern: "Focusing tradition"
+    section: "02"
+    definition: >
+      Eugene Gendlin's therapeutic method centered on attending to the
+      "felt sense" — the body's holistic, pre-verbal knowing about a
+      situation. Gendlin found that therapy clients who naturally
+      referenced felt sense showed better outcomes. Notice's emotion
+      taxonomy is grounded in this somatic orientation.
+
+references:
+
+  - key: craig-2002
+    pattern: "Bud Craig's"
+    section: "01"
+    title: "How Do You Feel? Interoception: The Sense of the Physiological Condition of the Body"
+    authors: "A.D. (Bud) Craig"
+    year: 2002
+    venue: "Nature Reviews Neuroscience 3(8), 655–666"
+    url: "https://doi.org/10.1038/nrn894"
+    summary: >
+      The foundational paper mapping interoception as a distinct sensory
+      pathway through the insular cortex. Established that the brain
+      maintains a real-time map of the body's physiological state, and
+      that conscious access to this map varies between individuals.
+    context: >
+      This is the neuroscience anchor for Notice's core claim: that
+      interoceptive accuracy is a trainable skill, not a fixed trait.
+
+  - key: lieberman-2007
+    pattern: "Lieberman et al. (2007)"
+    section: "02"
+    title: "Putting Feelings into Words: Affect Labeling Disrupts Amygdala Activity in Response to Affective Stimuli"
+    authors: "Matthew D. Lieberman, Naomi I. Eisenberger, Molly J. Crockett, Sabrina M. Tom, Jennifer H. Pfeifer, & Baldwin M. Way"
+    year: 2007
+    venue: "Psychological Science 18(5), 421–428"
+    url: "https://doi.org/10.1111/j.1467-9280.2007.01916.x"
+    summary: >
+      Demonstrated via fMRI that labeling an emotional face image
+      with a word reduces amygdala activation and increases right
+      VLPFC activation. The regulatory effect is implicit — participants
+      don't intend to regulate, yet labeling itself downregulates
+      the emotional response.
+    context: >
+      The neuroscience basis for why every Frame Snap is a
+      micro-intervention, not just a data capture event.
+
+  - key: barrett-2017
+    pattern: "Barrett's"
+    section: "02"
+    title: "How Emotions Are Made: The Secret Life of the Brain"
+    authors: "Lisa Feldman Barrett"
+    year: 2017
+    venue: "Houghton Mifflin Harcourt"
+    url: "https://lisafeldmanbarrett.com/books/how-emotions-are-made/"
+    summary: >
+      The book-length argument for constructed emotion theory: emotions
+      are not triggered reactions but predictions the brain constructs
+      from interoceptive signals, prior experience, and conceptual
+      knowledge. Emotion categories are culturally learned, not
+      biologically innate.
+    context: >
+      Grounds Notice's deepest design constraint — the app treats
+      emotion labels as frames, not facts.
+
+  - key: feldman-2007
+    pattern: "Feldman's"
+    section: "09"
+    title: "Parent–Infant Synchrony: Biological Foundations and Developmental Outcomes"
+    authors: "Ruth Feldman"
+    year: 2007
+    venue: "Current Directions in Psychological Science 16(6), 340–345"
+    url: "https://doi.org/10.1111/j.1467-8721.2007.00532.x"
+    summary: >
+      Established bio-behavioral synchrony as a framework for
+      parent-infant interaction: heart rate, gaze, affect, and
+      arousal patterns align between caregiver and infant in
+      structured ways that predict developmental outcomes.
+    context: >
+      The research basis for Notice's relational attunement tier —
+      the claim that physiological synchrony is measurable and
+      meaningful between individuals.
+
+  - key: fda-wellness
+    pattern: "FDA's General Wellness Guidance"
+    section: "04"
+    title: "General Wellness: Policy for Low Risk Devices"
+    authors: "U.S. Food and Drug Administration"
+    year: 2019
+    venue: "FDA Guidance Document"
+    url: "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/general-wellness-policy-low-risk-devices"
+    summary: >
+      Defines the regulatory boundary for wellness products. A device
+      qualifies as "general wellness" if it (1) is low risk and (2)
+      makes only general wellness claims, not disease-specific claims.
+      One diagnostic-sounding phrase can shift a product from unregulated
+      wellness to FDA-regulated medical device.
+    context: >
+      Why Notice's language is carefully constrained — the regulatory
+      classification depends on what the app says, not just what it
+      measures.
+
+  - key: ftc-hbnr
+    pattern: "FTC's Health Breach Notification Rule"
+    section: "04"
+    title: "Health Breach Notification Rule"
+    authors: "U.S. Federal Trade Commission"
+    year: 2023
+    venue: "16 CFR Part 318 (amended)"
+    url: "https://www.ftc.gov/legal-library/browse/rules/health-breach-notification-rule"
+    summary: >
+      Requires vendors of personal health records to notify consumers
+      and the FTC following a breach of unsecured health information.
+      Applies to apps that combine biometric data with health-related
+      self-reports — which includes Notice. Penalties up to $53,000 per
+      violation per day.
+    context: >
+      The compliance reason Notice's privacy architecture is non-negotiable,
+      not just a feature.
+
+links:
+
+  - key: notice-essay
+    pattern: "notice-essay-link"
+    section: "01"
+    url: "https://thbrdy.dev/writing/notice/"
+    title: "You're Already Feeling Something You Haven't Noticed Yet"
+    source: "thbrdy.dev · Notice Essay"
+    summary: >
+      The technical essay covering Notice's architecture, interaction
+      design, and the contemplative framework behind the product. Goes
+      deeper on the Frame Snap interaction, emotion taxonomy design,
+      and the AI reflection system.
+
+  - key: coregulation-essay
+    pattern: "coregulation-essay-link"
+    section: "09"
+    url: "https://thbrdy.dev/writing/coregulation/"
+    title: "What If You Could Feel Someone Breathing From Across the Room"
+    source: "thbrdy.dev · Co-Regulation Essay"
+    summary: >
+      The research essay covering the co-regulation tier — the science
+      of physiological synchrony, the hardware feasibility questions,
+      and the staged research program with kill criteria at each phase.
