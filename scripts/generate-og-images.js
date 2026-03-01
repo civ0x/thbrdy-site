@@ -330,7 +330,7 @@ function quoteCardSvg({ text, title, connected_project }) {
         stroke="${BORDER}" stroke-width="1" />
 
   <!-- Geometric texture — bottom-right -->
-  <g opacity="0.12" stroke="${colors.accent}" fill="none" stroke-width="1">
+  <g opacity="0.22" stroke="${colors.accent}" fill="none" stroke-width="1">
     <circle cx="1050" cy="500" r="60" />
     <circle cx="1050" cy="500" r="100" />
     <circle cx="1050" cy="500" r="140" />
@@ -341,9 +341,9 @@ function quoteCardSvg({ text, title, connected_project }) {
   </g>
 
   <!-- Decorative quotation mark -->
-  <text x="80" y="220"
-        font-family="Cormorant Garamond" font-size="220" font-weight="600"
-        fill="${colors.dim}">\u201C</text>
+  <text x="100" y="240"
+        font-family="Cormorant Garamond" font-size="200" font-weight="600"
+        fill="${colors.dim}" opacity="0.5">\u201C</text>
 
   <!-- Top bar -->
   <line x1="${(WIDTH - goldBarWidth) / 2}" y1="${topBarY}" x2="${(WIDTH + goldBarWidth) / 2}" y2="${topBarY}"
