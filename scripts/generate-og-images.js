@@ -318,6 +318,11 @@ function quoteCardSvg({ text, title }) {
   <rect x="0.5" y="0.5" width="${WIDTH - 1}" height="${HEIGHT - 1}" fill="none"
         stroke="${BORDER}" stroke-width="1" />
 
+  <!-- Decorative quotation mark -->
+  <text x="80" y="220"
+        font-family="Cormorant Garamond" font-size="220" font-weight="600"
+        fill="${TEXT_MUTED}">\u201C</text>
+
   <!-- Top gold bar -->
   <line x1="${(WIDTH - goldBarWidth) / 2}" y1="${topBarY}" x2="${(WIDTH + goldBarWidth) / 2}" y2="${topBarY}"
         stroke="${ACCENT}" stroke-width="2" />
