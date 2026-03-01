@@ -41,6 +41,15 @@ const BORDER = 'rgba(44, 36, 22, 0.1)';
 const BORDER_MID = 'rgba(44, 36, 22, 0.18)';
 const TEXT_FAINT = '#C4B8AA';
 
+// Per-project accent colors for quote cards
+const PROJECT_ACCENTS = {
+  'Scholion': { accent: '#B8860B', dim: '#C4B8AA' },
+  'Notice':   { accent: '#2A7A6A', dim: '#A3C4BD' },
+  'Pando':    { accent: '#2A5A8A', dim: '#A3B8CD' },
+  // Add future projects here
+};
+const DEFAULT_ACCENT = { accent: ACCENT, dim: TEXT_FAINT };
+
 // ──────────────────────────────────────────────
 // Frontmatter parsing
 // ──────────────────────────────────────────────
@@ -91,6 +100,7 @@ function extractQuotes(essay) {
       quotes.push({
         slug: essay.slug,
         title: essay.title,
+        connected_project: essay.connected_project,
         index,
         text,
       });
@@ -285,7 +295,8 @@ function getQuoteLines(text) {
   return { lines, fontSize: 26 };
 }
 
-function quoteCardSvg({ text, title }) {
+function quoteCardSvg({ text, title, connected_project }) {
+  const colors = PROJECT_ACCENTS[connected_project] || DEFAULT_ACCENT;
   const { lines, fontSize } = getQuoteLines(text);
   const lineHeight = fontSize * 1.45;
 
@@ -321,18 +332,18 @@ function quoteCardSvg({ text, title }) {
   <!-- Decorative quotation mark -->
   <text x="80" y="220"
         font-family="Cormorant Garamond" font-size="220" font-weight="600"
-        fill="${TEXT_MUTED}">\u201C</text>
+        fill="${colors.dim}">\u201C</text>
 
-  <!-- Top gold bar -->
+  <!-- Top bar -->
   <line x1="${(WIDTH - goldBarWidth) / 2}" y1="${topBarY}" x2="${(WIDTH + goldBarWidth) / 2}" y2="${topBarY}"
-        stroke="${ACCENT}" stroke-width="2" />
+        stroke="${colors.accent}" stroke-width="2" />
 
   <!-- Quote text -->
   ${quoteEls}
 
-  <!-- Bottom gold bar -->
+  <!-- Bottom bar -->
   <line x1="${(WIDTH - goldBarWidth) / 2}" y1="${bottomBarY}" x2="${(WIDTH + goldBarWidth) / 2}" y2="${bottomBarY}"
-        stroke="${ACCENT}" stroke-width="2" />
+        stroke="${colors.accent}" stroke-width="2" />
 
   <!-- Essay title -->
   <text x="${WIDTH / 2}" y="${essayTitleY}"
