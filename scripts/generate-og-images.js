@@ -44,7 +44,7 @@ const TEXT_FAINT = '#C4B8AA';
 // Per-project accent colors for quote cards
 const PROJECT_ACCENTS = {
   'Scholion': { accent: '#B8860B', dim: '#C4B8AA' },
-  'Notice':   { accent: '#2A7A6A', dim: '#A3C4BD' },
+  'Notice':   { accent: '#2A7A6A', dim: '#7AA69C' },
   'Pando':    { accent: '#2A5A8A', dim: '#A3B8CD' },
   // Add future projects here
 };
