@@ -42,13 +42,14 @@ const BORDER_MID = 'rgba(44, 36, 22, 0.18)';
 const TEXT_FAINT = '#C4B8AA';
 
 // Per-project accent colors for quote cards
+// glyphOpacity / mandalaOpacity tuned per-project for equal perceived contrast on #FAF6F0
 const PROJECT_ACCENTS = {
-  'Scholion': { accent: '#B8860B', dim: '#C4B8AA' },
-  'Notice':   { accent: '#2A7A6A', dim: '#7AA69C' },
-  'Pando':    { accent: '#2A5A8A', dim: '#A3B8CD' },
+  'Scholion': { accent: '#B8860B', dim: '#C4B8AA', glyphOpacity: 0.5, mandalaOpacity: 0.22 },
+  'Notice':   { accent: '#2A7A6A', dim: '#5A8A80', glyphOpacity: 0.7, mandalaOpacity: 0.32 },
+  'Pando':    { accent: '#2A5A8A', dim: '#A3B8CD', glyphOpacity: 0.5, mandalaOpacity: 0.22 },
   // Add future projects here
 };
-const DEFAULT_ACCENT = { accent: ACCENT, dim: TEXT_FAINT };
+const DEFAULT_ACCENT = { accent: ACCENT, dim: TEXT_FAINT, glyphOpacity: 0.5, mandalaOpacity: 0.22 };
 
 // ──────────────────────────────────────────────
 // Frontmatter parsing
@@ -330,7 +331,7 @@ function quoteCardSvg({ text, title, connected_project }) {
         stroke="${BORDER}" stroke-width="1" />
 
   <!-- Geometric texture — bottom-right -->
-  <g opacity="0.22" stroke="${colors.accent}" fill="none" stroke-width="1">
+  <g opacity="${colors.mandalaOpacity}" stroke="${colors.accent}" fill="none" stroke-width="1">
     <circle cx="1050" cy="500" r="60" />
     <circle cx="1050" cy="500" r="100" />
     <circle cx="1050" cy="500" r="140" />
@@ -343,7 +344,7 @@ function quoteCardSvg({ text, title, connected_project }) {
   <!-- Decorative quotation mark -->
   <text x="100" y="240"
         font-family="Cormorant Garamond" font-size="200" font-weight="600"
-        fill="${colors.dim}" opacity="0.5">\u201C</text>
+        fill="${colors.dim}" opacity="${colors.glyphOpacity}">\u201C</text>
 
   <!-- Top bar -->
   <line x1="${(WIDTH - goldBarWidth) / 2}" y1="${topBarY}" x2="${(WIDTH + goldBarWidth) / 2}" y2="${topBarY}"
