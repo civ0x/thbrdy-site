@@ -16,6 +16,25 @@ const { Content } = await render(post);
 // Estimate reading time from raw body text
 const words = post.body?.split(/\s+/).length ?? 0;
 const minutesRead = Math.max(1, Math.round(words / 250));
+
+// Related essays: same project first, then recent
+const allPosts = await getCollection('writing', ({ data }) => !data.draft);
+const currentSlug = post.id;
+
+let related: typeof allPosts = [];
+if (post.data.connected_project) {
+  related = allPosts
+    .filter(p => p.id !== currentSlug && p.data.connected_project === post.data.connected_project)
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    .slice(0, 2);
+}
+if (related.length < 2) {
+  const recent = allPosts
+    .filter(p => p.id !== currentSlug && !related.some(r => r.id === p.id))
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    .slice(0, 2 - related.length);
+  related = [...related, ...recent];
+}
 ---
 
 <PostLayout
@@ -26,6 +45,12 @@ const minutesRead = Math.max(1, Math.round(words / 250));
   connected_project={post.data.connected_project}
   minutesRead={minutesRead}
   ogImage={`/images/og/${post.id}.png`}
+  relatedEssays={related.map(p => ({
+    title: p.data.title,
+    description: p.data.description,
+    href: `/writing/${p.id}/`,
+    date: p.data.date,
+  }))}
 >
   <Content />
 </PostLayout>
