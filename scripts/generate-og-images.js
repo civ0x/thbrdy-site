@@ -72,7 +72,7 @@ function getEssays() {
   for (const file of files) {
     const filePath = resolve(CONTENT_DIR, file);
     const fm = parseFrontmatter(filePath);
-    if (!fm || fm.draft === true) continue;
+    if (!fm) continue;
     const slug = file.replace(/\.mdx$/, '');
     const body = readFileSync(filePath, 'utf-8');
     essays.push({

@@ -6,6 +6,7 @@ interface PullQuoteProps {
   children: ReactNode;
   slug?: string;
   quoteIndex?: number;
+  shareBase?: string;
 }
 
 function XIcon({ hovered }: { hovered: boolean }) {
@@ -101,7 +102,7 @@ function CheckIcon() {
   );
 }
 
-export function PullQuote({ children, slug, quoteIndex }: PullQuoteProps) {
+export function PullQuote({ children, slug, quoteIndex, shareBase }: PullQuoteProps) {
   const [ref, inView] = useInView(0.3);
   const [xHovered, setXHovered] = useState(false);
   const [linkedInHovered, setLinkedInHovered] = useState(false);
@@ -110,8 +111,9 @@ export function PullQuote({ children, slug, quoteIndex }: PullQuoteProps) {
   const [copied, setCopied] = useState(false);
 
   const hasShareData = slug && quoteIndex;
+  const base = shareBase ?? `/writing/${slug}`;
   const shareUrl = hasShareData
-    ? `https://thbrdy.dev/writing/${slug}/quote/${quoteIndex}/`
+    ? `https://thbrdy.dev${base}/quote/${quoteIndex}/`
     : '';
 
   function handleTweet() {
