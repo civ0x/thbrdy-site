@@ -45,6 +45,45 @@ function LinkIcon({ hovered }: { hovered: boolean }) {
   );
 }
 
+function LinkedInIcon({ hovered }: { hovered: boolean }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={hovered ? tokens.accent : tokens.textMuted}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ transition: "stroke 0.2s ease" }}
+    >
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
+      <rect x="2" y="9" width="4" height="12" />
+      <circle cx="4" cy="4" r="2" />
+    </svg>
+  );
+}
+
+function EmailIcon({ hovered }: { hovered: boolean }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={hovered ? tokens.accent : tokens.textMuted}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ transition: "stroke 0.2s ease" }}
+    >
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M22 7l-10 7L2 7" />
+    </svg>
+  );
+}
+
 function CheckIcon() {
   return (
     <svg
@@ -65,6 +104,8 @@ function CheckIcon() {
 export function PullQuote({ children, slug, quoteIndex }: PullQuoteProps) {
   const [ref, inView] = useInView(0.3);
   const [xHovered, setXHovered] = useState(false);
+  const [linkedInHovered, setLinkedInHovered] = useState(false);
+  const [emailHovered, setEmailHovered] = useState(false);
   const [linkHovered, setLinkHovered] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -82,6 +123,22 @@ export function PullQuote({ children, slug, quoteIndex }: PullQuoteProps) {
       url: shareUrl,
     }).toString()}`;
     window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  function handleLinkedIn() {
+    if (!shareUrl) return;
+    window.open(
+      `https://www.linkedin.com/sharing/share-offsite/?${new URLSearchParams({ url: shareUrl })}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  }
+
+  function handleEmail() {
+    if (!hasShareData) return;
+    const el = ref.current;
+    const quoteText = el?.querySelector('.pq-text')?.textContent?.trim() ?? '';
+    window.location.href = `mailto:?subject=${encodeURIComponent(`"${quoteText}"`)}&body=${encodeURIComponent(`"${quoteText}"\n\n${shareUrl}`)}`;
   }
 
   function handleCopy() {
@@ -156,6 +213,44 @@ export function PullQuote({ children, slug, quoteIndex }: PullQuoteProps) {
             }}
           >
             <XIcon hovered={xHovered} />
+          </button>
+          <span style={{ color: tokens.border, fontSize: "12px", lineHeight: 1 }}>&middot;</span>
+          <button
+            onClick={handleLinkedIn}
+            onMouseEnter={() => setLinkedInHovered(true)}
+            onMouseLeave={() => setLinkedInHovered(false)}
+            title="Share on LinkedIn"
+            aria-label="Share on LinkedIn"
+            style={{
+              background: "none",
+              border: "none",
+              padding: "4px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              lineHeight: 0,
+            }}
+          >
+            <LinkedInIcon hovered={linkedInHovered} />
+          </button>
+          <span style={{ color: tokens.border, fontSize: "12px", lineHeight: 1 }}>&middot;</span>
+          <button
+            onClick={handleEmail}
+            onMouseEnter={() => setEmailHovered(true)}
+            onMouseLeave={() => setEmailHovered(false)}
+            title="Share via email"
+            aria-label="Share via email"
+            style={{
+              background: "none",
+              border: "none",
+              padding: "4px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              lineHeight: 0,
+            }}
+          >
+            <EmailIcon hovered={emailHovered} />
           </button>
           <span style={{ color: tokens.border, fontSize: "12px", lineHeight: 1 }}>&middot;</span>
           <button

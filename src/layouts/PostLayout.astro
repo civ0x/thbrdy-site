@@ -13,6 +13,8 @@ interface Props {
 
 const { title, description, date, tags, connected_project, minutesRead, ogImage } = Astro.props;
 
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? 'https://thbrdy.dev').href;
+
 const formattedDate = date.toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'long',
@@ -55,12 +57,112 @@ const formattedDate = date.toLocaleDateString('en-US', {
           ))}
         </div>
       )}
+      <div class="share-bar" data-url={canonicalUrl} data-title={title} data-description={description}>
+        <button class="share-btn" data-action="copy" title="Copy link" aria-label="Copy essay link">
+          <svg class="share-icon share-icon--link" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+          <svg class="share-icon share-icon--check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </button>
+        <span class="share-sep">&middot;</span>
+        <a class="share-btn" data-action="twitter" title="Share on X" aria-label="Share on X" href="#" target="_blank" rel="noopener noreferrer">
+          <svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4l6.5 8L4 20h2.5l5-6.2L16.5 20H20l-6.5-8L20 4h-2.5l-5 6.2L7.5 4H4z" />
+          </svg>
+        </a>
+        <span class="share-sep">&middot;</span>
+        <a class="share-btn" data-action="linkedin" title="Share on LinkedIn" aria-label="Share on LinkedIn" href="#" target="_blank" rel="noopener noreferrer">
+          <svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
+            <rect x="2" y="9" width="4" height="12" />
+            <circle cx="4" cy="4" r="2" />
+          </svg>
+        </a>
+        <span class="share-sep">&middot;</span>
+        <a class="share-btn" data-action="email" title="Share via email" aria-label="Share via email" href="#" target="_blank" rel="noopener noreferrer">
+          <svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="M22 7l-10 7L2 7" />
+          </svg>
+        </a>
+      </div>
     </header>
 
     <div class="post__content">
       <slot />
     </div>
+
+    <div class="share-bar-divider"><hr /></div>
+    <div class="share-bar" data-url={canonicalUrl} data-title={title} data-description={description}>
+      <button class="share-btn" data-action="copy" title="Copy link" aria-label="Copy essay link">
+        <svg class="share-icon share-icon--link" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+        <svg class="share-icon share-icon--check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </button>
+      <span class="share-sep">&middot;</span>
+      <a class="share-btn" data-action="twitter" title="Share on X" aria-label="Share on X" href="#" target="_blank" rel="noopener noreferrer">
+        <svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4l6.5 8L4 20h2.5l5-6.2L16.5 20H20l-6.5-8L20 4h-2.5l-5 6.2L7.5 4H4z" />
+        </svg>
+      </a>
+      <span class="share-sep">&middot;</span>
+      <a class="share-btn" data-action="linkedin" title="Share on LinkedIn" aria-label="Share on LinkedIn" href="#" target="_blank" rel="noopener noreferrer">
+        <svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
+          <rect x="2" y="9" width="4" height="12" />
+          <circle cx="4" cy="4" r="2" />
+        </svg>
+      </a>
+      <span class="share-sep">&middot;</span>
+      <a class="share-btn" data-action="email" title="Share via email" aria-label="Share via email" href="#" target="_blank" rel="noopener noreferrer">
+        <svg class="share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2" />
+          <path d="M22 7l-10 7L2 7" />
+        </svg>
+      </a>
+    </div>
   </article>
+
+  <script>
+    document.querySelectorAll('.share-bar').forEach(bar => {
+      const el = bar as HTMLElement;
+      const url = el.dataset.url;
+      const title = el.dataset.title;
+      const description = el.dataset.description;
+
+      bar.querySelectorAll('[data-action="twitter"]').forEach(btn => {
+        (btn as HTMLAnchorElement).href = `https://twitter.com/intent/tweet?${new URLSearchParams({ text: title || '', url: url || '' })}`;
+      });
+      bar.querySelectorAll('[data-action="linkedin"]').forEach(btn => {
+        (btn as HTMLAnchorElement).href = `https://www.linkedin.com/sharing/share-offsite/?${new URLSearchParams({ url: url || '' })}`;
+      });
+      bar.querySelectorAll('[data-action="email"]').forEach(btn => {
+        (btn as HTMLAnchorElement).href = `mailto:?subject=${encodeURIComponent(title || '')}&body=${encodeURIComponent((description || '') + '\n\n' + (url || ''))}`;
+      });
+
+      bar.querySelectorAll('[data-action="copy"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(url || '').then(() => {
+            btn.classList.add('copied');
+            (btn as HTMLElement).title = 'Copied!';
+            btn.setAttribute('aria-label', 'Link copied');
+            setTimeout(() => {
+              btn.classList.remove('copied');
+              (btn as HTMLElement).title = 'Copy link';
+              btn.setAttribute('aria-label', 'Copy essay link');
+            }, 2000);
+          });
+        });
+      });
+    });
+  </script>
 </Base>
 
 <style>
@@ -280,6 +382,68 @@ const formattedDate = date.toLocaleDateString('en-US', {
     margin: 1.5rem 0;
     text-align: center;
     background: var(--accent-dim);
+  }
+
+  .share-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1rem;
+  }
+
+  .share-bar-divider {
+    margin-top: 3rem;
+  }
+
+  .share-bar-divider hr {
+    border: none;
+    border-top: 1px solid var(--border-mid);
+    max-width: 100px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .share-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+    line-height: 0;
+    text-decoration: none;
+  }
+
+  .share-btn:hover {
+    color: var(--accent);
+  }
+
+  .share-sep {
+    color: var(--border);
+    font-size: 12px;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .share-btn :global(.share-icon--check) {
+    display: none;
+  }
+
+  .share-btn:global(.copied) :global(.share-icon--link) {
+    display: none;
+  }
+
+  .share-btn:global(.copied) :global(.share-icon--check) {
+    display: block;
+    color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .share-btn {
+      transition: none;
+    }
   }
 
   @media (max-width: 640px) {
