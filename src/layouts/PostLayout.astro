@@ -157,6 +157,33 @@ const formattedDate = date.toLocaleDateString('en-US', {
     </footer>
   </article>
 
+  <div id="selection-share" class="sel-share" aria-hidden="true">
+    <button class="sel-share-btn" data-action="copy-quote" title="Copy quote with link" aria-label="Copy quote with link">
+      <svg class="sel-share-icon sel-share-icon--copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+      </svg>
+      <svg class="sel-share-icon sel-share-icon--check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    </button>
+    <span class="share-sep">&middot;</span>
+    <button class="sel-share-btn" data-action="tweet-quote" title="Share on X" aria-label="Share quote on X">
+      <svg class="sel-share-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 4l6.5 8L4 20h2.5l5-6.2L16.5 20H20l-6.5-8L20 4h-2.5l-5 6.2L7.5 4H4z" />
+      </svg>
+    </button>
+    <span class="share-sep">&middot;</span>
+    <button class="sel-share-btn" data-action="linkedin-quote" title="Share on LinkedIn" aria-label="Share quote on LinkedIn">
+      <svg class="sel-share-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
+        <rect x="2" y="9" width="4" height="12" />
+        <circle cx="4" cy="4" r="2" />
+      </svg>
+    </button>
+    <div class="sel-share-arrow"></div>
+  </div>
+
   <script>
     document.querySelectorAll('.share-bar').forEach(bar => {
       const el = bar as HTMLElement;
@@ -189,6 +216,125 @@ const formattedDate = date.toLocaleDateString('en-US', {
         });
       });
     });
+  </script>
+
+  <script>
+    if (window.matchMedia('(pointer: fine)').matches) {
+      const popover = document.getElementById('selection-share') as HTMLElement;
+      const contentArea = document.querySelector('.post__content');
+      const canonicalUrl = (document.querySelector('.share-bar') as HTMLElement)?.dataset.url || window.location.href;
+      const essayTitle = (document.querySelector('.share-bar') as HTMLElement)?.dataset.title || document.title;
+
+      let hideTimeout: ReturnType<typeof setTimeout>;
+
+      function isWithinContent(node: Node | null): boolean {
+        if (!node || !contentArea) return false;
+        let el: Node | null = node;
+        while (el) {
+          if (el === popover) return false;
+          if (el === contentArea) return true;
+          el = el.parentNode;
+        }
+        return false;
+      }
+
+      function getSelectedText(): string | null {
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed || sel.toString().trim().length < 15) return null;
+        if (!isWithinContent(sel.anchorNode) || !isWithinContent(sel.focusNode)) return null;
+        return sel.toString().trim();
+      }
+
+      function showPopover(rect: DOMRect) {
+        const midX = rect.left + rect.width / 2;
+        const popWidth = popover.offsetWidth || 120;
+        const flipped = rect.top < 60;
+
+        let left = midX;
+        // Clamp to viewport edges (with 8px padding)
+        const halfW = popWidth / 2;
+        if (left - halfW < 8) left = halfW + 8;
+        if (left + halfW > window.innerWidth - 8) left = window.innerWidth - 8 - halfW;
+
+        popover.style.left = `${left}px`;
+
+        if (flipped) {
+          popover.style.top = `${rect.bottom + 8}px`;
+          popover.classList.add('flipped');
+        } else {
+          popover.style.top = `${rect.top - 8}px`;
+          popover.style.transform = 'translate(-50%, -100%)';
+          popover.classList.remove('flipped');
+        }
+
+        if (flipped) {
+          popover.style.transform = 'translate(-50%, 0)';
+        }
+
+        popover.classList.add('visible');
+        popover.setAttribute('aria-hidden', 'false');
+      }
+
+      function hidePopover() {
+        popover.classList.remove('visible', 'flipped');
+        popover.setAttribute('aria-hidden', 'true');
+        popover.style.transform = 'translate(-50%, -100%)';
+      }
+
+      document.addEventListener('mouseup', () => {
+        setTimeout(() => {
+          const text = getSelectedText();
+          if (!text) { hidePopover(); return; }
+          const sel = window.getSelection();
+          if (!sel || sel.rangeCount === 0) return;
+          const range = sel.getRangeAt(0);
+          const rect = range.getBoundingClientRect();
+          showPopover(rect);
+        }, 10);
+      });
+
+      document.addEventListener('mousedown', (e) => {
+        if (!popover.contains(e.target as Node)) hidePopover();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') hidePopover();
+      });
+
+      window.addEventListener('scroll', () => {
+        clearTimeout(hideTimeout);
+        hideTimeout = setTimeout(hidePopover, 100);
+      }, { passive: true });
+
+      popover.addEventListener('click', (e) => {
+        const btn = (e.target as Element).closest('.sel-share-btn') as HTMLElement | null;
+        if (!btn) return;
+        const text = getSelectedText();
+        if (!text) return;
+        const action = btn.dataset.action;
+
+        if (action === 'copy-quote') {
+          const fragment = `#:~:text=${encodeURIComponent(text.slice(0, 100))}`;
+          const copyText = `"${text}"\n\u2014 ${essayTitle}\n${canonicalUrl}${fragment}`;
+          navigator.clipboard.writeText(copyText).then(() => {
+            btn.classList.add('copied');
+            setTimeout(() => btn.classList.remove('copied'), 2000);
+          });
+        } else if (action === 'tweet-quote') {
+          const truncated = text.length > 220 ? text.slice(0, 217) + '...' : text;
+          const tweetUrl = `https://twitter.com/intent/tweet?${new URLSearchParams({
+            text: `"${truncated}"`,
+            url: canonicalUrl,
+          })}`;
+          window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+        } else if (action === 'linkedin-quote') {
+          window.open(
+            `https://www.linkedin.com/sharing/share-offsite/?${new URLSearchParams({ url: canonicalUrl })}`,
+            '_blank', 'noopener,noreferrer'
+          );
+        }
+      });
+    }
   </script>
 </Base>
 
@@ -543,10 +689,95 @@ const formattedDate = date.toLocaleDateString('en-US', {
     color: var(--accent);
   }
 
+  /* Text-selection share popover */
+  .sel-share {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-mid);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    transform: translate(-50%, -100%);
+  }
+
+  .sel-share:global(.visible) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sel-share-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+    line-height: 0;
+  }
+
+  .sel-share-btn:hover {
+    color: var(--accent);
+  }
+
+  .sel-share-btn :global(.sel-share-icon--check) {
+    display: none;
+  }
+
+  .sel-share-btn:global(.copied) :global(.sel-share-icon--copy) {
+    display: none;
+  }
+
+  .sel-share-btn:global(.copied) :global(.sel-share-icon--check) {
+    display: block;
+    color: var(--accent);
+  }
+
+  .sel-share-arrow {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-mid);
+    border-bottom: 1px solid var(--border-mid);
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .sel-share:global(.flipped) .sel-share-arrow {
+    bottom: auto;
+    top: -5px;
+    transform: translateX(-50%) rotate(-135deg);
+  }
+
+  /* Text Fragment highlight (Chromium progressive enhancement) */
+  ::target-text {
+    background-color: var(--accent-dim);
+    color: var(--text);
+  }
+
+  @media (pointer: coarse) {
+    .sel-share {
+      display: none !important;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .share-btn,
     .post__related-card,
-    .post__back {
+    .post__back,
+    .sel-share,
+    .sel-share-btn {
       transition: none;
     }
   }
