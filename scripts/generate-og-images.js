@@ -11,10 +11,11 @@
  */
 
 import { Resvg } from '@resvg/resvg-js';
-import { writeFileSync, readFileSync, mkdirSync, readdirSync } from 'fs';
+import { writeFileSync, readFileSync, mkdirSync, readdirSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import yaml from 'js-yaml';
+import sharp from 'sharp';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -449,4 +450,209 @@ for (const essay of essays) {
   }
 }
 
-console.log(`\nGenerated ${essays.length + 1} essay OG images + ${quoteCount} quote cards.`);
+// ──────────────────────────────────────────────
+// Diagram OG cards
+// ──────────────────────────────────────────────
+
+const DIAGRAM_DIR = resolve(ROOT, 'public', 'images', 'diagrams');
+
+const DIAGRAM_CARDS = [
+  { image: 'notice-competitive-gap.png', essay: 'notice', label: 'Competitive Gap' },
+  { image: 'notice-build-timeline.png', essay: 'notice', label: 'Build Timeline' },
+  { image: 'notice-interaction-flow.png', essay: 'notice', label: 'Interaction Flow' },
+  { image: 'notice-architecture-diagram.png', essay: 'notice', label: 'Architecture' },
+  { image: 'notice-vision-texture-grid.png', essay: 'notice-vision', label: 'Texture Grid' },
+  { image: 'notice-vision-lead-time.png', essay: 'notice-vision', label: 'Lead Time' },
+  { image: 'notice-vision-scaffolding-decay.png', essay: 'notice-vision', label: 'Scaffolding Decay' },
+  { image: 'notice-vision-expansion-rings.png', essay: 'notice-vision', label: 'Expansion Rings' },
+  { image: 'notice-vision-timeline.png', essay: 'notice-vision', label: 'Vision Timeline' },
+  { image: 'coreg-evidence-map.png', essay: 'coregulation', label: 'Evidence Map' },
+  { image: 'coreg-phase-gate.png', essay: 'coregulation', label: 'Phase Gate' },
+  // ab-essay
+  { image: 'ab-convergence-diagram.png', essay: 'ab-essay', label: 'Convergence Diagram' },
+  { image: 'ab-wrong-first-flow.png', essay: 'ab-essay', label: 'Wrong-First Flow' },
+  // learned-compilation
+  { image: 'lc-coupling-diagram.png', essay: 'learned-compilation', label: 'Coupling Diagram' },
+  { image: 'lc-landscape-quadrant.png', essay: 'learned-compilation', label: 'Landscape Quadrant' },
+  { image: 'lc-nested-claims-flow.png', essay: 'learned-compilation', label: 'Nested Claims' },
+  { image: 'lc-evidence-grid.png', essay: 'learned-compilation', label: 'Evidence Grid' },
+  { image: 'lc-strategic-implications.png', essay: 'learned-compilation', label: 'Strategic Implications' },
+  // valley-of-death
+  { image: 'vod-legibility-gap.png', essay: 'valley-of-death', label: 'Legibility Gap' },
+  { image: 'vod-sequential-funnel.png', essay: 'valley-of-death', label: 'Sequential Funnel' },
+  { image: 'vod-maturity-switch.png', essay: 'valley-of-death', label: 'Maturity Switch' },
+  { image: 'vod-coupling-mechanism.png', essay: 'valley-of-death', label: 'Coupling Mechanism' },
+  { image: 'vod-case-comparison.png', essay: 'valley-of-death', label: 'Case Comparison' },
+  { image: 'vod-trading-zone.png', essay: 'valley-of-death', label: 'Trading Zone' },
+  // scholion
+  { image: 'scholion-dependency-chain.png', essay: 'scholion', label: 'Dependency Chain' },
+  { image: 'scholion-toulmin-diagram.png', essay: 'scholion', label: 'Toulmin Diagram' },
+  { image: 'scholion-positioning-grid.png', essay: 'scholion', label: 'Positioning Grid' },
+  { image: 'scholion-pipeline-diagram.png', essay: 'scholion', label: 'Pipeline Diagram' },
+  { image: 'scholion-validation-timeline.png', essay: 'scholion', label: 'Validation Timeline' },
+  { image: 'scholion-credibility-cards.png', essay: 'scholion', label: 'Credibility Cards' },
+  // the-circuitry-of-science
+  { image: 'scholion-decomposition-pipeline.png', essay: 'the-circuitry-of-science', label: 'Decomposition Pipeline' },
+  { image: 'scholion-chen-dependency-graph.png', essay: 'the-circuitry-of-science', label: 'Chen Dependency Graph' },
+  { image: 'scholion-safety-case-fragment.png', essay: 'the-circuitry-of-science', label: 'Safety Case Fragment' },
+  { image: 'scholion-schema-evolution.png', essay: 'the-circuitry-of-science', label: 'Schema Evolution' },
+  { image: 'scholion-competitive-gap.png', essay: 'the-circuitry-of-science', label: 'Competitive Gap' },
+  { image: 'scholion-roadmap.png', essay: 'the-circuitry-of-science', label: 'Roadmap' },
+];
+
+function diagramOverlaySvg({ label, title, connected_project }) {
+  const colors = PROJECT_ACCENTS[connected_project] || DEFAULT_ACCENT;
+  const labelText = connected_project
+    ? `DIAGRAM · ${escSvg(connected_project.toUpperCase())}`
+    : 'DIAGRAM';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
+  <!-- Label -->
+  <text x="80" y="50"
+        font-family="JetBrains Mono" font-size="13" font-weight="400"
+        fill="${colors.accent}" letter-spacing="3">${labelText}</text>
+
+  <!-- Label rule -->
+  <line x1="80" y1="66" x2="${WIDTH - 80}" y2="66"
+        stroke="${BORDER_MID}" stroke-width="1" />
+
+  <!-- Essay title -->
+  <text x="${WIDTH / 2}" y="560"
+        font-family="JetBrains Mono" font-size="14" font-weight="400"
+        fill="${TEXT_MUTED}" text-anchor="middle">${escSvg(title)}</text>
+
+  <!-- URL -->
+  <text x="${WIDTH / 2}" y="595"
+        font-family="JetBrains Mono" font-size="13" font-weight="400"
+        fill="${TEXT_FAINT}" text-anchor="middle">thbrdy.dev</text>
+</svg>`;
+}
+
+async function generateDiagramCards() {
+  const essayMap = {};
+  for (const e of essays) {
+    essayMap[e.slug] = e;
+  }
+
+  let diagramCount = 0;
+
+  for (const card of DIAGRAM_CARDS) {
+    const srcPath = resolve(DIAGRAM_DIR, card.image);
+    if (!existsSync(srcPath)) {
+      console.warn(`  ⚠ Skipping ${card.image} — source not found in public/images/diagrams/`);
+      continue;
+    }
+
+    const essay = essayMap[card.essay];
+    if (!essay) {
+      console.warn(`  ⚠ Skipping ${card.image} — essay "${card.essay}" not found`);
+      continue;
+    }
+
+    // Render text overlay SVG to PNG (transparent background)
+    const overlaySvg = diagramOverlaySvg({
+      label: card.label,
+      title: essay.title,
+      connected_project: essay.connected_project,
+    });
+    const overlayPng = renderPng(overlaySvg);
+
+    // Resize diagram screenshot to fit within the inset box
+    // Box: 1040×420, positioned at (80, 85) — below the rule, above the title
+    const boxW = 1040;
+    const boxH = 420;
+    const boxX = 80;
+    const boxY = 85;
+
+    const diagramBuf = readFileSync(srcPath);
+    const diagramMeta = await sharp(diagramBuf).metadata();
+    const dw = diagramMeta.width || boxW;
+    const dh = diagramMeta.height || boxH;
+
+    // Scale to fit within box, maintaining aspect ratio
+    const scale = Math.min(boxW / dw, boxH / dh);
+    const fitW = Math.round(dw * scale);
+    const fitH = Math.round(dh * scale);
+
+    // Center within box
+    const offsetX = boxX + Math.round((boxW - fitW) / 2);
+    const offsetY = boxY + Math.round((boxH - fitH) / 2);
+
+    // Resize the diagram
+    const resizedDiagram = await sharp(diagramBuf)
+      .resize(fitW, fitH, { fit: 'inside' })
+      .png()
+      .toBuffer();
+
+    // Create a bordered version: 1px border around the diagram
+    // Create a slightly larger canvas with the border color, then composite diagram on top
+    const borderWidth = 1;
+    const borderedW = fitW + borderWidth * 2;
+    const borderedH = fitH + borderWidth * 2;
+    const borderedDiagram = await sharp({
+      create: {
+        width: borderedW,
+        height: borderedH,
+        channels: 4,
+        background: { r: 44, g: 36, b: 22, alpha: 0.1 },
+      },
+    })
+      .composite([{
+        input: resizedDiagram,
+        left: borderWidth,
+        top: borderWidth,
+      }])
+      .png()
+      .toBuffer();
+
+    // Composite everything: background → bordered diagram → text overlay
+    const outName = `${card.essay}-diagram-${card.label.toLowerCase().replace(/\s+/g, '-')}.png`;
+    const outPath = resolve(OUT_DIR, outName);
+
+    await sharp({
+      create: {
+        width: WIDTH,
+        height: HEIGHT,
+        channels: 4,
+        background: { r: 250, g: 246, b: 240, alpha: 1 }, // #FAF6F0
+      },
+    })
+      .composite([
+        // Card border (1px inset)
+        {
+          input: Buffer.from(
+            `<svg width="${WIDTH}" height="${HEIGHT}">
+              <rect x="0.5" y="0.5" width="${WIDTH - 1}" height="${HEIGHT - 1}"
+                    fill="none" stroke="rgba(44,36,22,0.1)" stroke-width="1" />
+            </svg>`
+          ),
+          left: 0,
+          top: 0,
+        },
+        // Diagram screenshot with border
+        {
+          input: borderedDiagram,
+          left: offsetX - borderWidth,
+          top: offsetY - borderWidth,
+        },
+        // Text overlay
+        {
+          input: overlayPng,
+          left: 0,
+          top: 0,
+        },
+      ])
+      .png()
+      .toFile(outPath);
+
+    const stat = readFileSync(outPath);
+    console.log(`  ${outPath} (${(stat.length / 1024).toFixed(1)} KB)`);
+    diagramCount++;
+  }
+
+  return diagramCount;
+}
+
+const diagramCount = await generateDiagramCards();
+
+console.log(`\nGenerated ${essays.length + 1} essay OG images + ${quoteCount} quote cards + ${diagramCount} diagram cards.`);

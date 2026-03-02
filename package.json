@@ -8,7 +8,8 @@
     "prebuild": "node scripts/generate-og-images.js",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "screenshots": "node scripts/screenshot-diagrams.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
@@ -20,6 +21,8 @@
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "js-yaml": "^4.1.1",
+    "puppeteer-core": "^24.37.5",
+    "sharp": "^0.34.5",
     "wrangler": "^4.67.0"
   }
 }
