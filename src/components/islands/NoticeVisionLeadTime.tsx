@@ -46,7 +46,7 @@ function getCaption(progress: number): string {
   return "Ten minutes. You notice almost as soon as your body shifts. The scaffold has done its work.";
 }
 
-export default function NoticeVisionLeadTime() {
+export default function NoticeVisionLeadTime({ hideHeader = false }: { hideHeader?: boolean } = {}) {
   const [ref, inView] = useInView(0.1);
   const [progress, setProgress] = useState(0);
 
@@ -120,35 +120,37 @@ export default function NoticeVisionLeadTime() {
       `}</style>
 
       {/* Header */}
-      <div style={{
-        textAlign: "center",
-        marginBottom: "40px",
-        opacity: inView ? 1 : 0,
-        transform: inView ? "translateY(0)" : "translateY(14px)",
-        transition: "all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-      }}>
+      {!hideHeader && (
         <div style={{
-          fontFamily: tokens.mono,
-          fontSize: "11px",
-          letterSpacing: "2.5px",
-          textTransform: "uppercase",
-          color: tokens.accent,
-          marginBottom: "10px",
+          textAlign: "center",
+          marginBottom: "40px",
+          opacity: inView ? 1 : 0,
+          transform: inView ? "translateY(0)" : "translateY(14px)",
+          transition: "all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
         }}>
-          Interoceptive Lead Time
+          <div style={{
+            fontFamily: tokens.mono,
+            fontSize: "11px",
+            letterSpacing: "2.5px",
+            textTransform: "uppercase",
+            color: tokens.accent,
+            marginBottom: "10px",
+          }}>
+            Interoceptive Lead Time
+          </div>
+          <div style={{
+            fontFamily: tokens.serif,
+            fontSize: "26px",
+            fontWeight: 400,
+            color: tokens.text,
+            lineHeight: 1.3,
+            maxWidth: "520px",
+            margin: "0 auto",
+          }}>
+            The gap between when your body shifts and when you notice
+          </div>
         </div>
-        <div style={{
-          fontFamily: tokens.serif,
-          fontSize: "26px",
-          fontWeight: 400,
-          color: tokens.text,
-          lineHeight: 1.3,
-          maxWidth: "520px",
-          margin: "0 auto",
-        }}>
-          The gap between when your body shifts and when you notice
-        </div>
-      </div>
+      )}
 
       {/* Central number */}
       <div style={{

@@ -67,7 +67,7 @@ const steps: Step[] = [
   { icon: SparklesIcon, label: "Reflect", sublabel: "See data + AI reflection", detail: "Claude streams contemplative response", color: PURPLE },
 ];
 
-export function NoticeInteractionFlow() {
+export function NoticeInteractionFlow({ hideHeader = false, hideCallout = false }: { hideHeader?: boolean; hideCallout?: boolean } = {}) {
   const [ref, inView] = useInView(0.2);
   const [activeStep, setActiveStep] = useState(-1);
 
@@ -142,26 +142,28 @@ export function NoticeInteractionFlow() {
         }
       `}</style>
 
-      <div className="notice-flow-header">
-        <p style={{
-          fontFamily: tokens.mono,
-          fontSize: "11px",
-          letterSpacing: "2.5px",
-          textTransform: "uppercase",
-          color: tokens.accent,
-        }}>
-          Core Interaction
-        </p>
-        <h3 style={{
-          fontFamily: tokens.serif,
-          fontSize: "28px",
-          fontWeight: 400,
-          color: tokens.text,
-          marginTop: "8px",
-        }}>
-          The Frame Snap
-        </h3>
-      </div>
+      {!hideHeader && (
+        <div className="notice-flow-header">
+          <p style={{
+            fontFamily: tokens.mono,
+            fontSize: "11px",
+            letterSpacing: "2.5px",
+            textTransform: "uppercase",
+            color: tokens.accent,
+          }}>
+            Core Interaction
+          </p>
+          <h3 style={{
+            fontFamily: tokens.serif,
+            fontSize: "28px",
+            fontWeight: 400,
+            color: tokens.text,
+            marginTop: "8px",
+          }}>
+            The Frame Snap
+          </h3>
+        </div>
+      )}
 
       <div className="notice-flow-steps">
         {steps.map((step, i) => {
@@ -233,34 +235,36 @@ export function NoticeInteractionFlow() {
       </div>
 
       {/* Key decision callout */}
-      <div style={{
-        maxWidth: "580px",
-        margin: "40px auto 0",
-        padding: "20px 24px",
-        background: tokens.bgWarm,
-        borderLeft: `3px solid ${tokens.accent}`,
-        borderRadius: "0 8px 8px 0",
-        opacity: inView ? 1 : 0,
-        transition: "opacity 0.6s ease 2.5s",
-      }}>
-        <p style={{
-          fontFamily: tokens.sans,
-          fontSize: "11px",
-          fontWeight: 600,
-          letterSpacing: "1.5px",
-          textTransform: "uppercase",
-          color: tokens.accent,
-          marginBottom: "6px",
-        }}>Key Design Decision</p>
-        <p style={{
-          fontFamily: tokens.serif,
-          fontSize: "15px",
-          lineHeight: 1.7,
-          color: tokens.text,
+      {!hideCallout && (
+        <div style={{
+          maxWidth: "580px",
+          margin: "40px auto 0",
+          padding: "20px 24px",
+          background: tokens.bgWarm,
+          borderLeft: `3px solid ${tokens.accent}`,
+          borderRadius: "0 8px 8px 0",
+          opacity: inView ? 1 : 0,
+          transition: "opacity 0.6s ease 2.5s",
         }}>
-          You commit your subjective assessment <em>before</em> you see the biometric data. You say "I feel tense" and then discover your HRV is 22ms below your weekly average. Over time, that feedback loop trains calibration between felt sense and physiology.
-        </p>
-      </div>
+          <p style={{
+            fontFamily: tokens.sans,
+            fontSize: "11px",
+            fontWeight: 600,
+            letterSpacing: "1.5px",
+            textTransform: "uppercase",
+            color: tokens.accent,
+            marginBottom: "6px",
+          }}>Key Design Decision</p>
+          <p style={{
+            fontFamily: tokens.serif,
+            fontSize: "15px",
+            lineHeight: 1.7,
+            color: tokens.text,
+          }}>
+            You commit your subjective assessment <em>before</em> you see the biometric data. You say "I feel tense" and then discover your HRV is 22ms below your weekly average. Over time, that feedback loop trains calibration between felt sense and physiology.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

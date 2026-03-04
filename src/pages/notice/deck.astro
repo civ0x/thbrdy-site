@@ -73,7 +73,7 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
           <div class="slide-eyebrow dk-reveal" style="text-align: center">THE PRODUCT</div>
           <h2 class="slide-heading dk-reveal" style="text-align: center">Frame Snap: capture, label, reflect.</h2>
           <div class="notice-island-wrap">
-            <NoticeInteractionFlow client:visible />
+            <NoticeInteractionFlow client:visible hideHeader hideCallout />
           </div>
           <div class="s3-features dk-reveal">
             <div class="s3-feature">
@@ -98,7 +98,7 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
           <div class="slide-eyebrow dk-reveal" style="text-align: center">INTEROCEPTIVE LEAD TIME</div>
           <h2 class="slide-heading dk-reveal" style="text-align: center">The metric no one else measures</h2>
           <div class="notice-island-wrap">
-            <NoticeVisionLeadTime client:visible />
+            <NoticeVisionLeadTime client:visible hideHeader />
           </div>
           <div class="s4-callout dk-reveal">
             <p>If lead time reduction correlates with MAIA-2 score improvement — that's a peer-reviewable finding.</p>
@@ -257,6 +257,9 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
   }
   html.deck-mode body {
     overflow: hidden;
+  }
+  html.deck-mode footer {
+    display: none;
   }
 </style>
 
@@ -522,6 +525,10 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
     max-width: 780px;
     margin: 0 auto;
     width: 100%;
+  }
+
+  #slide-6 .notice-island-wrap {
+    max-width: none;
   }
 
   /* ── Slide 3: The Product ── */
@@ -830,10 +837,24 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
 
   .notice-island-wrap :global(.notice-gap) {
     margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
   }
 
   .notice-island-wrap :global(.notice-gap-header) {
     display: none;
+  }
+
+  .notice-island-wrap :global(.notice-gap-venn) {
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .notice-island-wrap :global(.notice-gap-grid) {
+    max-width: none !important;
+    margin: 0 !important;
   }
 
   /* ── Reduced motion ── */
@@ -879,6 +900,10 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
     }
 
     .s5-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .notice-island-wrap :global(.notice-gap) {
       grid-template-columns: 1fr;
     }
   }
