@@ -11,8 +11,9 @@ import { PullQuote } from '../../components/islands/shared/PullQuote.tsx'
 import TrustTopologyMap from '../../components/islands/TrustTopologyMap.tsx'
 import TrustPrivacyGradient from '../../components/islands/TrustPrivacyGradient.tsx'
 import TrustHrvDivergence from '../../components/islands/TrustHrvDivergence.tsx'
+import TrustTemporalAnchor from '../../components/islands/TrustTemporalAnchor.tsx'
 
-{/* Remaining island imports (Sessions 4-5): TrustTemporalAnchor, TrustConcurrencyBoundary */}
+{/* Remaining island import (Session 5): TrustConcurrencyBoundary */}
 
 You're building an app that captures a moment of noticing — the user taps a button when they feel something shift internally. The app reads biometric data from the wrist and pairs it with a subjective emotional label. An AI reflects on patterns over time. All of this works cleanly with a single device. The Apple Watch captures heart rate and HRV, transfers the data to the iPhone over WatchConnectivity, and the whole pipeline runs on-device. One trust domain, one data format, one timestamp source.
 
@@ -64,7 +65,7 @@ If you use the receive timestamp — when the iPhone gets the BLE payload — yo
 
 The architectural response preserves the Garmin epoch timestamp from the button press through the entire pipeline. The iPhone converts it — `garminTimestamp + garminEpochOffset → Date` — and uses the converted value as the snap timestamp. The ten-second capture window and the BLE transit latency are invisible to the data model. As far as the system is concerned, the snap happened when the user pressed the button. Full stop.
 
-{/* ISLAND: TemporalAnchoring — swim-lane timeline showing three parallel tracks (button press moment, HRV capture window, BLE transit) with an animated marker anchored to the button press. Show how the system preserves the phenomenological timestamp rather than the receive timestamp. Garmin epoch reference point (Dec 31, 1989) noted. */}
+<TrustTemporalAnchor client:visible />
 
 This is a small decision in terms of code — one timestamp conversion function, a constant for the epoch offset, a few lines of date arithmetic. But it encodes a commitment about what the system considers the moment of measurement. The default in data engineering is to timestamp receipt: when did the system learn about this event? That default is defensible for most applications. Server logs, financial transactions, sensor telemetry — all of these care about when the system processed the data, because the system's state is what matters. But in a system built around first-person events, the only defensible timestamp is the one anchored to the first-person act. The conversion function isn't plumbing. It's an ontological commitment about where events live — in the person's experience, not in the machine's processing queue.
 
