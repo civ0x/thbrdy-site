@@ -24,7 +24,7 @@ export async function getStaticPaths() {
 }
 
 const { post, quoteText, quoteIndex } = Astro.props;
-const essayUrl = new URL('/notice/', Astro.site ?? 'https://thbrdy.dev');
+const essayUrl = new URL('/notice/vision/', Astro.site ?? 'https://thbrdy.dev');
 const truncatedQuote = quoteText.length > 80 ? quoteText.slice(0, 80) + '…' : quoteText;
 ---
 

@@ -1,23 +1,15 @@
 ---
-import { getEntry, render } from 'astro:content';
-import PostLayout from '../layouts/PostLayout.astro';
-
-const post = await getEntry('writing', 'notice-vision');
-if (!post) throw new Error('notice-vision entry not found');
-const { Content } = await render(post);
-
-const words = post.body?.split(/\s+/).length ?? 0;
-const minutesRead = Math.max(1, Math.round(words / 250));
+import Base from '../layouts/Base.astro';
 ---
 
-<PostLayout
-  title={post.data.title}
-  description={post.data.description}
-  date={post.data.date}
-  tags={post.data.tags}
-  connected_project={post.data.connected_project}
-  minutesRead={minutesRead}
-  ogImage={`/images/og/${post.id}.png`}
->
-  <Content />
-</PostLayout>
+<Base title="Notice" description="Multi-device biometric awareness for iPhone — training interoceptive awareness through contemplative AI reflection.">
+  <section style="max-width: 720px; margin: 6rem auto; padding: 0 1.5rem; text-align: center;">
+    <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 1.5rem;">NOTICE</div>
+    <h1 style="font-family: var(--font-serif); font-size: 2rem; color: var(--text); margin-bottom: 1rem;">Coming Soon</h1>
+    <p style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--text-light);">This page is being rebuilt as a hub. In the meantime:</p>
+    <nav style="margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem; align-items: center;">
+      <a href="/notice/vision/" style="color: var(--accent);">The Body Knows First — Vision Doc</a>
+      <a href="/notice/roadmap/" style="color: var(--accent);">Roadmap</a>
+    </nav>
+  </section>
+</Base>
