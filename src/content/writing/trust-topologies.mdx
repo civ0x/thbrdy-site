@@ -10,8 +10,9 @@ import { SectionDivider } from '../../components/islands/shared/SectionDivider.t
 import { PullQuote } from '../../components/islands/shared/PullQuote.tsx'
 import TrustTopologyMap from '../../components/islands/TrustTopologyMap.tsx'
 import TrustPrivacyGradient from '../../components/islands/TrustPrivacyGradient.tsx'
+import TrustHrvDivergence from '../../components/islands/TrustHrvDivergence.tsx'
 
-{/* Remaining island imports (Sessions 3-5): TrustHrvDivergence, TrustTemporalAnchor, TrustConcurrencyBoundary */}
+{/* Remaining island imports (Sessions 4-5): TrustTemporalAnchor, TrustConcurrencyBoundary */}
 
 You're building an app that captures a moment of noticing — the user taps a button when they feel something shift internally. The app reads biometric data from the wrist and pairs it with a subjective emotional label. An AI reflects on patterns over time. All of this works cleanly with a single device. The Apple Watch captures heart rate and HRV, transfers the data to the iPhone over WatchConnectivity, and the whole pipeline runs on-device. One trust domain, one data format, one timestamp source.
 
@@ -45,7 +46,7 @@ This is a category error. SDNN and RMSSD are derived from the same underlying da
 
 The architectural response is two explicit fields on both `BiometricSnapshot` and `SnapRecord`: `hrvSDNN: Double?` and `hrvRMSSD: Double?`, with source-level documentation marking each field's physiological meaning and measurement method. Two separate relative descriptor functions — `relativeHRV` for SDNN, `relativeHrvRMSSD` for RMSSD — with different range thresholds calibrated to each metric's distribution. The type system encodes an epistemic constraint. Swift's compiler won't prevent you from writing `hrvSDNN == hrvRMSSD` — both are `Double?` — but the data model makes it structurally impossible to accidentally merge them into a single field. The separation is semantic, not syntactic, and it's enforced by architecture rather than by the type checker.
 
-{/* ISLAND: HRVDivergence — parallel derivation diagram showing RR intervals at the top branching into two paths: SDNN (standard deviation, sympathetic + parasympathetic, measurement window) and RMSSD (root mean square successive differences, parasympathetic only, beat-to-beat). Show the type-system constraint at the bottom: two separate fields, two separate descriptor functions, never merged. */}
+<TrustHrvDivergence client:visible />
 
 This pattern generalizes beyond biometrics. When you integrate data from multiple sources, the hardest bug isn't a pipeline failure — it's two values that look compatible but measure different things. The failure mode is subtle because the system continues to work. It produces outputs. The outputs are plausible. But they're wrong in a way that's invisible unless you understand the domain semantics of the source data. The type system is your first line of defense — not against runtime errors, but against category errors that produce plausible-looking nonsense.
 
