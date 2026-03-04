@@ -146,7 +146,7 @@ export default function TrustConcurrencyBoundary() {
           font-family: ${tokens.mono};
           font-size: 0.6rem;
           color: var(--accent);
-          background: rgba(184, 134, 11, 0.08);
+          background: var(--bg-dark);
           border: 1px solid rgba(184, 134, 11, 0.2);
           border-radius: 3px;
           padding: 0.25rem 0.5rem;
@@ -171,7 +171,7 @@ export default function TrustConcurrencyBoundary() {
           font-family: ${tokens.mono};
           font-size: 0.58rem;
           color: var(--red);
-          background: rgba(166, 61, 47, 0.08);
+          background: var(--bg-dark);
           border: 1px solid rgba(166, 61, 47, 0.2);
           border-radius: 3px;
           padding: 0.2rem 0.45rem;
