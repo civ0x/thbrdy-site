@@ -13,7 +13,7 @@ import TrustPrivacyGradient from '../../components/islands/TrustPrivacyGradient.
 import TrustHrvDivergence from '../../components/islands/TrustHrvDivergence.tsx'
 import TrustTemporalAnchor from '../../components/islands/TrustTemporalAnchor.tsx'
 
-{/* Remaining island import (Session 5): TrustConcurrencyBoundary */}
+import TrustConcurrencyBoundary from '../../components/islands/TrustConcurrencyBoundary.tsx'
 
 You're building an app that captures a moment of noticing — the user taps a button when they feel something shift internally. The app reads biometric data from the wrist and pairs it with a subjective emotional label. An AI reflects on patterns over time. All of this works cleanly with a single device. The Apple Watch captures heart rate and HRV, transfers the data to the iPhone over WatchConnectivity, and the whole pipeline runs on-device. One trust domain, one data format, one timestamp source.
 
@@ -79,7 +79,7 @@ The Garmin Connect IQ Companion SDK is an Objective-C framework. Its delegate ca
 
 This is concurrency housekeeping. But the pattern is structurally identical to the privacy boundary described in the first section. In both cases, data crosses from one trust domain to another. In both cases, the crossing requires decomposition — you can't bring the container across, only the contents. In both cases, you must explicitly declare what transfers. And in both cases, what *doesn't* cross is as important as what does. The concurrency boundary decomposes `IQDevice` into a UUID and `[String: Any]` into typed primitives. The privacy boundary decomposes absolute biometric values into relative descriptors. Both are checkpoints where implicit structure becomes explicit — where the system forces you to name what you're carrying across.
 
-{/* ISLAND: ConcurrencyBoundary — diagram showing the actor isolation model: BLE callback queue on the left (nonisolated, Objective-C types), main actor on the right (@MainActor, Swift types), with explicit data tokens crossing the boundary. Mirror the structure of the privacy boundary from Section 01 to make the parallel visible. */}
+<TrustConcurrencyBoundary client:visible />
 
 The compiler enforces the concurrency boundary. The architecture enforces the privacy boundary. Swift 6 strict concurrency is, in effect, a type-level privacy model for data flow between isolation domains. The mechanism is different — compiler errors versus architectural discipline — but the structural principle is the same: data moving between domains with different trust models must be explicitly decomposed at the crossing point, and the decomposition itself is where the important decisions happen. What you choose to carry across, what you leave behind, and how you reconstruct on the other side — these are design decisions that encode your commitments about what matters.
 
