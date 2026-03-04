@@ -218,6 +218,7 @@ export default function TrustConcurrencyBoundary() {
           font-size: 0.6rem;
           color: rgba(255, 255, 255, 0.3);
           line-height: 1.5;
+          text-wrap: balance;
         }
         .trust-concurrency-callout-eq {
           font-family: ${tokens.mono};
@@ -236,6 +237,7 @@ export default function TrustConcurrencyBoundary() {
           color: rgba(255, 255, 255, 0.4);
           line-height: 1.6;
           text-align: center;
+          text-wrap: balance;
         }
         /* Responsive */
         @media (max-width: 640px) {

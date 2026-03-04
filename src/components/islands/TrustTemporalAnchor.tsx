@@ -60,7 +60,7 @@ export default function TrustTemporalAnchor() {
         .trust-temporal-tick-label {
           font-family: ${tokens.mono};
           font-size: 0.55rem;
-          color: rgba(255, 255, 255, 0.55);
+          color: rgba(255, 255, 255, 0.7);
           white-space: nowrap;
           margin-top: 2px;
         }
@@ -89,7 +89,7 @@ export default function TrustTemporalAnchor() {
         .trust-temporal-lane-sub {
           font-family: ${tokens.mono};
           font-size: 0.52rem;
-          color: rgba(255, 255, 255, 0.45);
+          color: rgba(255, 255, 255, 0.6);
           line-height: 1.4;
           margin-top: 2px;
         }
