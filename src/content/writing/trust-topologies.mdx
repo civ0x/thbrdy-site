@@ -1,0 +1,84 @@
+---
+title: "Trust Topologies"
+description: "Three biometric devices, three data flow paths, three trust models — all converging on the same protocol. The hard problems aren't data engineering. They're decisions about what counts as the same thing, what boundaries data should cross, and when the moment of measurement actually is."
+date: 2026-03-04
+tags: ["Systems Architecture", "Privacy", "Epistemology", "iOS Development", "Biometrics"]
+connected_project: "Notice"
+---
+
+import { SectionDivider } from '../../components/islands/shared/SectionDivider.tsx'
+import { PullQuote } from '../../components/islands/shared/PullQuote.tsx'
+import TrustTopologyMap from '../../components/islands/TrustTopologyMap.tsx'
+import TrustPrivacyGradient from '../../components/islands/TrustPrivacyGradient.tsx'
+
+{/* Remaining island imports (Sessions 3-5): TrustHrvDivergence, TrustTemporalAnchor, TrustConcurrencyBoundary */}
+
+You're building an app that captures a moment of noticing — the user taps a button when they feel something shift internally. The app reads biometric data from the wrist and pairs it with a subjective emotional label. An AI reflects on patterns over time. All of this works cleanly with a single device. The Apple Watch captures heart rate and HRV, transfers the data to the iPhone over WatchConnectivity, and the whole pipeline runs on-device. One trust domain, one data format, one timestamp source.
+
+Then you add a Garmin Enduro 3. And an Oura Ring 3. And you discover that "add another data source" is not an engineering problem. It's three different problems wearing the same name: a topology problem about how data flows and what boundaries it crosses, an identity problem about when two measurements are actually measuring the same thing, and a temporal problem about when the moment of measurement actually is. Each of these looks like plumbing from the outside. Each one encodes an epistemic commitment in code.
+
+I'm building Notice, a contemplative awareness app for Apple Watch and iPhone. Integrating Garmin and Oura alongside the existing Apple Watch support forced a set of architectural decisions that generalize well beyond biometric sensing. Here's what those decisions reveal about what it means to be careful about boundaries.
+
+<SectionDivider number="01" label="The Topology Problem" />
+
+Three devices, three data flow paths. Apple Watch transfers biometric snapshots to the iPhone over WatchConnectivity — everything stays on-device, within a single Apple ecosystem trust domain. Garmin Enduro 3 uses the Connect IQ Companion SDK to send data over Bluetooth Low Energy directly to the iPhone. From a trust perspective, the Garmin path is topologically identical to Apple Watch: data flows from wrist to phone with no intermediate hop. But the transport is different (BLE versus WatchConnectivity), the SDK is different (Objective-C delegate callbacks versus Swift's native concurrency), and the payload format is different (a flat dictionary of primitives versus structured Swift types). Same topology, different mechanics.
+
+Oura Ring 3 is the one that breaks the pattern. The ring syncs to the Oura app over BLE, the Oura app syncs to Oura Cloud, and the data you care about most — nighttime HRV as RMSSD — is only available through Oura's REST API. It doesn't sync to Apple HealthKit. So the data path is: ring &rarr; BLE &rarr; Oura app &rarr; Oura Cloud &rarr; REST API &rarr; iPhone. A cloud hop sits in the middle of what should be a local pipeline. The privacy architecture has to accommodate a path where biometric data transits a third-party server.
+
+<TrustTopologyMap client:visible />
+
+The architectural response is a `SnapBiometricSource` protocol that normalizes all three into a `BiometricSnapshot` value type. Everything downstream — the AI reflection pipeline, the historical analysis, the user-facing display — consumes the snapshot, not the source. The protocol is the privacy enforcement boundary. It's where topology gets erased.
+
+But the interesting part isn't the protocol. It's what happens before the protocol — the different trust decisions each path requires. The Garmin path is privacy-clean. BLE direct transfer, same as Apple Watch, no data leaving the device. The Oura path requires a cloud hop, and the system handles this by making all API calls client-side: the iPhone authenticates directly with Oura Cloud via `ASWebAuthenticationSession`, fetches the data, and processes it locally. Raw Oura biometric data reaches the iPhone but never touches Notice's infrastructure. No Notice server sits in the path. The OAuth token stays on-device.
+
+Then there's what Claude sees. The `buildUserMessage` function branches on source, but regardless of which topology delivered the data, Claude receives only relative descriptors: "heart rate variability in a moderate range," "physiological stress level elevated," "energy reserve on the lower side." The privacy-safe transformation is the same operation applied to different inputs — but those inputs arrived through fundamentally different trust paths. The `SnapBiometricSource` protocol normalizes the topology. The descriptor functions — `relativeHRV`, `relativeHrvRMSSD`, `relativeStressScore`, `relativeBodyBattery` — normalize the values. By the time the data reaches the language model, the three architecturally distinct paths have been reduced to the same format, and the absolute values that could fingerprint a user have been replaced with relative ranges that cannot.
+
+<PullQuote client:visible slug="trust-topologies" quoteIndex={1}>Privacy is not a binary property. It's a topology — the question isn't whether data is private, but what path it traveled and what boundaries it crossed.</PullQuote>
+
+<TrustPrivacyGradient client:visible />
+
+<SectionDivider number="02" label="What Counts as the Same Thing" />
+
+Apple Watch stores heart rate variability as `heartRateVariabilitySDNN` — the standard deviation of NN intervals, reflecting total autonomic variability across both sympathetic and parasympathetic branches, computed over a measurement window. Oura and Garmin provide RMSSD — root mean square of successive differences, a beat-to-beat metric that specifically reflects parasympathetic vagal tone. Both are called "HRV." Both are measured in milliseconds. A naive implementation puts them in the same field.
+
+This is a category error. SDNN and RMSSD are derived from the same underlying data — the time intervals between successive heartbeats — but they extract different physiological signals. SDNN captures total variability, the combined output of multiple regulatory mechanisms operating at different timescales. RMSSD isolates the high-frequency component, the rapid beat-to-beat fluctuations driven by vagal modulation of the sinoatrial node. Comparing them numerically is meaningless. Trending them against each other is worse — it produces patterns that look interpretable but reflect the difference between the metrics, not changes in the user's autonomic state.
+
+The architectural response is two explicit fields on both `BiometricSnapshot` and `SnapRecord`: `hrvSDNN: Double?` and `hrvRMSSD: Double?`, with source-level documentation marking each field's physiological meaning and measurement method. Two separate relative descriptor functions — `relativeHRV` for SDNN, `relativeHrvRMSSD` for RMSSD — with different range thresholds calibrated to each metric's distribution. The type system encodes an epistemic constraint. Swift's compiler won't prevent you from writing `hrvSDNN == hrvRMSSD` — both are `Double?` — but the data model makes it structurally impossible to accidentally merge them into a single field. The separation is semantic, not syntactic, and it's enforced by architecture rather than by the type checker.
+
+{/* ISLAND: HRVDivergence — parallel derivation diagram showing RR intervals at the top branching into two paths: SDNN (standard deviation, sympathetic + parasympathetic, measurement window) and RMSSD (root mean square successive differences, parasympathetic only, beat-to-beat). Show the type-system constraint at the bottom: two separate fields, two separate descriptor functions, never merged. */}
+
+This pattern generalizes beyond biometrics. When you integrate data from multiple sources, the hardest bug isn't a pipeline failure — it's two values that look compatible but measure different things. The failure mode is subtle because the system continues to work. It produces outputs. The outputs are plausible. But they're wrong in a way that's invisible unless you understand the domain semantics of the source data. The type system is your first line of defense — not against runtime errors, but against category errors that produce plausible-looking nonsense.
+
+The constraint propagates through the entire stack. In the Claude reflection layer, the system prompt frames these as categorically distinct signals — "snap-time biometrics" captured at the moment of noticing versus "overnight baseline data" including nighttime HRV — never merging them in analysis. The epistemic boundary encoded in the data model — two fields, never compared — extends through the API payload format, into the language model's context window, and out through its generated reflections. A constraint that began as a type decision on a Swift struct reaches the user as careful language about which measurement means what.
+
+<PullQuote client:visible slug="trust-topologies" quoteIndex={2}>The type system is an epistemic tool — it encodes what you know about the domain, not just what's convenient for the data model.</PullQuote>
+
+<SectionDivider number="03" label="When Is Now" />
+
+When the user presses the button on their Garmin Enduro 3, the watch captures the Garmin epoch timestamp — `Time.now().value()`, seconds since December 31, 1989 00:00 UTC, an arbitrary epoch that predates GPS time by a decade. Then the watch spends ten seconds accumulating RR intervals for HRV computation, rejecting ectopic beats — intervals that deviate more than 25% from the running median — to ensure physiological plausibility. Then it transmits the payload over BLE. The iPhone receives it twelve to fourteen seconds after the button press.
+
+Which timestamp goes on the snap?
+
+If you use the receive timestamp — when the iPhone gets the BLE payload — you've recorded the moment the data arrived, not the moment of noticing. For most data pipelines, this distinction is irrelevant. For an app whose entire thesis is capturing the instant when the user becomes aware of an internal state shift, twelve seconds is the difference between phenomenological fidelity and engineering convenience. The snap didn't happen when the phone received a Bluetooth packet. It happened when the user felt something and pressed a button.
+
+The architectural response preserves the Garmin epoch timestamp from the button press through the entire pipeline. The iPhone converts it — `garminTimestamp + garminEpochOffset → Date` — and uses the converted value as the snap timestamp. The ten-second capture window and the BLE transit latency are invisible to the data model. As far as the system is concerned, the snap happened when the user pressed the button. Full stop.
+
+{/* ISLAND: TemporalAnchoring — swim-lane timeline showing three parallel tracks (button press moment, HRV capture window, BLE transit) with an animated marker anchored to the button press. Show how the system preserves the phenomenological timestamp rather than the receive timestamp. Garmin epoch reference point (Dec 31, 1989) noted. */}
+
+This is a small decision in terms of code — one timestamp conversion function, a constant for the epoch offset, a few lines of date arithmetic. But it encodes a commitment about what the system considers the moment of measurement. The default in data engineering is to timestamp receipt: when did the system learn about this event? That default is defensible for most applications. Server logs, financial transactions, sensor telemetry — all of these care about when the system processed the data, because the system's state is what matters. But in a system built around first-person events, the only defensible timestamp is the one anchored to the first-person act. The conversion function isn't plumbing. It's an ontological commitment about where events live — in the person's experience, not in the machine's processing queue.
+
+Even the coordinate system for time is device-specific. The Garmin epoch — December 31, 1989 — is documented in Connect IQ's API reference, but the offset requires empirical verification on physical hardware because edge cases accumulate across firmware versions and timezone handling. Apple Watch uses Unix time. Oura's API returns ISO 8601 strings in UTC. Three devices, three temporal reference frames, three conversions required before you can say that two events happened at the "same time." The scare quotes are earned.
+
+<SectionDivider number="04" label="Boundaries as Architecture" />
+
+The Garmin Connect IQ Companion SDK is an Objective-C framework. Its delegate callbacks — `IQDeviceEventDelegate` for device connection state, `IQAppMessageDelegate` for BLE data payloads — arrive on a BLE callback queue that is not the main actor. The service that manages Garmin state, `GarminConnectivityService`, is `@MainActor @Observable` because its published properties drive SwiftUI views. Swift 6 strict concurrency enforces isolation between these domains: you cannot pass non-`Sendable` types across actor boundaries without the compiler objecting.
+
+`IQDevice` and `[String: Any]` — the BLE payload dictionary — are Objective-C types that aren't `Sendable`. So the delegate callbacks are marked `nonisolated`. They receive the Objective-C objects on the BLE queue, extract all values into local `Sendable` primitives — `let hr = payload["hr"] as? Double`, `let rr = payload["rr"] as? [Int]`, `let st = payload["st"] as? Double`, `let bb = payload["bb"] as? Double` — and then cross to the main actor via `Task { @MainActor in ... }`. The non-`Sendable` container stays on the BLE side of the boundary. Only the typed, `Sendable` contents cross.
+
+This is concurrency housekeeping. But the pattern is structurally identical to the privacy boundary described in the first section. In both cases, data crosses from one trust domain to another. In both cases, the crossing requires decomposition — you can't bring the container across, only the contents. In both cases, you must explicitly declare what transfers. And in both cases, what *doesn't* cross is as important as what does. The concurrency boundary decomposes `IQDevice` into a UUID and `[String: Any]` into typed primitives. The privacy boundary decomposes absolute biometric values into relative descriptors. Both are checkpoints where implicit structure becomes explicit — where the system forces you to name what you're carrying across.
+
+{/* ISLAND: ConcurrencyBoundary — diagram showing the actor isolation model: BLE callback queue on the left (nonisolated, Objective-C types), main actor on the right (@MainActor, Swift types), with explicit data tokens crossing the boundary. Mirror the structure of the privacy boundary from Section 01 to make the parallel visible. */}
+
+The compiler enforces the concurrency boundary. The architecture enforces the privacy boundary. Swift 6 strict concurrency is, in effect, a type-level privacy model for data flow between isolation domains. The mechanism is different — compiler errors versus architectural discipline — but the structural principle is the same: data moving between domains with different trust models must be explicitly decomposed at the crossing point, and the decomposition itself is where the important decisions happen. What you choose to carry across, what you leave behind, and how you reconstruct on the other side — these are design decisions that encode your commitments about what matters.
+
+The patterns that emerged from integrating three biometric devices into a contemplative awareness app — trust topologies, category error prevention, temporal anchoring, explicit decomposition at crossing points — are not specific to biometric sensing or iOS development. They're the patterns that show up whenever you build systems that combine data from sources with different trust models, different measurement semantics, and different temporal reference frames. The specific decisions in Notice are about heart rate variability and Bluetooth Low Energy. The structural insight is about what it means to be careful about boundaries — and about the fact that the most consequential architectural decisions are often the ones that look like plumbing.
