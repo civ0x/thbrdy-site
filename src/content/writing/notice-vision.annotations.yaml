@@ -159,6 +159,37 @@ terms:
       Notice uses it to validate device identity before the Cloudflare
       proxy forwards any API request.
 
+  - key: trust-topology
+    pattern: "trust topologies"
+    section: "02"
+    definition: >
+      The pattern of trust boundaries data crosses between its origin
+      and its destination. Different devices create different topologies
+      even when delivering the same logical data. Apple Watch and Garmin
+      are single-domain (wrist → phone); Oura requires a cloud hop
+      through third-party infrastructure.
+
+  - key: biometric-snapshot
+    pattern: "biometric snapshot"
+    section: "02"
+    definition: >
+      A Swift protocol that normalizes biometric data from multiple
+      hardware sources into a single value type. Downstream consumers —
+      AI reflections, historical analysis, user display — consume the
+      snapshot, not the source. The protocol boundary is where trust
+      topology gets erased.
+
+  - key: sdnn-rmssd
+    pattern: "SDNN"
+    section: "05"
+    definition: >
+      Two heart rate variability metrics derived from the same inter-beat
+      intervals but measuring different signals. SDNN (standard deviation
+      of NN intervals) reflects total autonomic variability. RMSSD (root
+      mean square of successive differences) isolates parasympathetic
+      vagal tone. Comparing them numerically is a category error. Notice
+      tracks both as separate fields with separate descriptor functions.
+
   - key: focusing
     pattern: "Focusing tradition"
     section: "02"

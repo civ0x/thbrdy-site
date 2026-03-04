@@ -2,7 +2,7 @@
 title: "The Body Knows First"
 date: 2026-02-27
 description: "A biofeedback-assisted state navigation app that trains interoceptive awareness — helping you notice what your body already knows, in the middle of a life."
-tags: ["Interoception", "Contemplative Technology", "Apple Watch", "AI Architecture", "Vision"]
+tags: ["Interoception", "Contemplative Technology", "Multi-Device", "AI Architecture", "Vision"]
 connected_project: "Notice"
 draft: true
 ---
@@ -39,7 +39,9 @@ This is part of a broader thesis I have been developing across two projects. [Sc
 
 ## What Notice Is
 
-The core interaction is called a **[[term:frame-snap|Frame Snap]]**. When you notice something shifting — a tightening in your chest, a surge of energy, a settling you cannot quite name — you tap your Watch or phone. That tap captures a biometric snapshot: heart rate, [[term:hrv|heart rate variability]], and contextual signals assembled by on-device intelligence. Then you debrief.
+The core interaction is called a **[[term:frame-snap|Frame Snap]]**. When you notice something shifting — a tightening in your chest, a surge of energy, a settling you cannot quite name — you tap your Watch or phone. That tap captures a [[term:biometric-snapshot|biometric snapshot]]: heart rate, [[term:hrv|heart rate variability]], and contextual signals assembled by on-device intelligence. Then you debrief.
+
+The same snap-debrief-reflection loop works across Apple Watch, Garmin, and iPhone — and Oura Ring feeds overnight baseline context into the system without requiring a conscious snap. Three hardware ecosystems, three different transport layers, three different [[term:trust-topology|trust topologies]] — all normalized through a single protocol boundary so downstream intelligence never knows which wrist the data came from.
 
 <NoticeInteractionFlow client:visible />
 
@@ -65,25 +67,35 @@ Claude reflects at three timescales: a brief sentence at snap time — a small a
 
 ## What's Built
 
-Notice is not a concept. It is a working product in closed beta via TestFlight with eight testers from the Jhourney contemplative community. Fifteen development sessions have produced a complete end-to-end experience — about 24 hours of build time, starting from zero iOS experience.
+Notice is not a concept. It is a working product in closed beta via TestFlight. The core loop has been built three times across three hardware ecosystems — Apple Watch via WatchConnectivity, Garmin Enduro 3 via Connect IQ Companion SDK over BLE, and Oura Ring 3 via cloud REST API — each with different transport mechanics, different epoch formats, and different trust boundaries.
 
-The full snap-debrief-reflection loop works on both Watch and iPhone. Voice-initiated snaps via Siri and AirPods let you capture a moment without looking at a screen. On-device intelligence handles context assembly — HealthKit trends, calendar, location, recent snaps — without any data leaving the device.
+What made this tractable is the `BiometricSnapshot` protocol: a single abstraction that normalizes heart rate, [[term:sdnn-rmssd|HRV (SDNN and RMSSD tracked as separate fields)]], stress indicators, and device-specific metrics into one value type. Downstream consumers — AI reflections, historical analysis, user display — consume the snapshot, not the source. The architecture separates what data means from where it came from.
+
+Voice-initiated snaps via Siri and AirPods let you capture a moment without looking at a screen. On-device intelligence handles context assembly — HealthKit trends, calendar, location, recent snaps — without any data leaving the device.
 
 <SectionDivider client:visible number="04" label="Privacy by Architecture" />
 
 ## Privacy by Architecture
 
-Notice's privacy model is not a policy. It is an architecture.
+Notice's privacy model is not a policy. It is an architecture. And with three hardware sources, the question is no longer whether data is private but what path it traveled and what boundaries it crossed.
 
 <NoticeArchitectureDiagram client:visible />
 
 <PullQuote client:visible slug="notice-vision" quoteIndex={3} shareBase="/notice">Notice's privacy model is not a policy. It is an architecture.</PullQuote>
 
-Tier 1 reads everything. Raw heart rate, calendar entries, GPS coordinates, contacts. It assembles a structured summary, stripping absolute values, timestamps, and identifying details. Tier 2 — Claude via the cloud — sees only those summaries. "HRV lower than your baseline." "Back-to-back meetings this morning." Never a heart rate number. Never a location. Never a name.
+Three trust paths converge on a single protocol:
+
+**Apple Watch** — single trust domain. Data travels wrist → phone via WatchConnectivity. No network hop. Raw heart rate, HRV, and accelerometer data never leave the device pairing.
+
+**Garmin** — single trust domain, different mechanics. Data travels wrist → phone via BLE through the Connect IQ Companion SDK. Different transport, different encoding (Garmin epoch, flat dictionaries), same topological guarantee: no cloud hop.
+
+**Oura Ring** — cloud hop. Data travels ring → Oura app → Oura Cloud → REST API → iPhone. Authentication via OAuth. The raw data reaches the phone but never touches Notice infrastructure — it is a client-side fetch, topologically equivalent to the user reading their own Oura dashboard.
+
+The `SnapBiometricSource` protocol normalizes these three paths. Relative descriptor functions — `relativeHRV`, `relativeHrvRMSSD`, `relativeStressScore`, `relativeBodyBattery` — translate device-specific values into contextual language. By the time data reaches Claude, all three architecturally distinct paths have been reduced to the same format: "HRV lower than your baseline." "Stress elevated." Never a raw number. Never a source identifier. The full architectural analysis — how three trust topologies converge on a single protocol — is documented in [Trust Topologies](/writing/trust-topologies/).
 
 A stateless Cloudflare Worker proxy holds the API key server-side and validates device identity via Apple's [[term:app-attest|App Attest]] before forwarding any request.
 
-This is not just a privacy choice. It is a regulatory strategy. The [[ref:fda-wellness|FDA's General Wellness Guidance]] classifies Notice as non-invasive wellness only if it avoids disease claims — one diagnostic-sounding phrase could trigger FDA jurisdiction. The [[ref:ftc-hbnr|FTC's Health Breach Notification Rule]] applies because Notice combines biometric data with emotional self-reports: any unauthorized third-party disclosure triggers breach notification at $53,000 per violation. By keeping raw health data on-device and sending only structured summaries through the proxy, the architecture *is* the compliance strategy.
+This is not just a privacy choice. It is a regulatory strategy. The [[ref:fda-wellness|FDA's General Wellness Guidance]] classifies Notice as non-invasive wellness only if it avoids disease claims — one diagnostic-sounding phrase could trigger FDA jurisdiction. The [[ref:ftc-hbnr|FTC's Health Breach Notification Rule]] applies because Notice combines biometric data with emotional self-reports: any unauthorized third-party disclosure triggers breach notification at $53,000 per violation. The topology-aware architecture strengthens the compliance posture: each data path has a documentable trust boundary, and the protocol normalization layer is where raw values get stripped — not by policy, but by the type system itself.
 
 <SectionDivider client:visible number="05" label="What the Science Says" />
 
@@ -103,7 +115,7 @@ Barrett's research shows that people who make finer distinctions between emotion
 
 This is the metric I am most excited about, and as far as I can tell, no one else is measuring it.
 
-Notice already collects both data streams: continuous biometric samples from HealthKit running in the background, and discrete conscious reports from Frame Snaps — the moment you notice a shift. The temporal gap between when your body shifts and when you consciously register it is your [[term:interoceptive-lead-time|interoceptive lead time]]. And it is trainable. Shrinking that gap *is* interoceptive development.
+Notice already collects both data streams: continuous biometric samples from HealthKit running in the background, and discrete conscious reports from Frame Snaps — the moment you notice a shift. With multiple devices, the system now tracks [[term:sdnn-rmssd|SDNN (Apple Watch) and RMSSD (Garmin, Oura) as separate fields]] with separate descriptor functions — preventing the category error of comparing metrics that look similar but measure different physiological signals. The temporal gap between when your body shifts and when you consciously register it is your [[term:interoceptive-lead-time|interoceptive lead time]]. And it is trainable. Shrinking that gap *is* interoceptive development.
 
 <PullQuote client:visible slug="notice-vision" quoteIndex={4} shareBase="/notice">A month ago, your body would shift 40 minutes before you snapped. Now it is 15 minutes. You are noticing sooner.</PullQuote>
 
@@ -149,9 +161,9 @@ Three product categories surround the space Notice occupies. None connect all th
 
 <PullQuote client:visible slug="notice-vision" quoteIndex={6} shareBase="/notice">Notice is not a meditation app that added HRV, or a tracker that added journaling. It is a new thing.</PullQuote>
 
-Calm and Headspace own guided meditation. WHOOP and Oura own biometric tracking. How We Feel and Daylio own mood logging. Rosebud owns AI journaling. None connect all three layers. Notice is not a meditation app that added HRV, or a tracker that added journaling. It is a new thing.
+Calm and Headspace own guided meditation. WHOOP and Oura own biometric tracking. How We Feel and Daylio own mood logging. Rosebud owns AI journaling. None connect all three layers — and none support multi-device biometric integration. WHOOP reads only WHOOP. Oura reads only Oura. Calm and Headspace do not read biometrics at all. Notice works across Apple Watch, Garmin, and Oura Ring with unified AI reflection, which means users are not locked to one hardware ecosystem and the addressable market is the union of all three device populations.
 
-The window to establish this position is narrowing. Calm is adding HRV biofeedback. Headspace is integrating with Oura Ring. WHOOP is publishing peer-reviewed mental health research and adding journal prompts. Each competitor is extending toward the triad from their corner. None have arrived yet, but the trajectories are visible. Time-to-market for the core loop matters more than feature completeness.
+The window to establish this position is narrowing. Calm is adding HRV biofeedback. Headspace is integrating with Oura Ring. WHOOP is publishing peer-reviewed mental health research and adding journal prompts. Each competitor is extending toward the triad from their corner. None have arrived yet, but the trajectories are visible. Multi-device support is a structural moat: each new integration widens the addressable market and increases the architectural distance competitors must cross to match it. Time-to-market for the core loop matters more than feature completeness.
 
 Premium, anchored against WHOOP and Oura, not meditation apps.
 
@@ -189,7 +201,9 @@ Each expansion widens the moat.
 
 <NoticeVisionTimeline client:visible />
 
-The on-device reflection model is the key technical milestone. Brief reflections moving on-device eliminates the largest cost center, makes the Core tier economically viable at zero marginal cost, and delivers the privacy promise in its fullest form.
+The on-device reflection model is the key technical milestone. Brief reflections moving on-device eliminates the largest cost center, makes the Core tier economically viable at zero marginal cost, and delivers the privacy promise in its strongest form.
+
+For Apple Watch and Garmin snaps with on-device reflections, nothing leaves your phone — the entire path from wrist to insight stays within a single trust domain. For Oura baseline context, the data transits Oura's cloud but never touches Notice infrastructure. The privacy guarantee is topological, not absolute: you can trace exactly which boundaries each datum crossed.
 
 <PullQuote client:visible slug="notice-vision" quoteIndex={8} shareBase="/notice">"Nothing leaves your phone" becomes literally true for the most common interaction.</PullQuote>
 
@@ -206,7 +220,7 @@ The technology is in service of that learning. A temporary scaffold that builds 
     TRY IT
   </div>
   <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.15rem', color: 'var(--text-mid)', maxWidth: '480px', margin: '0 auto 1.5rem' }}>
-    Notice is in active beta on Apple Watch + iPhone.
+    Notice is in active beta — multi-device biometric awareness for iPhone.
   </div>
   <div style={{ marginBottom: '2rem' }}>
     <a href="https://testflight.apple.com/join/2AR4qQYp" target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem', letterSpacing: '0.08em', color: 'var(--accent)', textDecoration: 'none', padding: '0.6rem 1.5rem', border: '1px solid var(--accent)', borderRadius: '4px', transition: 'background 0.2s ease, color 0.2s ease' }}>
