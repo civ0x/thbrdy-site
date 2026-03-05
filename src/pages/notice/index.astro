@@ -1,0 +1,388 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base title="Notice" description="Multi-device biometric awareness for iPhone — training interoceptive awareness through contemplative AI reflection.">
+  <div class="hub-page">
+    <nav class="hub-nav" aria-label="Notice section navigation">
+      <div class="hub-nav__inner">
+        <div class="hub-nav__left">
+          <span class="hub-nav__eyebrow">NOTICE</span>
+        </div>
+        <div class="hub-nav__right">
+          <a href="/notice/vision/" class="hub-nav__link">Vision</a>
+          <span class="hub-nav__sep">&middot;</span>
+          <a href="/notice/deck/" class="hub-nav__link">Deck</a>
+          <span class="hub-nav__sep">&middot;</span>
+          <a href="/notice/brief/" class="hub-nav__link">Brief</a>
+          <span class="hub-nav__sep">&middot;</span>
+          <a href="/notice/roadmap/" class="hub-nav__link">Roadmap</a>
+        </div>
+      </div>
+    </nav>
+
+    <header class="notice-header">
+      <div class="notice-header__eyebrow">NOTICE</div>
+      <img src="/images/enso-transparent.png" alt="" class="notice-header__enso" width="60" height="60" />
+      <h1 class="notice-header__title">Notice</h1>
+      <p class="notice-header__subtitle"><em>Making the body's intelligence visible and navigable.</em></p>
+      <p class="notice-header__desc">Multi-device biometric awareness for iPhone — training interoceptive awareness through contemplative AI reflection.</p>
+    </header>
+
+    <div class="card-grid">
+
+      <a class="notice-card reveal" href="/notice/vision/" style="transition-delay: 0ms">
+        <div class="card-eyebrow">VISION</div>
+        <h2 class="card-title">The Body Knows First</h2>
+        <p class="card-desc">The full vision — what Notice is, why it exists, and where it's going. The science, the architecture, the market.</p>
+      </a>
+
+      <div class="notice-card notice-card--compound reveal" style="transition-delay: 100ms">
+        <a class="card-main-link" href="/notice/deck/">
+          <div class="card-eyebrow">INVESTOR DECK</div>
+          <h2 class="card-title">The Pitch</h2>
+          <p class="card-desc">Eight slides. The insight, the product, the metric no one else measures, the moat.</p>
+        </a>
+        <div class="card-pdf-link">
+          <a href="/notice-investor-deck-v2.pdf" target="_blank" rel="noopener">PDF version ↗</a>
+        </div>
+      </div>
+
+      <div class="notice-card notice-card--compound reveal" style="transition-delay: 200ms">
+        <a class="card-main-link" href="/notice/brief/">
+          <div class="card-eyebrow">INVESTOR BRIEF</div>
+          <h2 class="card-title">The One-Pager</h2>
+          <p class="card-desc">Everything distilled. The insight, the product, the metric, the moat — with interactive diagrams.</p>
+        </a>
+        <div class="card-pdf-link">
+          <a href="/notice-investor-one-pager.pdf" target="_blank" rel="noopener">PDF version ↗</a>
+        </div>
+      </div>
+
+      <a class="notice-card reveal" href="/notice/roadmap/" style="transition-delay: 300ms">
+        <div class="card-eyebrow">ROADMAP</div>
+        <h2 class="card-title">What's Next</h2>
+        <p class="card-desc">What's shipped, what's in progress, and where Notice is headed. A living document.</p>
+      </a>
+
+    </div>
+
+    <footer class="notice-footer">
+      <p>If this resonates — as a user, investor, or collaborator — reach out.</p>
+      <div class="notice-footer__links">
+        <a href="mailto:jthomasbrady@proton.me">jthomasbrady@proton.me</a>
+      </div>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  /* ── Hub Page Layout ── */
+  .hub-page {
+    position: relative;
+    padding-top: 60px;
+  }
+
+  /* ── Hub Navigation Bar ── */
+  .hub-nav {
+    padding: 0.75rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .hub-nav__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hub-nav__left {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .hub-nav__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .hub-nav__right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .hub-nav__link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .hub-nav__link:hover {
+    color: var(--accent);
+  }
+
+  .hub-nav__sep {
+    color: var(--text-faint);
+    font-size: 0.65rem;
+  }
+
+  /* ── Header ── */
+  .notice-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 4rem auto 0;
+    padding: 0 1.5rem;
+  }
+
+  .notice-header__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .notice-header__enso {
+    display: block;
+    margin: 0 auto 1rem;
+    opacity: 0.6;
+  }
+
+  .notice-header__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 0.75rem;
+    line-height: 1.2;
+  }
+
+  .notice-header__subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    color: var(--text-light);
+    margin: 0 0 0.75rem;
+  }
+
+  .notice-header__desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* ── Card Grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    max-width: 780px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+  }
+
+  /* ── Cards ── */
+  .notice-card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .notice-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+
+  .notice-card--compound {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .notice-card--compound:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+
+  .card-main-link {
+    display: block;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
+  }
+
+  .card-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 0.5rem;
+  }
+
+  .card-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text-light);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .card-pdf-link {
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    margin-top: auto;
+  }
+
+  .card-pdf-link a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .card-pdf-link a:hover {
+    color: var(--accent);
+  }
+
+  /* ── Scroll Reveal ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Footer ── */
+  .notice-footer {
+    text-align: center;
+    max-width: 520px;
+    margin: 3rem auto 4rem;
+    padding: 0 1.5rem;
+  }
+
+  .notice-footer p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin: 0 0 0.75rem;
+  }
+
+  .notice-footer__links a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s ease;
+  }
+
+  .notice-footer__links a:hover {
+    color: var(--text);
+  }
+
+  /* ── Reduced Motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .notice-card {
+      transition: none;
+    }
+    .notice-card--compound {
+      transition: none;
+    }
+  }
+
+  /* ── Responsive: Tablet ── */
+  @media (max-width: 900px) {
+    .hub-page {
+      padding-top: 50px;
+    }
+  }
+
+  /* ── Responsive: Phone ── */
+  @media (max-width: 640px) {
+    .hub-nav {
+      padding: 0.5rem 1rem;
+    }
+
+    .hub-nav__inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+    }
+
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .notice-header {
+      margin-top: 2.5rem;
+    }
+  }
+</style>
+
+<script>
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const revealElements = document.querySelectorAll('.reveal');
+
+  if (prefersReducedMotion) {
+    revealElements.forEach(el => el.classList.add('revealed'));
+  } else {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          (entry.target as HTMLElement).classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealElements.forEach(el => observer.observe(el));
+  }
+</script>
