@@ -27,6 +27,7 @@ import Base from '../../layouts/Base.astro';
       <h1 class="notice-header__title">Notice</h1>
       <p class="notice-header__subtitle"><em>Making the body's intelligence visible and navigable.</em></p>
       <p class="notice-header__desc">Multi-device biometric awareness for iPhone — training interoceptive awareness through contemplative AI reflection.</p>
+      <a href="https://testflight.apple.com/join/2AR4qQYp" target="_blank" rel="noopener noreferrer" class="notice-cta-btn">Join the TestFlight →</a>
     </header>
 
     <div class="card-grid">
@@ -70,6 +71,9 @@ import Base from '../../layouts/Base.astro';
     <footer class="notice-footer">
       <p>If this resonates — as a user, investor, or collaborator — reach out.</p>
       <div class="notice-footer__links">
+        <a href="https://testflight.apple.com/join/2AR4qQYp" target="_blank" rel="noopener noreferrer" class="notice-cta-btn">Join the TestFlight →</a>
+      </div>
+      <div class="notice-footer__links" style="margin-top: 0.75rem;">
         <a href="mailto:thbrdy@pando.industries">thbrdy@pando.industries</a>
       </div>
     </footer>
@@ -322,6 +326,26 @@ import Base from '../../layouts/Base.astro';
 
   .notice-footer__links a:hover {
     color: var(--text);
+  }
+
+  /* ── CTA Button ── */
+  .notice-cta-btn {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    transition: background 0.2s ease, color 0.2s ease;
+    margin-top: 1.5rem;
+  }
+
+  .notice-cta-btn:hover {
+    background: var(--accent);
+    color: var(--bg);
   }
 
   /* ── Reduced Motion ── */

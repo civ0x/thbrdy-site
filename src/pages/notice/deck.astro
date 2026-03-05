@@ -36,6 +36,9 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
           <h1 class="s1-title dk-reveal">Notice</h1>
           <p class="s1-tagline dk-reveal"><em>Notice what's happening before it decides for you.</em></p>
           <p class="s1-subtitle dk-reveal">Interoceptive training for Apple Watch + iPhone</p>
+          <div class="s1-cta dk-reveal">
+            <a href="https://testflight.apple.com/join/2AR4qQYp" target="_blank" rel="noopener noreferrer" class="deck-cta-btn">Join the TestFlight →</a>
+          </div>
           <div class="s1-contact dk-reveal">
             Thomas Brady &middot; thbrdy@pando.industries &middot; notice.tools &middot; Pando Industries
           </div>
@@ -237,8 +240,11 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
               <span>AI research (Scholion &amp; Learned Compilation), Notice, Absolute Beginners++, and thbrdy.dev (this site). Every project makes invisible structures visible and navigable.</span>
             </div>
           </div>
-          <div class="s8-contact dk-reveal" style="transition-delay: 600ms">
-            thbrdy@pando.industries &middot; notice.tools
+          <div class="s8-cta dk-reveal" style="transition-delay: 600ms">
+            <a href="https://testflight.apple.com/join/2AR4qQYp" target="_blank" rel="noopener noreferrer" class="deck-cta-btn">Join the TestFlight →</a>
+          </div>
+          <div class="s8-contact dk-reveal" style="transition-delay: 700ms">
+            <a href="mailto:thbrdy@pando.industries" style="color: var(--text-muted); text-decoration: none;">thbrdy@pando.industries</a> &middot; notice.tools
           </div>
         </div>
       </section>
@@ -820,6 +826,29 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
     font-size: 0.85rem;
     color: var(--text-faint);
     line-height: 1.5;
+  }
+
+  .s1-cta,
+  .s8-cta {
+    margin-bottom: 1.5rem;
+  }
+
+  .deck-cta-btn {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .deck-cta-btn:hover {
+    background: var(--accent);
+    color: var(--bg);
   }
 
   .s8-contact {

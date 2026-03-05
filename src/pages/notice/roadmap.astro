@@ -9,6 +9,9 @@ import Base from '../../layouts/Base.astro';
       <h1 class="title">Roadmap</h1>
       <p class="subtitle">A multi-device biometric awareness app for iPhone &mdash; training interoceptive awareness through contemplative AI reflection.</p>
       <div class="last-updated">Last updated March 4, 2026</div>
+      <div class="roadmap-cta-top">
+        <a href="https://testflight.apple.com/join/2AR4qQYp" target="_blank" rel="noopener noreferrer" class="roadmap-cta-btn">Join the TestFlight →</a>
+      </div>
       <a class="back-link" href="/notice/">← Notice</a>
     </header>
 
@@ -146,6 +149,14 @@ import Base from '../../layouts/Base.astro';
         <div class="detail-para"><strong>Bidirectional awareness.</strong> Longitudinal snap data combined with calendar context enables a prospective mode. Pattern-informed prompts based on the user's own snap history &mdash; not generic calendar-triggered wellness reminders. The user learns to read their own anticipatory body states. Scaffolding decay applies with particular force here: if the user develops the capacity to feel upcoming shifts independently, the prompts should reduce and stop.</div>
       </div>
     </details>
+
+    <footer class="roadmap-footer">
+      <p>If this resonates — as a user, investor, or collaborator — reach out.</p>
+      <a href="https://testflight.apple.com/join/2AR4qQYp" target="_blank" rel="noopener noreferrer" class="roadmap-cta-btn">Join the TestFlight →</a>
+      <div class="roadmap-footer__email">
+        <a href="mailto:thbrdy@pando.industries">thbrdy@pando.industries</a>
+      </div>
+    </footer>
 
   </section>
 </Base>
@@ -360,6 +371,62 @@ import Base from '../../layouts/Base.astro';
   .detail-para strong {
     color: var(--text);
     font-weight: 600;
+  }
+
+  /* CTA Button */
+  .roadmap-cta-top {
+    margin: 1rem 0 0.75rem;
+  }
+
+  .roadmap-cta-btn {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .roadmap-cta-btn:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  /* Footer */
+  .roadmap-footer {
+    text-align: center;
+    padding: 3rem 0 0;
+    border-top: 1px solid var(--border-mid);
+    margin-top: 3.5rem;
+  }
+
+  .roadmap-footer p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin: 0 0 1rem;
+  }
+
+  .roadmap-footer__email {
+    margin-top: 0.75rem;
+  }
+
+  .roadmap-footer__email a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s ease;
+  }
+
+  .roadmap-footer__email a:hover {
+    color: var(--text);
   }
 
   /* Responsive */
