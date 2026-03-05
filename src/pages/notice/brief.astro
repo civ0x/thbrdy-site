@@ -1,0 +1,506 @@
+---
+import Base from '../../layouts/Base.astro';
+import { NoticeInteractionFlow } from '../../components/islands/NoticeInteractionFlow.tsx';
+import NoticeVisionLeadTime from '../../components/islands/NoticeVisionLeadTime.tsx';
+import { NoticeArchitectureDiagram } from '../../components/islands/NoticeArchitectureDiagram.tsx';
+import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitiveGap.tsx';
+import NoticeVisionExpansionRings from '../../components/islands/NoticeVisionExpansionRings.tsx';
+---
+
+<Base title="Notice — Investor Brief" description="The one-page case for interoceptive training as a product category.">
+  <div class="brief-page">
+    <header class="brief-header">
+      <div class="brief-header__inner">
+        <div class="brief-header__left">
+          <span class="brief-header__eyebrow">NOTICE</span>
+          <span class="brief-header__title">Investor Brief</span>
+        </div>
+        <div class="brief-header__right">
+          <a href="/notice/vision/" class="brief-header__link">Vision</a>
+          <span class="brief-header__sep">&middot;</span>
+          <a href="/notice/deck/" class="brief-header__link">Deck</a>
+          <span class="brief-header__sep">&middot;</span>
+          <a href="/notice/roadmap/" class="brief-header__link">Roadmap</a>
+          <span class="brief-header__sep">&middot;</span>
+          <a href="/notice-investor-one-pager.pdf" class="brief-header__link">PDF</a>
+          <span class="brief-header__sep">&middot;</span>
+          <a href="/notice/" class="brief-header__link">&larr; Notice Hub</a>
+        </div>
+      </div>
+    </header>
+
+    <article class="brief">
+
+      <!-- Page Header -->
+      <header class="brief__hero reveal">
+        <div class="brief__eyebrow">NOTICE</div>
+        <h1 class="brief__title">Investor Brief</h1>
+        <p class="brief__subtitle"><em>The one-page case for interoceptive training as a product category.</em></p>
+        <div class="brief-stats">
+          <span><strong>8</strong> beta users</span>
+          <span class="brief-stats__sep">&middot;</span>
+          <span><strong>3</strong> device ecosystems</span>
+          <span class="brief-stats__sep">&middot;</span>
+          <span><strong>$0</strong> marginal cost</span>
+          <span class="brief-stats__sep">&middot;</span>
+          <span><strong>0</strong> competitors measuring ILT</span>
+        </div>
+        <a href="/notice-investor-one-pager.pdf" class="brief-pdf-link">Download PDF version ↗</a>
+      </header>
+
+      <!-- 01 The Insight -->
+      <section class="reveal">
+        <div class="section-divider">
+          <span class="section-number">01 The Insight</span>
+          <hr />
+        </div>
+        <p>Your body registers emotional shifts before your conscious mind catches up. HRV drops before anxiety. Heart rate climbs before excitement. Skin conductance shifts before you can name the feeling.</p>
+        <p>This gap — between physiological change and conscious awareness — is measurable, trainable, and completely unserved by existing products. Meditation apps teach you to sit. Health trackers show you numbers. Mood journals ask you to remember. None of them train you to notice what's happening in your body while it's happening.</p>
+      </section>
+
+      <!-- 02 The Product -->
+      <section>
+        <div class="section-divider reveal">
+          <span class="section-number">02 The Product</span>
+          <hr />
+        </div>
+        <p class="reveal">Frame Snap — tap your Apple Watch when you notice a shift. The app captures biometric context, you label the felt sense, and an AI trained in contemplative vocabulary reflects back what the pattern might mean. Four steps: Tap → Capture → Name → Reflect.</p>
+        <div class="brief-island-wrap">
+          <NoticeInteractionFlow client:visible hideHeader hideCallout />
+        </div>
+        <div class="brief-features reveal">
+          <div class="brief-feature">
+            <strong>Affect labeling</strong>
+            <span>Name what you feel. Naming alone measurably reduces emotional intensity.</span>
+          </div>
+          <div class="brief-feature">
+            <strong>3 reflection timescales</strong>
+            <span>See patterns across moments, days, and weeks — not just individual snapshots.</span>
+          </div>
+          <div class="brief-feature">
+            <strong>Scaffolding decay</strong>
+            <span>The app fades as the skill grows. You graduate, not churn.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 Novel Metric -->
+      <section>
+        <div class="section-divider reveal">
+          <span class="section-number">03 Novel Metric</span>
+          <hr />
+        </div>
+        <p class="reveal">Interoceptive Lead Time (ILT): the temporal gap between a biometric shift and conscious noticing. As the user trains, this gap shrinks — they notice sooner. ILT gives Notice a peer-reviewable outcome metric: the first objective measure of interoceptive skill gain, validatable against MAIA-2 assessments.</p>
+        <div class="brief-island-wrap">
+          <NoticeVisionLeadTime client:visible hideHeader />
+        </div>
+      </section>
+
+      <!-- 04 Privacy Architecture -->
+      <section>
+        <div class="section-divider reveal">
+          <span class="section-number">04 Privacy Architecture</span>
+          <hr />
+        </div>
+        <p class="reveal">Three trust paths, one protocol. Apple Watch data stays entirely on-device via WatchConnectivity. Garmin connects via BLE direct — raw data never leaves the phone. Oura data transits Oura's cloud but is fetched client-side and never re-uploaded. All paths converge through relative descriptor functions — the AI sees patterns, never raw biometrics. Privacy by architecture, not policy.</p>
+        <div class="brief-island-wrap">
+          <NoticeArchitectureDiagram client:visible />
+        </div>
+      </section>
+
+      <!-- 05 The Market -->
+      <section>
+        <div class="section-divider reveal">
+          <span class="section-number">05 The Market</span>
+          <hr />
+        </div>
+        <p class="reveal">Meditation apps teach awareness but ignore the body. Health trackers measure the body but don't build awareness. Mood journals ask you to reflect but only after the fact. Notice connects all three: real-time biometric sensing, somatic awareness training, and AI-assisted reflection. No existing product occupies this intersection.</p>
+        <div class="brief-island-wrap">
+          <NoticeCompetitiveGap client:visible />
+        </div>
+        <div class="brief-biz-model reveal">
+          <strong>Business model.</strong> Core: $80/year (AI reflection limited to brief). Full: $149–199/year (unlimited AI, multi-device, longitudinal analysis). Positioned between meditation apps (~$70) and health trackers (~$200).
+        </div>
+      </section>
+
+      <!-- 06 On-Device Moat -->
+      <section class="reveal">
+        <div class="section-divider">
+          <span class="section-number">06 On-Device Moat</span>
+          <hr />
+        </div>
+        <p>On-device personalization via LoRA fine-tuning on the user's own patterns. No API dependency for the core reflection loop. Training data never leaves the device. The model improves with each user without any user's data improving it for anyone else. Privacy and personalization compound into a moat that deepens with every snap.</p>
+      </section>
+
+      <!-- 07 Longer Vision -->
+      <section>
+        <div class="section-divider reveal">
+          <span class="section-number">07 Longer Vision</span>
+          <hr />
+        </div>
+        <p class="reveal">Individual → Relational → Collective. Notice begins with personal interoceptive training. It expands to relational awareness — shared somatic states in couples, teams, therapeutic dyads. The long arc: a collective interoceptive commons. The infrastructure to make this progression possible is the same at every scale: sense, name, reflect, integrate.</p>
+        <div class="brief-island-wrap">
+          <NoticeVisionExpansionRings client:visible />
+        </div>
+      </section>
+
+      <!-- 08 Team -->
+      <section class="reveal">
+        <div class="section-divider">
+          <span class="section-number">08 Team</span>
+          <hr />
+        </div>
+        <div class="brief-team">
+          <h3 class="brief-team__name">Thomas Brady</h3>
+          <div class="brief-team__role">Solo founder · Pando Industries</div>
+          <div class="brief-team__bio">8 years shipping AI products (AWS, H2O.ai, startups). U.S. Army Special Forces (Green Beret). 10+ years contemplative practice (Theravāda + Vajrayāna). Notice comes from practice, not market research.</div>
+        </div>
+      </section>
+
+      <!-- Footer CTA -->
+      <footer class="brief-cta reveal">
+        <p>If this resonates — as a user, investor, or collaborator — reach out.</p>
+        <a href="mailto:jthomasbrady@proton.me" class="brief-cta__email">jthomasbrady@proton.me</a>
+      </footer>
+
+    </article>
+  </div>
+</Base>
+
+<style>
+  /* ── Header Bar ── */
+  .brief-page {
+    position: relative;
+    padding-top: 60px;
+  }
+
+  .brief-header {
+    padding: 0.75rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .brief-header__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .brief-header__left {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .brief-header__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .brief-header__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .brief-header__right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .brief-header__link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .brief-header__link:hover {
+    color: var(--accent);
+  }
+
+  .brief-header__sep {
+    color: var(--text-faint);
+    font-size: 0.65rem;
+  }
+
+  /* ── Article Layout ── */
+  .brief {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+  }
+
+  /* ── Page Hero ── */
+  .brief__hero {
+    text-align: center;
+    padding: 3rem 0 2rem;
+  }
+
+  .brief__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .brief__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .brief__subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── Stats Bar ── */
+  .brief-stats {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0 0 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .brief-stats strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .brief-stats__sep {
+    color: var(--text-faint);
+  }
+
+  .brief-pdf-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .brief-pdf-link:hover {
+    color: var(--accent);
+  }
+
+  /* ── Section Dividers ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 3rem 0 1.5rem;
+  }
+
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .section-divider hr {
+    flex: 1;
+    border: none;
+    border-top: 1px solid var(--border-mid);
+    margin: 0;
+  }
+
+  /* ── Prose ── */
+  .brief p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin: 0 0 1.25rem;
+  }
+
+  /* ── Island Wrapper ── */
+  .brief-island-wrap {
+    max-width: 780px;
+    margin: 1.5rem auto;
+    width: 100%;
+  }
+
+  .brief-island-wrap :global(.notice-flow) {
+    margin: 0;
+  }
+
+  .brief-island-wrap :global(.nvlt-root) {
+    margin: 0 auto;
+  }
+
+  .brief-island-wrap :global(.notice-arch) {
+    margin: 0;
+  }
+
+  .brief-island-wrap :global(.notice-gap) {
+    margin: 0;
+  }
+
+  /* ── Features Grid ── */
+  .brief-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    background: var(--bg-warm);
+    padding: 1.25rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+
+  .brief-feature strong {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+  }
+
+  .brief-feature span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+
+  /* ── Business Model Callout ── */
+  .brief-biz-model {
+    background: var(--bg-card);
+    padding: 1.25rem 1.5rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-light);
+  }
+
+  .brief-biz-model strong {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ── Team Card ── */
+  .brief-team {
+    background: var(--bg-dark);
+    color: var(--bg);
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+  }
+
+  .brief-team__name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--bg);
+    margin-bottom: 0.25rem;
+  }
+
+  .brief-team__role {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--bg);
+    opacity: 0.6;
+    margin-bottom: 1rem;
+  }
+
+  .brief-team__bio {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--bg);
+    margin: 0;
+  }
+
+  /* ── Footer CTA ── */
+  .brief-cta {
+    text-align: center;
+    padding: 3rem 0 0;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  .brief-cta p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 0.75rem;
+  }
+
+  .brief-cta__email {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s ease;
+  }
+
+  .brief-cta__email:hover {
+    color: var(--text);
+  }
+
+  /* ── Responsive: Tablet ── */
+  @media (max-width: 900px) {
+    .brief-page {
+      padding-top: 50px;
+    }
+  }
+
+  /* ── Responsive: Phone ── */
+  @media (max-width: 640px) {
+    .brief-header {
+      padding: 0.5rem 1rem;
+    }
+
+    .brief-header__inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+    }
+
+    .brief {
+      padding: 0 1.25rem 4rem;
+    }
+
+    .brief-features {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
