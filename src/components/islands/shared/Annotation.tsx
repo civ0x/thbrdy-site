@@ -5,6 +5,8 @@ type AnnotationMode = "term" | "reference" | "link";
 
 interface TermContent {
   definition: string;
+  url?: string;
+  urlLabel?: string;
 }
 
 interface ReferenceContent {
@@ -210,6 +212,17 @@ export function Annotation({ mode, term, content, children }: AnnotationProps) {
           </div>
           <div className="annotation-popover-term-name">{term}</div>
           <div className="annotation-popover-definition">{c.definition}</div>
+          {c.url && (
+            <a
+              className="annotation-popover-ref-link"
+              href={c.url}
+              target={c.url.startsWith("/") ? undefined : "_blank"}
+              rel={c.url.startsWith("/") ? undefined : "noopener noreferrer"}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {c.urlLabel || "Read more"} <span className="annotation-arrow">&rarr;</span>
+            </a>
+          )}
         </div>
       );
     }
@@ -258,9 +271,15 @@ export function Annotation({ mode, term, content, children }: AnnotationProps) {
         <div className="annotation-popover-link-title">{c.title}</div>
         <div className="annotation-popover-link-source">{c.source}</div>
         <div className="annotation-popover-link-summary">{c.summary}</div>
-        <div className="annotation-popover-link-cta">
+        <a
+          className="annotation-popover-link-cta"
+          href={c.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+        >
           Visit page <span className="annotation-arrow">&rarr;</span>
-        </div>
+        </a>
       </div>
     );
   };
@@ -548,9 +567,13 @@ const annotationStyles = `
     font-size: 0.7rem;
     font-weight: 500;
     color: var(--teal);
+    text-decoration: none;
     margin-top: 0.6rem;
     padding-top: 0.5rem;
     border-top: 1px solid var(--border);
+  }
+  .annotation-popover-link-cta:hover {
+    color: var(--text);
   }
 
   @media (prefers-reduced-motion: reduce) {

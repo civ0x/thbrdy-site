@@ -1,0 +1,124 @@
+---
+title: "The Wrong Axis"
+date: 2026-03-10
+description: "An Anti-Debate on AI governance revealed that both participants were arguing on a map that doesn't match the territory. The real contest is between two industry coalitions fighting over whose values prevail in the rubble of the republic."
+tags: ["ai-governance", "epistemology", "coordination"]
+draft: true
+connected_project: "Scholion"
+---
+
+import { SectionDivider } from '../../components/islands/shared/SectionDivider.tsx';
+import { PullQuote } from '../../components/islands/shared/PullQuote.tsx';
+import { TweetCard } from '../../components/islands/shared/TweetCard.tsx';
+import WATCoalitionTopology from '../../components/islands/WATCoalitionTopology.tsx';
+
+Eighty-five plus people gathered as the sun set in an outdoor space at [LightHaven](https://lighthaven.space/) in Berkeley, with another hundred and eighty-five on the waitlist. The format was an [[link:anti-debate-format|Anti-Debate]] — a structured dialogue designed by Stephanie Lepp's Synthesis Media that opens like a traditional debate, with opening statements and rebuttals, then pivots into something harder. Participants steelman each other's positions, critique their own, and attempt to integrate what survives. [Liv Boeree](https://x.com/Liv_Boeree) moderated. The participants were Daniel Kokotajlo and Dean Ball.
+
+Kokotajlo is the lead author of [[ref:ai-2027|AI 2027]] and the founder of the AI Futures Project. He resigned from OpenAI in 2024, refused to sign a non-disparagement clause, and forfeited roughly two million dollars in equity. His earlier forecast, "What 2026 Looks Like," written sixteen months before ChatGPT, predicted chain-of-thought reasoning, inference-time compute scaling, and what he called "bureaucracy architectures" — what we now call agent frameworks. An independent evaluation scored nineteen of thirty-five predictions as totally correct. Ball is a senior fellow at the [Foundation for American Innovation](https://www.thefai.org/). From April through August 2025, he served as senior policy advisor for AI at the White House, where he was the primary staff drafter of America's [[link:ai-action-plan|AI Action Plan]]. His intellectual formation runs through [[term:oakeshott|Michael Oakeshott]] — a deep skepticism of rationalist planning, a conviction that governance is the enterprise of keeping afloat on an even keel rather than steering toward a destination.
+
+These two represent the most coherent positions in AI governance. Kokotajlo argues for planned intervention under compressed timelines. Ball argues for adaptive institutional response in the face of irreducible uncertainty. They have genuine respect for each other — they co-authored a [TIME piece on AI transparency](https://time.com/collections/time100-voices/7086285/ai-transparency-measures/) — and the Anti-Debate format was built to find where people like this actually disagree.
+
+<SectionDivider number="01" label="What the Format Found" client:visible />
+
+## What the format found
+
+The Anti-Debate did its job. In the steelmanning phase, Ball had to inhabit Kokotajlo's reasoning from the inside — not summarize it, defend it. Then Ball conceded Kokotajlo's predictive track record directly. The man who drafted America's AI Action Plan said, of the man who resigned from OpenAI:
+
+<blockquote>
+*I keep waiting for you to be wrong.*
+</blockquote>
+
+They were not arguing about what is happening. They agreed on the capability trajectory, the timelines, the current insufficiency of alignment. The empirical picture collapsed in the first half hour. What remained was narrower: which governance strategy has the least-thin warrant given institutional constraints they both acknowledge.
+
+From there, the positions moved — not toward each other, but toward something neither had started with. Kokotajlo abandoned multilateral treaties as infeasible, shifted to third-party intermediaries, then to lab consolidation, then to Dean's consumer activism as a decentralized forcing function. Four coordination mechanisms in sequence, each more decentralized than the last — walking down the institutional ladder, testing each rung. Ball proposed something his own national security colleagues would find alarming: technology parity with China, loosening chip export controls on the logic that asymmetry breeds desperation while parity creates mutual deterrence. The positions crossed. Ball conditioned his entire stance on capability levels — explicitly including the circumstances under which he would abandon adaptive governance for something stronger.
+
+By the integration phase, they had built a layered coordination stack neither walked in with. Consumer pressure creates political cover for regulation. Third-party audits create legibility for consumer pressure. Lab-level values alignment buys time for both. [[term:redundancy-engineering|Redundancy engineering]] applied to governance.
+
+Then both participants — one who has been inside a frontier lab, one who has been inside the White House — agreed on the vacuum at the center: current AI systems are not aligned enough, and the government cannot build an aligned model. The coordination stack they had just constructed is oriented entirely around influencing actors who hold capabilities no external body can replicate or fully evaluate.
+
+This was productive. The format stripped away pseudo-disagreements and exposed a real one. But the entire ninety minutes operated on an axis I think is wrong.
+
+<SectionDivider number="02" label="The Wrong Axis" client:visible />
+
+## The wrong axis
+
+During Q&A, I asked about the topology everyone was assuming. The debate — and the audience — had been organized along a public-private axis: government versus industry, regulation versus innovation. Kokotajlo's positions all involved some form of public oversight. Ball's positions all involved constraining public intervention. The disagreement was about how much government, and when.
+
+But the actual power structure is not government on one side and industry on the other. It is two industry coalitions facing each other, both operating largely outside democratic accountability, and the question is whose values prevail.
+
+On one side: the frontier AI labs and their associated venture capital ecosystem, building general-purpose intelligence and arguing — with varying sincerity — for safety constraints. On the other: defense technology companies like Palantir and Anduril, backed by the national security apparatus they serve. The capital bases overlap more than the coalitions do — Founders Fund invested in both Anthropic and Anduril, Andreessen Horowitz funds defense tech and frontier AI alike, though it notably excludes Anthropic, the most safety-constrained lab. The divide runs along capability and governance lines, not economic ones.
+
+<WATCoalitionTopology client:visible />
+
+[[term:palantir-ontology|Palantir's Ontology layer]] fuses data from hundreds of incompatible government databases — financial records, travel data, biometrics, communications metadata, social media — into unified searchable profiles of real people. It operates on classified networks across every major US intelligence agency, five NATO combatant commands, and at least fifteen allied nations. A $10 billion Army enterprise contract — one I helped set in motion when I worked for Senator Tom Cotton. Twenty thousand active military users on Maven alone. Agencies that have tried to replace Palantir found their own data held hostage by proprietary ontology mappings. Germany's Federal Constitutional Court ruled the profiling it enables unconstitutional. Palantir is the operational infrastructure through which mass surveillance occurs.
+
+Anduril builds autonomous weapons across air, sea, ground, and electronic warfare domains — loitering munitions, autonomous combat jets, undersea vehicles that operate for months without human contact — all connected by a single AI operating system called [[term:lattice|Lattice]]. Human control over lethal engagements is maintained as a policy setting, not a hard technical constraint. The authorization step is software-configurable. One operator manages two dozen strike drones simultaneously. For electronic warfare, Pulsar already operates in fully autonomous mode. A five-million-square-foot factory is under construction in Ohio for hyperscale production. Revenue doubles annually.
+
+When Anthropic refused to remove two specific contractual restrictions from its Pentagon deployment — prohibitions on mass domestic surveillance of Americans and fully autonomous weapons without meaningful human oversight — it was designated a supply-chain risk to national security. That designation had never been applied to a domestic American company. It was built for Kaspersky, Huawei, and ZTE. At 5:14 PM on February 27, Defense Secretary Hegseth posted the designation on X, using the phrase "defective altruism." Emil Michael, the Under Secretary of War for Research and Engineering, had brokered the arrangement. That same evening, OpenAI announced a replacement deal. Sam Altman later admitted it was "rushed" and "looked opportunistic and sloppy." Brad Carson, the former Under Secretary of the Army, reviewed OpenAI's surveillance prohibition and concluded it "doesn't really exist."
+
+<TweetCard
+  author="Katherine Boyle"
+  handle="KTmBoyle"
+  date="February 26, 2026"
+  url="https://x.com/KTmBoyle/status/2027218085116088403"
+  verified
+  orgBadge="a16z"
+  client:visible
+>
+We've seen this movie before. When the dust settles, a lot of patriotic founders will point to this exact moment as the match that lit the fire in them.
+</TweetCard>
+
+<TweetCard
+  author="Katherine Boyle"
+  handle="KTmBoyle"
+  date="March 3, 2026"
+  url="https://x.com/KTmBoyle/status/2028939226113348050"
+  verified
+  orgBadge="a16z"
+  client:visible
+>
+"If Silicon Valley believes we're going to take everyone's white collar jobs AND screw the military…If you don't think that's going to lead to the nationalization of our technology—you're retarded."<br /><br />—Alex Karp, Palantir, at a16z American Dynamism Summit
+</TweetCard>
+
+The fracture runs through OpenAI itself. On March 9, thirty-seven engineers and scientists from OpenAI and Google — including Jeff Dean, Google DeepMind's chief scientist — filed an amicus brief supporting Anthropic's lawsuit against the contract their own employer signed hours after Anthropic's blacklisting. Caitlin Kalinowski, OpenAI's head of hardware, resigned over the deal, calling it "a governance concern first and foremost."
+
+That sequence is not a story about government constraining industry. It is one industry coalition — equipped with surveillance infrastructure and autonomous weapons production — using state power to discipline a member of the other coalition for maintaining a values boundary. The two restrictions Anthropic refused to drop map precisely onto the two capabilities the defense-tech coalition provides: Palantir's surveillance, Anduril's autonomous weapons.
+
+The governance debate as structured at LightHaven assumes the relevant contest is between "labs" and "government." The coordination stack Kokotajlo and Ball built assumes you can layer consumer pressure, third-party audits, and lab values into a robust oversight architecture — with government as the regulator or at least the referee. But if the actual topology is two private coalitions with entangled state relationships and radically different capability profiles, none of those layers land where they need to.
+
+<SectionDivider number="03" label="The Hospice Room" client:visible />
+
+## The hospice room
+
+Ball himself does not believe the framework he was debating within.
+
+In a [[ref:ball-republic-dying|recent essay]], Ball wrote that the American republic is dying — not metaphorically, but as a diagnosis. The machinery of governance has become unpredictable, arbitrary, and capricious. Each administration governs more by executive fiat and less through durable institutional process. He described the Anthropic-Pentagon standoff not as a policy dispute but as a symptom — a death rattle of the old republic. He has written explicitly that whatever comes next will be deeply intertwined with advanced AI.
+
+<TweetCard
+  author="Dean W. Ball"
+  handle="deanwball"
+  date="March 10, 2026"
+  url="https://x.com/deanwball/status/2031395463161852012"
+  verified
+  client:visible
+>
+If I had to pick a single fact that best highlights how absurd and wrong-on-its-face the supply chain risk designation is, it would probably be that Emil Michael insists a deal with Anthropic is still possible.<br /><br />SCR is not a tool intended to be used for contract negotiation leverage. The DoW would be wise to maintain the legal fiction that this isn't about leverage and is instead about, you know, national security. Emil Michael's consistent admissions that this is all about leverage, and thus that a deal is still possible, should reveal everything you need to know. This dispute is not about US national security, and those who maintain otherwise are misinformed or lying.
+</TweetCard>
+
+Ball's Oakeshott framework — keep afloat on an even keel, navigate rather than steer — assumes functioning institutions that can adapt. But Ball himself is saying the institutions are in hospice. The adaptive governance position requires a republic healthy enough to adapt, and its own advocate has pronounced the patient terminal.
+
+Ball's position holds both pieces honestly: tragic realism about the republic's trajectory, paired with the conviction that rationalist planning would be even worse. You navigate because steering is impossible, even though the vessel is breaking apart. Kokotajlo's planned intervention, meanwhile, assumes a state capable of executing coordinated policy — and Ball's diagnosis of the republic undermines that assumption too.
+
+Both positions assume a functioning public sector as either the actor (Kokotajlo) or the adaptive medium (Ball). If the public sector is discorporating, and the actual power contest is between two industry coalitions — one building general intelligence, the other building the infrastructure of coercion — then the governance question is not "how much government?" It is whose values get encoded into the systems that will operate in the space the republic used to occupy. Anthropic encodes its values explicitly through [[ref:constitutional-ai|Constitutional AI]] — natural-language principles in a published constitution, with traceable chain-of-thought reasoning. OpenAI's replacement approach relies on citing existing laws and trusting the government to follow them. One method makes the values [[term:legibility|legible]] and contestable. The other makes them invisible. That distinction is the contest in miniature.
+
+<SectionDivider number="04" label="What the Debate Didn't Reach" client:visible />
+
+## What the debate didn't reach
+
+The Anti-Debate format did something valuable. It stripped away layers of pseudo-disagreement — about timelines, about risk, about whether alignment is sufficient — and exposed a real philosophical dispute about planning versus navigation under radical uncertainty. Most public discourse about AI governance never gets this far.
+
+But the format also inherited an assumption from its participants: that the relevant power topology is public versus private. The most consequential AI governance decisions being made right now — which labs get Pentagon contracts, which safety constraints survive contact with national security demands, which coalition's values get embedded in classified deployments — are being made within industry, between actors whose capabilities include the tools of coercion itself.
+
+Kokotajlo and Ball spent ninety minutes building a coordination stack for a world where government is the counterweight to industry. Ball's own writing suggests that world is ending. The question the debate didn't reach is what coordination looks like when the counterweight is gone and the contest is between two private power centers — one that builds intelligence and one that builds the machinery to deploy it by force — over whose values prevail in whatever comes next.
+
+Neither participant had an answer to that. Neither, I suspect, does anyone in the room. But it is the question, and the first step is getting the axis right.

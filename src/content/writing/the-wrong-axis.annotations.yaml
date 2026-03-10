@@ -1,0 +1,160 @@
+# ──────────────────────────────────────────────────────────────────────
+# The Wrong Axis — Annotation Companion File
+# Essay: "The Wrong Axis"
+# Generated: 2026-03-10
+# ──────────────────────────────────────────────────────────────────────
+#
+# Three annotation modes:
+#   terms:      Domain vocabulary. Author-written definitions.
+#   references: Papers, books, reports. AI-generated summaries, author-reviewed.
+#   links:      External URLs with curated metadata.
+#
+# Shared terms (reusable across essays) are tagged: shared: true
+#
+# Matching: explicit markers in MDX. The "pattern" field identifies
+# the text to annotate. Annotate first substantive usage unless noted.
+# ──────────────────────────────────────────────────────────────────────
+
+terms:
+
+  - key: oakeshott
+    pattern: "Michael Oakeshott"
+    section: intro
+    shared: false
+    definition: >
+      British political philosopher (1901–1990). His central claim:
+      governance is not the pursuit of a destination but the activity of
+      attending to arrangements — "keeping afloat on an even keel."
+      Rationalist planning, in his view, mistakes a map for the territory.
+
+  - key: redundancy-engineering
+    pattern: "Redundancy engineering"
+    section: "01"
+    shared: true
+    definition: >
+      Designing systems so that no single failure point is catastrophic.
+      In governance, this means layering multiple independent coordination
+      mechanisms rather than relying on any one institution. See also the
+      coordination architecture in "The Valley of Death Is a Legibility
+      Problem."
+
+  - key: palantir-ontology
+    pattern: "Palantir's Ontology layer"
+    section: "02"
+    shared: false
+    definition: >
+      Palantir's core data integration technology. It creates a unified
+      semantic model across incompatible databases — mapping entities,
+      relationships, and events into a single searchable graph. The
+      "ontology" refers to this shared schema, not to philosophy.
+      Agencies that adopt it find their data structured around Palantir's
+      proprietary mappings.
+
+  - key: lattice
+    pattern: "Lattice"
+    section: "02"
+    shared: false
+    definition: >
+      Anduril's AI command-and-control operating system. It connects
+      autonomous platforms across domains (air, sea, ground, electronic
+      warfare) into a single sensor-shooter network. Human authorization
+      for lethal engagements is a software-configurable policy setting
+      within Lattice, not a hardware constraint.
+
+  - key: legibility
+    pattern: "legible"
+    section: "03"
+    shared: true
+    definition: >
+      Capable of being read and evaluated by external parties. In
+      governance, legibility is the precondition for accountability —
+      you cannot contest what you cannot see. This is the same legibility
+      problem that drives both Scholion's claim-dependency tracking and
+      the technology transfer failures analyzed in "The Valley of Death
+      Is a Legibility Problem."
+    url: "/writing/valley-of-death/"
+    urlLabel: "Read essay"
+
+
+references:
+
+  - key: ai-2027
+    pattern: "*AI 2027*"
+    section: intro
+    title: "AI 2027"
+    authors: "Daniel Kokotajlo et al."
+    year: 2026
+    venue: "AI Futures Project"
+    url: "https://ai-2027.com"
+    summary: >
+      A detailed forecast of AI development trajectories through 2027,
+      authored by the AI Futures Project. An independent evaluation scored
+      19 of 35 predictions as totally correct.
+    context: >
+      Establishes Kokotajlo's predictive track record — the basis for
+      Ball's concession that he "keeps waiting for you to be wrong."
+
+  - key: constitutional-ai
+    pattern: "Constitutional AI"
+    section: "03"
+    title: "Claude's Constitution"
+    authors: "Anthropic"
+    year: 2024
+    venue: "Anthropic"
+    url: "https://www.anthropic.com/research/claudes-constitution"
+    summary: >
+      Natural-language principles governing model behavior, with traceable
+      chain-of-thought reasoning. The constitution is published and
+      contestable — a legibility choice with structural parallels to how
+      Scholion surfaces the dependency structure of scientific claims.
+    context: >
+      The essay uses Constitutional AI as the concrete example of legible
+      values encoding, contrasted with OpenAI's approach of citing existing
+      laws — making the values invisible and uncontestable.
+
+  - key: ball-republic-dying
+    pattern: "recent essay"
+    section: "03"
+    title: "Clawed"
+    authors: "Dean Ball"
+    year: 2026
+    venue: "Hyperdimensional"
+    url: "https://www.hyperdimensional.co/p/clawed"
+    summary: >
+      Ball describes the American republic's trajectory not as decline but
+      as a phase transition — governance by durable institutional process
+      giving way to governance by executive fiat, with advanced AI deeply
+      intertwined in whatever comes next. He uses the Anthropic-Pentagon
+      standoff as his focal case.
+    context: >
+      Critical to the essay's argument: Ball's own writing undermines
+      the adaptive governance framework he defended in the Anti-Debate.
+      If the institutions are in hospice, adaptive governance has no
+      medium to adapt through.
+
+
+links:
+
+  - key: ai-action-plan
+    pattern: "AI Action Plan"
+    section: intro
+    url: "https://www.ai.gov/action-plan"
+    title: "America's AI Action Plan"
+    source: "White House"
+    summary: >
+      Executive policy framework drafted under Ball's tenure as senior
+      policy advisor for AI. Establishes the administration's approach
+      to AI governance — the institutional baseline against which both
+      the Anti-Debate and the Anthropic-Pentagon standoff play out.
+
+  - key: anti-debate-format
+    pattern: "Anti-Debate"
+    section: intro
+    url: "https://www.anti-debate.org/"
+    title: "The Anti-Debate"
+    source: "Synthesis Media"
+    summary: >
+      Structured dialogue format designed by Stephanie Lepp. Opens like
+      a traditional debate with opening statements and rebuttals, then
+      pivots: participants steelman each other's positions, critique
+      their own, and attempt to integrate what survives.

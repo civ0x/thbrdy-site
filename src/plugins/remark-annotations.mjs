@@ -109,6 +109,8 @@ export default function remarkAnnotations() {
           let contentObj;
           if (modeShort === "term") {
             contentObj = { definition: annotationData.definition?.trim() || "" };
+            if (annotationData.url) contentObj.url = annotationData.url;
+            if (annotationData.urlLabel) contentObj.urlLabel = annotationData.urlLabel;
           } else if (modeShort === "ref") {
             contentObj = {
               title: annotationData.title || "",
