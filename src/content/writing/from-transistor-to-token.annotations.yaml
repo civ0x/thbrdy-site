@@ -558,6 +558,25 @@ references:
       but not yet automated. The Prime RL insight — evals and environments
       are two sides of the same coin — bridges to the postscript's thesis.
 
+  - key: m5-ultra-leaks
+    pattern: "firmware leaks"
+    section: "04"
+    title: "M5 Ultra Firmware and Supply Chain Evidence"
+    authors: "Multiple sources"
+    year: 2025–2026
+    venue: "Bloomberg, iOS firmware, TF International Securities"
+    summary: >
+      M5 Ultra confirmed through four independent streams: Gurman
+      (Bloomberg, narrowing from "2026" to "middle of the year"),
+      firmware leak exposing Mac Studio model J775d with chip H17D,
+      iOS 26.3 chip identifier T6052/H17D following Apple's Ultra naming
+      convention, and Kuo (TF International) forecasting N3P mass
+      production with SoIC packaging.
+    context: >
+      Multi-source convergence gives high confidence in existence and
+      approximate timeline. Specs projected from established 2× Max
+      formula; die topology unknown.
+
 links:
 
   - key: invisible-structures
