@@ -1,0 +1,453 @@
+# ──────────────────────────────────────────────────────────────────────
+# From Transistor to Token — Annotation Companion File
+# Essay: "From Transistor to Token"
+# Generated: 2026-03-10
+# ──────────────────────────────────────────────────────────────────────
+
+terms:
+
+  - key: ane
+    pattern: "Apple Neural Engine"
+    section: "01"
+    shared: false
+    definition: >
+      Apple Neural Engine. A dedicated neural network accelerator in Apple
+      Silicon, operating as a convolution engine at up to 19 TFLOPS (FP16)
+      and 6.6 TFLOPS/W. Present in every Apple Silicon chip since A11 (2017).
+
+  - key: tops
+    pattern: "TOPS"
+    section: "01"
+    shared: false
+    definition: >
+      Tera operations per second. Apple's marketing metric for the Neural
+      Engine, counting INT8 operations at 2× the FP16 rate by industry
+      convention. The M4 ANE is marketed at 38 TOPS but measures 19 TFLOPS
+      in FP16.
+
+  - key: tflops
+    pattern: "TFLOPS"
+    section: "01"
+    shared: false
+    definition: >
+      Tera floating-point operations per second. Measures raw compute
+      throughput in FP16 or FP32 arithmetic — distinct from TOPS, which
+      counts integer operations at a higher rate.
+
+  - key: sram-cliff
+    pattern: "SRAM cliff"
+    section: "01"
+    shared: false
+    definition: >
+      The 32 MB threshold in the ANE's on-chip SRAM. Below it, peak
+      throughput; above it, ~30% degradation as working sets spill to DRAM.
+      This boundary constrains both inference and training working set sizes.
+
+  - key: coreml
+    pattern: "CoreML"
+    section: "01"
+    shared: false
+    definition: >
+      Apple's public framework for deploying ML models. Acts as a black-box
+      scheduler dispatching operations to CPU, GPU, or ANE. Developers
+      cannot force ANE execution, inspect ANE programs, or perform gradient
+      computation through it.
+
+  - key: iosurface
+    pattern: "IOSurface"
+    section: "01"
+    shared: false
+    definition: >
+      Apple's kernel-level shared memory buffer. Used by private ANE APIs
+      to pass weights and activations without copying — the mechanism that
+      enables ANE training in the autoresearch-ANE project.
+
+  - key: fusion-architecture
+    pattern: "Fusion Architecture"
+    section: "02"
+    shared: false
+    definition: >
+      Apple's M5 packaging: two 3nm dies bonded into one SoC. Die 1 handles
+      CPU, Neural Engine, and I/O. Die 2 handles GPU, media engines, and
+      memory controllers. M5 Max doubles Die 2 for 40 GPU cores and 614 GB/s.
+
+  - key: neural-accelerator
+    pattern: "Neural Accelerator"
+    section: "02"
+    shared: false
+    definition: >
+      Dedicated neural compute units embedded in every M5 GPU core,
+      programmable via Metal 4 Tensor APIs. Distinct from the 16-core ANE —
+      these scale with GPU core count (10/20/40 across M5/Pro/Max).
+
+  - key: prefill
+    pattern: "Prefill"
+    section: "02"
+    shared: false
+    definition: >
+      The first phase of LLM inference: processing the entire input prompt
+      at once. Compute-bound — benefits from more FLOPS, not more bandwidth.
+      M5 Max delivers 4× improvement over M4 Max in this phase.
+
+  - key: decode
+    pattern: "Decode"
+    section: "02"
+    shared: false
+    definition: >
+      The second phase of LLM inference: generating tokens one at a time.
+      Bandwidth-bound — each token requires reading the model weights from
+      memory. M5 Max's bandwidth improvement yields only ~12% gain here.
+
+  - key: mlx
+    pattern: "MLX"
+    section: "03"
+    shared: false
+    definition: >
+      Apple's open-source ML research framework. Runs on GPU via Metal,
+      supports zero-copy unified memory access, and achieves 20–30% higher
+      throughput than llama.cpp on Apple Silicon.
+
+  - key: gguf
+    pattern: "GGUF"
+    section: "03"
+    shared: false
+    definition: >
+      The quantized model file format used by llama.cpp. Stores weights in
+      reduced precision (Q4, Q6, etc.) for efficient inference on consumer
+      hardware.
+
+  - key: unified-memory
+    pattern: "unified memory"
+    section: "02"
+    shared: false
+    definition: >
+      Apple Silicon's memory architecture where CPU, GPU, and Neural Engine
+      share a single pool of high-bandwidth memory, eliminating data copies
+      between processors. 128GB on M5 Max configurations.
+
+  - key: rdma
+    pattern: "Remote Direct Memory Access"
+    section: "04"
+    shared: false
+    definition: >
+      RDMA allows one machine's GPU to read another machine's memory
+      directly, bypassing the kernel. Over Thunderbolt 5, reduces
+      inter-device latency from ~300μs (TCP) to 3–50μs.
+
+  - key: quantization
+    pattern: "quantization"
+    section: "02"
+    shared: false
+    definition: >
+      Reducing model weight precision (e.g., FP16 → INT4) to decrease
+      memory footprint and increase inference speed, with controlled quality
+      loss. Q4 uses ~4 bits per weight; Q6 uses ~6 bits.
+
+  - key: gated-deltanet
+    pattern: "Gated DeltaNet"
+    section: "05"
+    shared: false
+    definition: >
+      The recurrent attention mechanism in Qwen 3.5. Combines a decay gate
+      (global memory clearing) with the delta rule (surgical key-value
+      updates) in a fixed-size state matrix of ~32 KB per attention head.
+
+  - key: linear-attention
+    pattern: "linear attention"
+    section: "05"
+    shared: false
+    definition: >
+      A family of attention mechanisms that replace the softmax attention
+      matrix with a recurrent state, achieving O(1) memory per token instead
+      of O(L). Enables long-context inference on consumer hardware.
+
+  - key: moe
+    pattern: "Mixture of Experts"
+    section: "05"
+    shared: false
+    definition: >
+      An architecture that activates only a subset of parameters per token.
+      Qwen 3.5's 397B flagship activates 17B per token (10 routed + 1
+      shared expert out of 512), reducing per-token memory reads.
+
+  - key: active-parameters
+    pattern: "activates only 17B parameters"
+    section: "05"
+    shared: false
+    definition: >
+      In MoE models, the number of parameters actually used per forward
+      pass. Qwen 3.5's 397B model reads ~8.5 GB per token at Q4 — far less
+      than a dense 397B model would require.
+
+  - key: val-bpb
+    pattern: "val_bpb"
+    section: "06"
+    shared: false
+    definition: >
+      Validation bits-per-byte. The metric autoresearch uses to evaluate
+      model quality — measured on a held-out validation set, not generated
+      by the model. Lower is better.
+
+  - key: tok-s
+    pattern: "tokens per second"
+    section: "02"
+    shared: false
+    definition: >
+      Tokens per second. The standard measure of LLM generation speed
+      during the decode phase. Usability threshold is roughly 10 tok/s for
+      interactive use; 15+ tok/s feels fluid.
+
+  - key: jaccl
+    pattern: "JACCL"
+    section: "04"
+    shared: false
+    definition: >
+      Jack and Angelos' Collective Communication Library. Apple's
+      distributed communication backend for Apple Silicon, providing RDMA
+      primitives over Thunderbolt 5. A deliberate pun on NVIDIA's NCCL.
+
+references:
+
+  - key: maderix
+    pattern: "maderix"
+    section: "01"
+    title: "Apple Neural Engine Reverse Engineering"
+    authors: "maderix"
+    year: 2024
+    venue: "GitHub"
+    summary: >
+      Reverse-engineering project (5,300 GitHub stars) that documented the
+      ANE's internal architecture, measured 19 TFLOPS FP16, characterized
+      the 32 MB SRAM cliff, and demonstrated training on inference-only
+      hardware via private APIs.
+    context: >
+      The foundational source for Act I's claims about ANE architecture.
+      Demonstrated that the gap between inference accelerator and general
+      compute is narrower than Apple's public API surface suggests.
+
+  - key: orion-paper
+    pattern: "Orion paper"
+    section: "01"
+    title: "Orion: An On-Device Operating System for Neural Processing Units"
+    authors: "Orion team"
+    year: 2026
+    venue: "arXiv:2603.06728"
+    summary: >
+      Cataloged 20 ANE restrictions (14 previously undocumented) and
+      characterized CoreML as a black-box scheduler that developers cannot
+      inspect or override. Identified the 119-compile-per-process ceiling.
+    context: >
+      The most comprehensive third-party documentation of CoreML's
+      limitations as an ANE access layer.
+
+  - key: autoresearch-ane
+    pattern: "autoresearch-ANE"
+    section: "01"
+    title: "autoresearch-ANE: Autonomous ML Research on Apple Neural Engine"
+    authors: "ncdrone"
+    year: 2026
+    venue: "GitHub"
+    summary: >
+      Fork of Karpathy's autoresearch running directly on the Apple Neural
+      Engine via private APIs. Dynamic weight pipeline via IOSurface. 67.6M-
+      param GPT at ~99ms/step. Discovered depth-6 optimal on ANE vs depth-4
+      on GPU.
+    context: >
+      Bridges Act I (ANE private APIs) and Act III (autonomous
+      experimentation). Demonstrates three different hardware optima on the
+      same chip.
+
+  - key: karpathy-autoresearch
+    pattern: "autoresearch"
+    section: "06"
+    title: "autoresearch: Autonomous ML Research"
+    authors: "Andrej Karpathy"
+    year: 2025
+    venue: "GitHub"
+    summary: >
+      Autonomous ML experimentation framework: 630 lines of mutable
+      training code, an immutable evaluation harness, and a Markdown
+      specification file. Git-based ratchet pattern: branch, modify, train,
+      evaluate, keep or revert.
+    context: >
+      The foundational system for Act III. Design philosophy — one GPU,
+      one file, one metric — contrasts with Sakana AI's full-lifecycle
+      approach.
+
+  - key: trevin-mlx-port
+    pattern: "MLX port"
+    section: "06"
+    title: "autoresearch MLX Port"
+    authors: "trevin-creator"
+    year: 2025
+    venue: "GitHub"
+    summary: >
+      Community port of autoresearch to Apple Silicon via MLX. Discovered
+      that depth-4 models outperform depth-8 within fixed time budgets —
+      fewer, wider layers with more optimizer steps beat deeper networks.
+    context: >
+      Key evidence for the "change the substrate, change the optimum"
+      thesis. The finding was emergent, not predicted.
+
+  - key: tiny-lab
+    pattern: "Tiny-Lab"
+    section: "06"
+    title: "Tiny-Lab: Apple Silicon Experiment Runner"
+    authors: "trevin-creator"
+    year: 2026
+    venue: "GitHub"
+    summary: >
+      Dedicated Apple Silicon experiment runner with Claude-driven
+      hypothesis queue, structured single-variable design, JSONL ledger.
+      The autoresearch pattern maturing from ad-hoc script into purpose-
+      built experimental infrastructure.
+    context: >
+      Represents the maturation of ad-hoc experimentation into
+      infrastructure — itself an instance of the bottleneck shift the
+      essay describes.
+
+  - key: ziskind-benchmarks
+    pattern: "Ziskind"
+    section: "03"
+    title: "M5 Max Independent Benchmark Suite"
+    authors: "Ziskind"
+    year: 2026
+    venue: "Independent benchmark"
+    summary: >
+      Stream Triad: 351 GB/s sustained on M5 Max (13% above M4 Max,
+      exceeding M3 Ultra's 337 GB/s). Gemma 34B Q4 prefill: 4,468 tok/s.
+      Token generation: 65 tok/s M5 Max vs 82 M3 Ultra — bandwidth
+      hierarchy asserts itself.
+    context: >
+      The most rigorous independent validation of Apple's performance
+      claims and the prefill/decode distinction.
+
+  - key: gupta-analysis
+    pattern: "Gupta"
+    section: "04"
+    title: "M5 as Inference Machine"
+    authors: "Aakash Gupta"
+    year: 2026
+    venue: "Analysis"
+    summary: >
+      Framing of the M5 as Apple designing silicon around one assumption:
+      the primary pro laptop workload in 2026 is running LLMs locally.
+      Pricing and press release evidence cited.
+    context: >
+      Crystallizes the inference-machine thesis that the essay's Act II
+      builds toward.
+
+  - key: exo-labs
+    pattern: "EXO Labs"
+    section: "04"
+    title: "EXO: Distributed Inference Framework"
+    authors: "EXO Labs"
+    year: 2025
+    venue: "GitHub (Apache 2.0)"
+    summary: >
+      Open-source distributed inference framework (42K GitHub stars).
+      Demonstrated automatic disaggregated inference across heterogeneous
+      hardware, RDMA-over-Thunderbolt clustering, and Spark+Mac hybrid
+      prefill/decode routing.
+    context: >
+      Featured at Apple's own NeurIPS booth. The primary evidence for
+      distributed consumer inference viability.
+
+  - key: geerling-benchmarks
+    pattern: "Geerling"
+    section: "04"
+    title: "4× M3 Ultra Mac Studio Cluster Benchmarks"
+    authors: "Jeff Geerling"
+    year: 2025
+    venue: "Independent benchmark"
+    summary: >
+      Testing of four M3 Ultra Mac Studios via EXO with RDMA. Qwen3 235B
+      at 31.9 tok/s, DeepSeek V3.1 671B at 32.5 tok/s, Kimi K2 1T at
+      28.3 tok/s. TCP degrades with added nodes; RDMA enables scaling.
+    context: >
+      Demonstrates that RDMA reverses the conventional wisdom about
+      distributed consumer inference latency penalties.
+
+  - key: qwen35
+    pattern: "Qwen 3.5"
+    section: "05"
+    title: "Qwen 3.5 Model Family"
+    authors: "Alibaba / Qwen Team"
+    year: 2026
+    venue: "Technical report"
+    summary: >
+      Model family using Gated DeltaNet hybrid architecture. 397B-A17B
+      flagship, 35B-A3B mid-range, dense 0.8B–9B small series. 3:1
+      DeltaNet-to-attention ratio. 262K native context.
+    context: >
+      The primary case study for convergent optimization. Designed for
+      datacenter economics, emergently aligned with edge deployment.
+
+  - key: hermes-agent
+    pattern: "Hermes Agent"
+    section: "06"
+    title: "Hermes Agent"
+    authors: "Nous Research"
+    year: 2026
+    venue: "GitHub"
+    summary: >
+      Persistent local agent running via llama.cpp on Apple Silicon.
+      Accumulates reusable skill documents over time, creating a
+      monotonically improving capability surface across arbitrary tasks.
+    context: >
+      Represents the application layer of the inference stack — the
+      full pipeline from transistor to persistent agent on one machine.
+
+  - key: weinbach-thermal
+    pattern: "Weinbach"
+    section: "08"
+    title: "M5 Max: Chiplets, Thermals, and Performance-Per-Watt"
+    authors: "Ben Weinbach"
+    year: 2026
+    venue: "Creative Strategies"
+    summary: >
+      M5 Max analysis. ANE measured at 19.9 TFLOPS (vs M4's 15.8).
+      Characterized the ANE as "a block-level accelerator" suited for
+      dense matmul-heavy shapes, not token-by-token decode. Chiplet
+      thermal decoupling data.
+    context: >
+      Key source for the close's ANE reframing. The ANE got faster even
+      as Apple de-emphasized it in marketing.
+
+  - key: mannak-tweet
+    pattern: "Mannak"
+    section: "08"
+    title: "CoreML to CoreAI Connection"
+    authors: "Ronald Mannak"
+    year: 2026
+    venue: "Twitter/X"
+    summary: >
+      Developer tweet (191K views) connecting CoreML overhead findings to
+      the rumored CoreAI framework update for WWDC 2026. Captured community
+      sentiment about the framework bottleneck.
+    context: >
+      Single data point for developer community reaction to the CoreML
+      overhead findings. The technical pressure is real; the timeline is
+      specific.
+
+links:
+
+  - key: invisible-structures
+    pattern: "invisible structures"
+    section: "01"
+    url: "/writing/scholion/"
+    title: "The Circuitry of Science"
+    source: "thbrdy.dev"
+    summary: >
+      The Scholion essay's thesis — making invisible structures visible and
+      navigable — which this essay extends to the inference stack.
+
+  - key: circuitry
+    pattern: "forensic"
+    section: "01"
+    url: "/writing/the-circuitry-of-science/"
+    title: "The Circuitry of Science"
+    source: "thbrdy.dev"
+    summary: >
+      The Circuitry of Science essay, whose voice and forensic analytical
+      approach this essay matches.
