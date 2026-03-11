@@ -18,20 +18,50 @@ const steps: Step[] = [
 
 const annotations = [
   {
-    target: 6,
-    text: "The random seed incident — seed 42→137 passed the gate via evaluation-set overfitting",
-    color: tokens.red,
+    text: "Same loop structure across all three layers — the pattern is invariant; the instantiation varies",
+    color: tokens.accent,
   },
   {
-    target: 5,
-    text: "Depth-4 on GPU, depth-6 on ANE — the hardware determines the optimum",
-    color: tokens.accent,
+    text: "Each instance discovers hardware- or constraint-specific optima invisible from the spec sheet",
+    color: tokens.blue,
+  },
+  {
+    text: "The metric gate is only as good as the metric — seed 42→137 passed via evaluation-set overfitting",
+    color: tokens.red,
   },
 ];
 
-const hwComparison = [
-  { label: "H100", value: "~12 exp/hr" },
-  { label: "Apple Silicon (MLX)", value: "~8–9 exp/hr" },
+const instances = [
+  {
+    layer: "Architecture",
+    project: "autoresearch",
+    mutable: "train.py",
+    immutable: "val_bpb harness",
+    budget: "5 min wall-clock",
+    rate: "~8–12 exp/hr",
+    finding: "Depth-4 on GPU, depth-6 on ANE, depth-8 on H100",
+    color: tokens.accent,
+  },
+  {
+    layer: "Kernel",
+    project: "AutoKernel",
+    mutable: "kernel.py",
+    immutable: "bench.py (5-stage)",
+    budget: "~90s per kernel",
+    rate: "~40 exp/hr",
+    finding: "80–95% of cuBLAS on tuned kernels",
+    color: tokens.blue,
+  },
+  {
+    layer: "Constraint",
+    project: "sample-efficiency",
+    mutable: "train.py",
+    immutable: "val_bpb harness",
+    budget: "10M token budget",
+    rate: "~50 exp/overnight",
+    finding: "14% val loss reduction; different optima than time-budgeted",
+    color: tokens.teal,
+  },
 ];
 
 export default function FTTAutoresearchRatchet() {
@@ -163,22 +193,61 @@ export default function FTTAutoresearchRatchet() {
           flex-shrink: 0;
           margin-top: 0.35rem;
         }
-        .ftt-ratchet-hw {
-          display: flex;
-          gap: 1.5rem;
+        .ftt-ratchet-instances {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.75rem;
           padding-top: 0.75rem;
           border-top: 1px solid ${tokens.border};
-          justify-content: center;
         }
-        .ftt-ratchet-hw-item {
+        .ftt-ratchet-instance {
+          background: ${tokens.bgCard};
+          border: 1px solid ${tokens.border};
+          border-radius: 8px;
+          padding: 0.75rem;
+        }
+        .ftt-ratchet-instance-layer {
+          font-family: ${tokens.mono};
+          font-size: 0.55rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          margin-bottom: 0.15rem;
+        }
+        .ftt-ratchet-instance-project {
+          font-family: ${tokens.sans};
+          font-size: 0.6rem;
+          color: ${tokens.textMuted};
+          margin-bottom: 0.6rem;
+        }
+        .ftt-ratchet-instance-rows {
+          display: flex;
+          flex-direction: column;
+          gap: 0.35rem;
+          margin-bottom: 0.6rem;
+        }
+        .ftt-ratchet-instance-row {
+          display: flex;
+          flex-direction: column;
+          gap: 0.05rem;
+        }
+        .ftt-ratchet-instance-key {
+          font-family: ${tokens.mono};
+          font-size: 0.48rem;
+          color: ${tokens.textMuted};
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+        .ftt-ratchet-instance-value {
           font-family: ${tokens.sans};
           font-size: 0.65rem;
-          color: ${tokens.textMuted};
-        }
-        .ftt-ratchet-hw-value {
-          font-family: ${tokens.mono};
-          font-weight: 500;
           color: ${tokens.textMid};
+        }
+        .ftt-ratchet-instance-finding {
+          font-family: ${tokens.sans};
+          font-size: 0.62rem;
+          line-height: 1.35;
+          padding-top: 0.5rem;
+          border-top: 1px solid ${tokens.border};
         }
         @media (max-width: 640px) {
           .ftt-ratchet-inner {
@@ -200,6 +269,9 @@ export default function FTTAutoresearchRatchet() {
           .ftt-ratchet-arrow {
             font-size: 0.7rem;
           }
+          .ftt-ratchet-instances {
+            grid-template-columns: 1fr;
+          }
         }
         @media (max-width: 420px) {
           .ftt-ratchet-node {
@@ -207,6 +279,9 @@ export default function FTTAutoresearchRatchet() {
             padding: 0.4rem 0.5rem;
           }
           .ftt-ratchet-detail {
+            display: none;
+          }
+          .ftt-ratchet-instance-rows {
             display: none;
           }
         }
@@ -220,7 +295,7 @@ export default function FTTAutoresearchRatchet() {
           transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
         }}
       >
-        <div className="ftt-ratchet-header">The git-based ratchet</div>
+        <div className="ftt-ratchet-header">The ratchet pattern</div>
 
         <div className="ftt-ratchet-loop">
           {steps.map((step, i) => (
@@ -276,26 +351,47 @@ export default function FTTAutoresearchRatchet() {
           {annotations.map((a, i) => (
             <div className="ftt-ratchet-annotation" key={i}>
               <div className="ftt-ratchet-annotation-dot" style={{ background: a.color }} />
-              <div>
-                <span style={{ fontFamily: tokens.mono, fontSize: "0.55rem", color: tokens.textMuted }}>
-                  Step {a.target}:
-                </span>{" "}
-                {a.text}
-              </div>
+              <div>{a.text}</div>
             </div>
           ))}
         </div>
 
-        <div
-          className="ftt-ratchet-hw"
-          style={{
-            opacity: inView ? 1 : 0,
-            transition: "opacity 0.4s ease 0.9s",
-          }}
-        >
-          {hwComparison.map((h) => (
-            <div className="ftt-ratchet-hw-item" key={h.label}>
-              {h.label}: <span className="ftt-ratchet-hw-value">{h.value}</span>
+        <div className="ftt-ratchet-instances">
+          {instances.map((inst, i) => (
+            <div
+              className="ftt-ratchet-instance"
+              key={inst.layer}
+              style={{
+                opacity: inView ? 1 : 0,
+                transform: inView ? "translateY(0)" : "translateY(10px)",
+                transition: `all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${0.6 + i * 0.1}s`,
+              }}
+            >
+              <div className="ftt-ratchet-instance-layer" style={{ color: inst.color }}>
+                {inst.layer}
+              </div>
+              <div className="ftt-ratchet-instance-project">{inst.project}</div>
+              <div className="ftt-ratchet-instance-rows">
+                <div className="ftt-ratchet-instance-row">
+                  <div className="ftt-ratchet-instance-key">Mutable</div>
+                  <div className="ftt-ratchet-instance-value">{inst.mutable}</div>
+                </div>
+                <div className="ftt-ratchet-instance-row">
+                  <div className="ftt-ratchet-instance-key">Immutable</div>
+                  <div className="ftt-ratchet-instance-value">{inst.immutable}</div>
+                </div>
+                <div className="ftt-ratchet-instance-row">
+                  <div className="ftt-ratchet-instance-key">Budget</div>
+                  <div className="ftt-ratchet-instance-value">{inst.budget}</div>
+                </div>
+                <div className="ftt-ratchet-instance-row">
+                  <div className="ftt-ratchet-instance-key">Rate</div>
+                  <div className="ftt-ratchet-instance-value">{inst.rate}</div>
+                </div>
+              </div>
+              <div className="ftt-ratchet-instance-finding" style={{ color: inst.color }}>
+                {inst.finding}
+              </div>
             </div>
           ))}
         </div>
