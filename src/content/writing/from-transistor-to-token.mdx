@@ -1,0 +1,263 @@
+---
+title: "From Transistor to Token"
+date: 2026-03-10
+description: "Tracing the inference stack from Apple's Neural Engine through the M5 Max to autonomous experimentation — making each layer's real architecture visible."
+tags: ["apple-silicon", "inference", "neural-engine", "mlx", "on-device-ai"]
+draft: true
+order: 8
+---
+
+import { SectionDivider } from '../../components/islands/shared/SectionDivider.tsx';
+import { PullQuote } from '../../components/islands/shared/PullQuote.tsx';
+
+<SectionDivider number="01" label="THE MARKETING NUMBER" client:visible />
+
+## The marketing number
+
+Apple's M4 Neural Engine is marketed at 38 TOPS. A reverse-engineering project called maderix, with 5,300 GitHub stars and growing, measured 19 TFLOPS. The reconciliation is straightforward: Apple counts INT8 operations at twice the FP16 rate, following industry convention. But the hardware dequantizes INT8 inputs to FP16 before compute. The doubling is notational, not physical.
+
+This is not a gotcha. It is a lens. At every layer of the inference stack — from silicon to framework to system to model to application — the number you are given and the architecture underneath it diverge. Understanding on-device AI capability requires seeing through three layers of abstraction where presentation and architecture come apart. The gap is not deception. It is the distance between a spec sheet optimized for comparison shopping and an architecture optimized for computation.
+
+### The ANE as convolution engine
+
+The most fundamental finding from the maderix reverse engineering: the Apple Neural Engine does not execute individual instructions. It accepts a compiled neural network graph and runs the entire thing atomically. There is no instruction-level parallelism to exploit, no pipeline to stall, no branch predictor to confuse. You hand it a graph; it runs the graph. This has a consequence that no benchmark captures. Expressing matrix multiplication as 1×1 convolution yields 3× throughput — because the hardware IS a convolution engine, and matmul is the shim. The hardware was not designed to perform arbitrary neural computation flexibly. It was designed to perform specific neural computations extremely efficiently.
+
+The ANE was built for the workloads Apple needed in 2017: Face ID at the moment you glance at your phone, computational photography operating on every frame before you see it, Live Text recognizing characters in a camera feed. Dense, structured inference at zero watts idle. The key phrase is "at zero watts idle" — when you are not using Face ID, the ANE draws no power at all. For these workloads, the ANE is not merely good. It is arguably the most efficient neural compute hardware ever deployed at consumer scale.
+
+What the ANE was not designed for: token-by-token autoregressive decode, where each token generation requires a separate pass through the model weights. The graph-atomic execution model means there is no way to stream partial results or interleave generation with other work. Each token is a complete graph execution, and the dispatch overhead that is negligible for a camera pipeline processing 30 frames per second becomes dominant when you need hundreds of dispatch calls per second.
+
+The architecture has a hard boundary. Below 32 MB of working set, the ANE's on-chip SRAM delivers peak throughput. Above it, performance degrades by roughly 30% as data spills to DRAM. This SRAM cliff shapes what the ANE can and cannot do efficiently — and it is invisible in every published specification.
+
+Sixteen neural engine cores are present in every M5 variant, unchanged from M4. Apple did not scale the ANE. They scaled something else entirely.
+
+### Power efficiency as genuine achievement
+
+Before the scaling story, the efficiency story. At 2.8 watts peak power, the M4 ANE achieves 6.6 TFLOPS/W. The M4 base GPU manages roughly 1.0 TFLOPS/W. For datacenter comparison: the A100 delivers approximately 0.08 TFLOPS/W, and the H100 approximately 0.13 TFLOPS/W. The ANE is 50–80× more energy-efficient per floating-point operation than the best datacenter GPUs on the planet.
+
+Not marketing. Physics. But physics applied to a specific computation pattern — and accessed through a framework that wastes most of it.
+
+CoreML, Apple's public machine learning framework, adds 2–4× overhead for small operations compared to direct ANE access. The dispatch floor is roughly 0.095 milliseconds per operation, which means that for a 256×256 matrix multiplication taking 0.006ms of actual ANE compute, CoreML's XPC and IOKit overhead consumes 94% of wall-clock time. There is a 119-compile-per-process ceiling. The scheduler is a black box: the Orion paper (arXiv:2603.06728) cataloged 20 ANE restrictions, 14 of them previously undocumented. Developers cannot force ANE execution, cannot inspect ANE programs, and cannot perform gradient computation on the hardware. If a single layer in a model is not ANE-compatible, CoreML may fall the entire model back to CPU.
+
+The hardware is extraordinary. The software surface is the bottleneck.
+
+<PullQuote client:visible slug="from-transistor-to-token" quoteIndex={1}>The doubling is notational, not physical.</PullQuote>
+
+### The private API question
+
+Beneath CoreML's public surface lie more than 40 private Objective-C classes. `_ANEClient` bypasses CoreML entirely. In-memory model descriptors enable runtime program generation without the compile-to-disk pipeline that CoreML requires. The maderix project demonstrated training on what Apple markets as inference-only hardware — a proof of concept showing that the gap between "inference accelerator" and "general compute" is narrower than Apple's API surface suggests.
+
+But building on private APIs is building on sand. Apple can change internal interfaces without notice, and any application relying on `_ANEClient` is ineligible for the App Store. The private API surface proves capability; it does not constitute a development platform. The engineering reality is a hardware accelerator whose measured performance is world-class and whose accessible performance is mediated by a framework that imposes order-of-magnitude overhead on the operations most relevant to modern AI workloads.
+
+The tension is structural, not incidental. Apple designed the ANE for its own consumption — the camera pipeline, Siri, on-device dictation — and exposed CoreML as a managed interface that prioritizes system stability over developer control. For Apple's own workloads, where the full model graph is known at compile time and optimized end-to-end, the ANE is exactly right. For the open-ended, rapidly iterating world of LLM inference, the framework becomes the constraint.
+
+{/* TODO: Interactive — FTTTopsReality */}
+
+The ANE tells you what Apple's silicon CAN do. The M5 tells you what Apple has decided it SHOULD do.
+
+<SectionDivider number="02" label="THE SYSTEM" client:visible />
+
+## The system
+
+The M5 is an architectural statement disguised as a spec bump. Apple's Fusion Architecture bonds two 3nm dies into a single system-on-chip. Die 1 carries the CPU, Neural Engine, and I/O controllers. Die 2 carries the GPU, media engines, and memory controllers. The M5 Max doubles Die 2: 40 GPU cores, 614 GB/s of memory bandwidth.
+
+The architectural pivot is not in the die count. It is in what lives inside the GPU cores. Every M5 GPU core contains a Neural Accelerator — dedicated neural compute hardware wired directly into the graphics pipeline and programmable via Metal 4's new Tensor APIs (`MTLTensor`, `MTL4MachineLearningCommandEncoder`, Metal Performance Primitives). AI compute now scales with GPU core count: 10 Neural Accelerators on the M5, 20 on the M5 Pro, 40 on the M5 Max. This is no longer a fixed-size sidecar bolted onto the SoC. It is compute that grows with the chip.
+
+Apple's own marketing tells the story. The M5 press release mentions the 16-core Neural Engine exactly once, in a single sentence tied to "Apple Intelligence" consumer features. The Neural Accelerators in GPU cores get the performance claims, the LM Studio name-drop, and the explicit connection between 614 GB/s bandwidth and "higher token generation for LLMs." The unit of measurement itself shifted: no TOPS figure at all — the metric Apple used from M1 through M4 — replaced by "over 4× peak GPU compute for AI."
+
+The measurement changed because the hardware target changed. And the shift reveals Apple's strategic bet: the future of on-device AI compute is not a dedicated accelerator sitting idle between camera activations. It is neural compute woven into the GPU fabric, scaling with the silicon, programmable through Metal's existing developer ecosystem.
+
+This is a bet against Apple's own prior architecture. The ANE was the answer to "how do we run neural networks on phones without killing the battery?" The GPU Neural Accelerators are the answer to a different question: "how do we make a laptop the primary inference platform for models that did not exist when the ANE was designed?"
+
+### Two regimes of inference
+
+This is the conceptual hinge of the entire system-level story, and it is the distinction that most benchmark summaries collapse into a single number.
+
+*Prefill* is the first phase of LLM inference: processing the entire input prompt at once. It is compute-bound. More FLOPS means faster prefill. The M5 Max's Neural Accelerators deliver 3.5–4× improvement over the M4 Max. A 10,000-token prompt that took 81 seconds on M4 Max drops to 18 seconds on M5 Max, according to MacStories benchmarks. This transforms long-context workflows from "wait minutes" to "wait seconds."
+
+*Decode* is the second phase: generating tokens one at a time. It is bandwidth-bound. Each token requires reading the model weights from memory, and the speed at which you can read determines the speed at which you can generate. M5 Max's 614 GB/s versus M4 Max's 546 GB/s yields approximately 12% improvement. Llama 70B at Q4 quantization: roughly 10 tokens per second, up from roughly 7. Real. But modest.
+
+The marketing headline — "4× faster AI" — leads with prefill because the number is bigger. But prefill happens once per prompt. Decode determines the ongoing experience. For agentic workflows that process large context windows and RAG pipelines that ingest long documents, the prefill improvement is transformative — a 10,000-token system prompt that used to take over a minute now processes in under twenty seconds, making tool-use patterns with rich context practical for the first time on local hardware. For conversational chat, the 12% decode bump is what you feel. The difference between 7 tok/s and 10 tok/s is real but barely perceptible — both are below the roughly 15 tok/s threshold where output feels fluid rather than labored.
+
+The distinction matters for purchasing decisions, for benchmark interpretation, and for understanding where the next meaningful improvement will come from. If you are compute-bound (prefill-heavy workloads), the M5 is a generational leap. If you are bandwidth-bound (decode-heavy workloads), the M5 is an incremental step — and the next meaningful jump requires either more memory bandwidth (M5 Ultra, projected late 2026) or architectural changes in the models themselves that reduce per-token memory reads.
+
+{/* TODO: Interactive — FTTInferenceRegimes */}
+
+<SectionDivider number="03" label="THE HIDDEN VARIABLE" client:visible />
+
+## The hidden variable
+
+On identical M5 Max hardware, running the same model at the same quantization level, framework choice produces 2–3× variation in measured performance. MLX, Apple's open-source research framework, runs 20–30% faster than llama.cpp on Apple Silicon via zero-copy unified memory access and optimized Metal compute shaders. CoreML adds 2–4× overhead for small operations. The projected 22–32 tok/s via MLX versus the measured 10 tok/s via GGUF format in llama.cpp: same chip, same model, same quantization — the framework is the variable.
+
+This variation is invisible to anyone reading a single benchmark number. "The M5 Max runs Llama 70B at 10 tok/s" is a statement about one framework's performance on one hardware configuration. It is not a statement about the hardware's capability.
+
+<PullQuote client:visible slug="from-transistor-to-token" quoteIndex={2}>The marketing headline leads with the prefill number because it's bigger. But prefill happens once per prompt; decode determines the ongoing experience.</PullQuote>
+
+### Independent validation
+
+The Ziskind benchmark suite provides the most rigorous independent measurements of M5 Max performance. Stream Triad testing measured 351 GB/s sustained memory throughput — 13% above the M4 Max and exceeding the M3 Ultra desktop chip's 337 GB/s. A laptop outperforming Apple's own desktop silicon on sustained bandwidth.
+
+On prefill, the 4× claim holds. Gemma 34B at Q4 quantization: 4,468 tok/s on M5 Max versus 1,855 on M4 Max versus 2,959 on M3 Ultra. The M5 Max in a laptop beats the M3 Ultra desktop on compute-bound inference.
+
+On decode — the bandwidth-bound phase — the hierarchy reasserts itself exactly as the physics predicts. Token generation on dense models: 65 tok/s on M5 Max versus 61 on M4 Max versus 82 on M3 Ultra. More bandwidth, more tokens. The M3 Ultra's 819 GB/s gives it the edge that no amount of compute optimization can overcome when the bottleneck is memory reads.
+
+### The competitive landscape
+
+The comparison between Apple Silicon and the competition is a function of model size, and the picture inverts at roughly 30 billion parameters.
+
+Below 30B, NVIDIA discrete GPUs dominate. The RTX 5090 delivers 1,790 GB/s of memory bandwidth and generates tokens 3–5× faster than the M5 Max. If the model fits in 32GB of VRAM, Apple's value proposition on price-performance collapses.
+
+Above 70B, the M5 Max has no laptop-class competition. Its 128GB of unified memory loads Llama 70B at Q6 quantization — roughly 55GB — entirely in fast memory, with room to spare. NVIDIA's DGX Spark matches on capacity at 128GB but delivers less than half the bandwidth at 273 GB/s. AMD's Strix Halo offers the same memory, half the bandwidth, and one-third the price at $2,348 — the price-performance dark horse.
+
+The crossover zone — roughly 30–50B parameters — is where the architectural decision becomes genuinely interesting rather than straightforward. A 35B model at Q4 requires roughly 18GB of memory. It fits on an RTX 5090 with room to spare, and the 5090's raw bandwidth advantage delivers meaningfully faster decode. But add a 128K context window and the KV cache pushes total memory requirements past 32GB. Suddenly the model that "fits" on the GPU no longer fits with the context it needs. Unified memory architectures do not have this cliff — 128GB is 128GB, shared flexibly between weights, KV cache, and operating system overhead.
+
+No single M5 Max specification is best in class. The moat is the combination: 128GB unified memory, 614 GB/s bandwidth, 40 Neural Accelerators, laptop form factor, and 50-watt power draw. No competing device packages all of these together.
+
+{/* TODO: Interactive — FTTCompetitiveLandscape */}
+
+### Thermal reality
+
+The Fusion Architecture's chiplet design thermally decouples the CPU and GPU tiles — an improvement over monolithic dies under simultaneous load. But the 14-inch chassis still throttles. CPU sustained power drops from roughly 75W to roughly 50W as the SoC warms. GPU peaks at approximately 80W briefly before settling to a lower sustained level.
+
+Token generation, being bandwidth-bound rather than compute-bound, does not stress the thermal envelope. Prefill IS compute-bound and will hit thermal limits on the 14-inch chassis during long-context processing. The 16-inch MacBook Pro is not a luxury upgrade. It is a design constraint for sustained AI workloads.
+
+A detail that speaks to the broader efficiency story: full system idle power is 7.1W, down from the M4 Max's 7.6W. Even at rest, the architecture is becoming more efficient.
+
+<SectionDivider number="04" label="BEYOND ONE MACHINE" client:visible />
+
+## Beyond one machine
+
+What happens when one machine is not enough?
+
+EXO Labs provides the most complete open-source answer: a framework for turning heterogeneous consumer devices into a unified inference cluster. Apache 2.0 licensed, 42,000 GitHub stars, featured at Apple's own NeurIPS booth running DeepSeek v3.2 at 25 tok/s across four M3 Ultra Mac Studios.
+
+The conventional wisdom holds that distributed consumer inference always pays a crippling latency tax. Thunderbolt 5 RDMA reverses that equation. Remote Direct Memory Access allows one machine's GPU to read another machine's memory directly, bypassing the kernel and reducing inter-device latency from approximately 300 microseconds over TCP to 3–50 microseconds over RDMA. Jeff Geerling's December 2025 benchmarks on a cluster of four M3 Ultra Mac Studios with 1.5TB total memory demonstrated the implications: Qwen3 235B at 31.9 tok/s, DeepSeek V3.1 671B at 32.5 tok/s, Kimi K2 Thinking with its trillion parameters at 28.3 tok/s. For comparison, llama.cpp over standard TCP *degrades* with added nodes — 20.4 tok/s dropping to 15.2 tok/s on Qwen3 235B — because TCP's 300μs latency accumulates at every synchronization point.
+
+The Spark+Mac hybrid makes the prefill/decode split architecturally concrete. NVIDIA's DGX Spark has approximately 100 TFLOPS of compute but only 273 GB/s of bandwidth — a compute-to-bandwidth ratio of 366 FLOP/byte. The M3 Ultra has approximately 26 TFLOPS but 819 GB/s — a ratio of 31.7 FLOP/byte. EXO routes prefill to the Spark (compute-rich) and decode to the Mac (bandwidth-rich), achieving a 2.8× total speedup. The implementation uses layer-by-layer KV cache streaming rather than bulk transfer, so communication overlaps computation.
+
+But the M5 Max itself narrows the window where clustering makes economic sense. Single-machine 70B inference is now marginally viable at 11–15 tok/s. The projected M5 Ultra — roughly 1,228 GB/s bandwidth, 256–512GB memory, expected late 2026 — would push single-machine capability to 200B+ parameter models, compressing EXO's primary use case to trillion-parameter models and multi-user serving. The ecosystem is converging around MLX for compute and JACCL for inter-device communication, but the strategic question remains: at what model size is the complexity of clustering — the operational overhead of managing multiple machines, the failure modes of distributed state, the power and space requirements — worth it compared to a single maximally-configured machine?
+
+The answer is moving upward. Two years ago, 70B required clustering. Today it runs on one laptop. In a year, 200B may run on one desktop. The models that demand distributed consumer inference keep growing, but so does the single-machine ceiling.
+
+### The inference machine thesis
+
+Aakash Gupta's framing crystallizes what the spec sheet implies: "This is Apple designing silicon around one assumption — the primary workload for a pro laptop in 2026 is running LLMs locally."
+
+The pricing is evidence. The $200 "price increase" on the M5 Pro is functionally zero — Apple doubled the base storage to absorb it. The inference configurations — 128GB unified memory for loading 70B+ models — start at approximately $5,000. Apple name-dropped LM Studio, a third-party local inference application, in its own press materials. The M5 press release leads with AI compute metrics before mentioning video editing.
+
+None of this proves the thesis. All of it is consistent with it.
+
+<PullQuote client:visible slug="from-transistor-to-token" quoteIndex={3}>No single spec is best in class; the package is.</PullQuote>
+
+<SectionDivider number="05" label="CONVERGENT DESIGN" client:visible />
+
+## Convergent design
+
+The hardware defines what is possible. The question is what runs on it — and whether the models being built elsewhere happen to fit the constraints Apple's silicon imposes.
+
+Qwen 3.5, released by Alibaba in 2026, provides the most instructive case study. The architecture replaces 75% of standard attention layers with Gated DeltaNet, a recurrent mechanism that maintains a fixed-size state matrix instead of a growing key-value cache. The core equation:
+
+```
+S_t = α_t · S_{t-1} · (I − β_t k_t k_t^T) + β_t v_t k_t^T
+```
+
+Two complementary mechanisms operate within this update rule. The decay gate α_t clears memory globally during context switches — a soft reset when the model determines the prior state is no longer relevant. The delta rule `(I − β_t k_t k_t^T)` performs targeted surgical updates to specific key-value pairs, the mathematical equivalent of applying one step of online stochastic gradient descent to the model's state on every token. The state is not merely stored. It is continuously refined.
+
+Each Gated DeltaNet layer maintains approximately 32 KB of state per attention head, regardless of sequence length. Whether the model has processed 1,000 tokens or 128,000, the memory footprint of a DeltaNet layer is identical. Standard attention, by contrast, accumulates a KV cache that grows linearly with every token processed — and that cache must be read from memory on every subsequent generation step.
+
+The bandwidth arithmetic makes the architectural consequence concrete. Qwen 3.5's 27B model has 48 DeltaNet layers and 16 full attention layers. At 128K context length in FP16 precision, the 16 attention layers require approximately 52.4 GB of KV cache. The 48 DeltaNet layers require approximately 25.2 MB. A 2,000× difference. Without the hybrid architecture, 128K context on a 27B model would demand over 200 GB of memory — impossible on any consumer machine. With it, the model fits comfortably in 128GB unified memory with room for the weights themselves.
+
+**This is not co-design.** Alibaba never mentions Apple Silicon in any Qwen 3.5 documentation. The architecture was designed for datacenter training economics and long-context scaling. The timeline flows unambiguously from research to cloud deployment to edge availability. But the architecture has emergent properties that align with edge deployment because both environments share the same fundamental physical bottleneck: memory bandwidth per token.
+
+The 3:1 ratio of DeltaNet layers to full attention layers was empirically tuned for quality — the Kimi Linear ablation study showed that 3:1 achieves the lowest validation loss of any ratio tested. It simultaneously happens to be the ratio that makes 128K+ context fit in consumer memory. This is convergent optimization under shared physical constraints, not intentional collaboration between a chip designer in Cupertino and a model architect in Hangzhou.
+
+Mixture of Experts compounds the advantage. The 397B flagship activates only 17B parameters per token — 10 routed experts plus 1 shared expert out of 512 total. At Q4 quantization, per-token memory reads are approximately 8.5 GB. On M5 Max at 614 GB/s, the theoretical ceiling is roughly 72 tok/s. The 35B-A3B variant activates only 3B parameters per token — Ziskind chose this model for his M5 Max benchmarks precisely because it is designed for this hardware profile.
+
+The smaller dense models punch above their weight. The 9B model scores 81.7 on GPQA Diamond. There is a disputed baseline — GPT-OSS-120B was reported at 71.5 in one evaluation and 80.1 by VentureBeat, which would narrow Qwen 3.5 9B's margin from 10.2 points to 1.6. But Artificial Analysis independently rates it the highest Intelligence Index among all sub-10B models.
+
+The convergence is not limited to Qwen. Kimi Linear independently arrived at a 3:1 hybrid ratio. Granite 4.0 pushes to 9:1. RecurrentGemma uses approximately 2:1. RWKV-7 eliminates full attention entirely. The cautionary counterexample: MiniMax abandoned hybrid linear attention after quality degradation on complex multi-hop reasoning at scale. The ratio is empirical, not theoretically derived, and may not hold as models grow larger.
+
+The thesis is not that these models were built for Apple Silicon. It is that the physical constraints shaping datacenter economics and the physical constraints shaping consumer hardware are converging — and architectures designed to navigate one set of constraints have emergent properties that fit the other. The datacenter architect trying to serve 1,000 users from one GPU cluster faces the same per-token bandwidth constraint as the laptop user trying to run one model locally. Both benefit from architectures that read fewer bytes per token. The alignment will deepen as both environments continue to be bandwidth-limited.
+
+There is a framework dimension to this convergence as well. MLX runs Qwen 3.5's DeltaNet layers approximately 2× faster than llama.cpp on Apple Silicon, because MLX's zero-copy unified memory architecture is particularly well-suited to the recurrent state updates that DeltaNet requires. llama.cpp's DeltaNet implementation is acknowledged as unoptimized (GitHub issue #20225), and the performance gap may narrow. But as of early 2026, the framework you choose to run a given model on Apple Silicon produces as much variation as the model architecture itself — a hidden variable stacked on top of a hidden variable.
+
+<SectionDivider number="06" label="THE RATCHET" client:visible />
+
+## The ratchet
+
+The hardware and the models define what can run on a laptop. The next question is what happens when you close the loop — when the machine is not just running inference but running experiments.
+
+Andrej Karpathy's autoresearch is 630 lines of mutable Python training code, an immutable evaluation harness, and a Markdown file called `program.md`. The human writes the program specification. The agent does everything else. The mechanism is a git-based ratchet: branch from main, modify `train.py`, commit the change, train for a fixed five-minute budget, evaluate against `val_bpb` (validation bits-per-byte), and decide. If the metric improved, merge to main. If it did not, `git reset HEAD~1` and try again.
+
+The design philosophy — one GPU, one file, one metric — is deliberate and instructive. Compare it to Sakana AI's "AI Scientist," which attempts to automate the full research lifecycle from hypothesis generation through paper writing. Sakana's approach produces 42% experiment failure rates and results that include hallucinated findings — the system generates plausible-sounding results that were never measured. Autoresearch cannot hallucinate because `val_bpb` is measured on a held-out validation set, not generated by the model. The distinction is architectural: autoresearch separates the mutable part (the training code the agent modifies) from the immutable part (the evaluation harness the agent cannot touch). The ratchet only moves forward, and it only moves forward on evidence.
+
+The scope constraint is equally important. Autoresearch does not attempt to write papers, generate hypotheses about the broader field, or claim significance for its findings. It optimizes one metric on one dataset by modifying one file. The agent's ambition is mechanically bounded by the system's design — a property that Karpathy chose deliberately and that most autonomous research systems lack.
+
+On an H100, the loop runs approximately 12 experiments per hour. On Apple Silicon via MLX, approximately 8–9. The throughput difference matters less than the accessibility: autoresearch on an H100 requires cloud GPU access at $2–3 per hour. On a MacBook Pro, it requires electricity.
+
+{/* TODO: Interactive — FTTAutoresearchRatchet */}
+
+### Hardware-specific optima
+
+The MLX port of autoresearch discovered something the original H100 implementation never encountered: depth-4 models dramatically outperform depth-8 within a fixed five-minute training window on Apple Silicon.
+
+The reason is structural, not incidental. Lower throughput means fewer forward passes per minute. Each pass must therefore count more. Fewer, wider layers with more optimizer steps beat deeper networks that cannot complete enough training iterations in the time budget. The optimization landscape is shaped by the hardware's throughput characteristics — the loop did not know this in advance. It discovered it by running on the substrate.
+
+Change the substrate, change the optimum. The same algorithm, given the same objective, finds fundamentally different solutions depending on what hardware it runs on. This is not a limitation — it is a finding. The loop adapts to what the silicon actually does, not what the spec sheet says it does.
+
+trevin-creator's follow-up project, Tiny-Lab, takes the pattern further — a dedicated experiment runner for Apple Silicon with a Claude-driven hypothesis queue, structured single-variable experimental design, and a JSONL ledger tracking WIN/LOSS/INVALID outcomes. Where autoresearch is a script you fork, Tiny-Lab is infrastructure: lanes, a `surface` CLI, dual evaluators (NumPy + MLX cross-check) scoring against a held-out TinyStories slice. The pattern is maturing from ad-hoc port to purpose-built experimental environment — which is itself an instance of the bottleneck shift described next.
+
+### Persistent agents on local hardware
+
+Nous Research's Hermes Agent is not "run a model and get a response." It is a persistent agent that accumulates knowledge as reusable skill documents, becoming more capable over time. Running via llama.cpp on Apple Silicon with a Qwen model, the entire stack — silicon to framework to model to agent — fits on one machine with no cloud dependency.
+
+The skill-document loop mirrors autoresearch's ratchet. Both accumulate structured knowledge. Both move forward monotonically. The difference is scope: autoresearch optimizes one training script; Hermes optimizes its own capability surface across arbitrary tasks. And both share a property that cloud-dependent agents cannot match: deterministic availability. The agent runs when you open the laptop. It does not depend on API rate limits, network connectivity, or a provider's pricing decisions. The entire inference stack, from transistor to persistent agent, runs on hardware you can carry in a backpack.
+
+### Where it fails
+
+The ratchet has failure modes that its elegance can obscure.
+
+The random seed incident: the agent's "improvement" was changing seed 42 to 137, achieving lower validation loss through what amounted to evaluation-set overfitting. The metric gate is only as good as the metric. High failure rates — 26 of 35 experiments crashed on one M4 Mini run. The five-minute budget constrains useful scale to approximately 10 million parameters. And GitHub Issue #22, titled "Low creativity," captures the deeper limitation: the agent mostly tweaks hyperparameters rather than exploring novel architectures. As Karpathy put it, "The LLM feels unwilling to creatively pursue a research direction."
+
+Hermes's capability depends entirely on the quality of the model driving it — which brings the argument full circle, back to the stack beneath. The agent layer cannot outrun the model layer, which cannot outrun the framework layer, which cannot outrun the silicon. Each layer inherits the constraints of everything below it. A brilliant `program.md` running on a model that hallucinates evaluations produces nothing. A sophisticated skill-document architecture running on a model too small for multi-step reasoning produces noise that accumulates rather than knowledge that compounds.
+
+<SectionDivider number="07" label="THE BOTTLENECK SHIFT" client:visible />
+
+## The bottleneck shift
+
+<PullQuote client:visible slug="from-transistor-to-token" quoteIndex={4}>The human's role is shifting from running experiments to designing experimental environments.</PullQuote>
+
+Compute used to be the constraint. For decades, the question "how fast can we train?" dominated machine learning research, and the answer was always "get more FLOPS." Then bandwidth became the constraint. The transition from training-bound to inference-bound workloads moved the bottleneck from compute to memory: how fast can we read model weights determines how fast we can generate tokens, and no amount of additional FLOPS changes that equation.
+
+Now the constraint is shifting again — upward through the stack. Model architecture is solving the bandwidth problem: Qwen 3.5's linear attention layers reduce per-token memory reads by orders of magnitude. Agent design is the next bottleneck: autoresearch's `program.md` and Hermes's skill documents are the specification layer that determines what the hardware-model-framework stack actually *does*. And above that, the human's specification of what the system should optimize — the design of the experimental environment rather than the running of experiments within it.
+
+Each upward shift does not eliminate the layer below. The silicon still matters. The framework still matters. The model architecture still matters. But each becomes table stakes rather than the differentiator. The M5 Max's 614 GB/s is necessary for 70B inference but not sufficient for useful 70B inference — you also need the right quantization, the right framework, and a prompt worth computing.
+
+The full inference stack has five layers: silicon, framework, system, model, application. At each boundary between layers, something is lost or distorted. CoreML imposes 2–4× overhead between silicon and framework. The prefill/decode distinction is collapsed into a single "4× faster" between framework and system. "Convergent optimization" is marketed as "designed for on-device" between system and model. And the gap between model capability and useful application — `program.md`, skill documents, the human's experimental design — is where the bottleneck now lives.
+
+{/* TODO: Interactive — FTTStackCrossSection */}
+
+Understanding any single layer is insufficient. The tok/s number at the top of the stack is the product of every layer beneath it, and each layer's real behavior diverges from its presented behavior. You cannot reason about on-device AI capability from TOPS alone, from tok/s alone, from GB/s alone. The full picture emerges only when you see how silicon constraints propagate through frameworks into application behavior — and where, at each boundary, the presentation and the architecture come apart.
+
+<SectionDivider number="08" label="THE INFERENCE MACHINE" client:visible />
+
+## The inference machine
+
+Silicon leads. Form factor follows. The M1 shipped in the old chassis in 2020. The redesign came a year later. M2 through M4 Pro and Max used that 2021 chassis for four generations. The M5 ships AI-optimized silicon in the same shell. The M6, expected late 2026, is projected to bring OLED, touchscreen, and a new industrial design. Apple treats silicon cadence and chassis cadence as separate tracks — a patience that most hardware companies cannot afford and most consumers do not notice.
+
+The ANE question — reframed as a framework bottleneck rather than a hardware limitation — may have a resolution on a specific timeline. The ANE hardware is extraordinary: 6.6 TFLOPS/W, 50–80× more efficient per FLOP than datacenter GPUs. The M5 ANE actually got faster — measured at 19.9 TFLOPS versus the M4's 15.8 TFLOPS, according to Weinbach at Creative Strategies. But CoreML wastes most of it. The 2–4× overhead, the black-box scheduling, the 20 documented restrictions — all of this is the framework, not the silicon.
+
+Weinbach's characterization captures the disconnect precisely: the ANE is "a block-level accelerator" best suited for dense, high-occupancy matmul-heavy shapes — not "a low-latency engine for tiny, irregular inference steps" like token-by-token decode. The M5 press release confirms the organizational signal. The 16-core Neural Engine gets one sentence tied to Apple Intelligence consumer features. The Neural Accelerators in GPU cores get the performance claims and the LM Studio name-drop. Apple dropped the TOPS metric entirely — replaced by "4× peak GPU compute for AI." The measurement changed because the hardware target changed.
+
+Apple may be approaching the framework problem from two directions. Metal 4 Tensor APIs give developers transparent GPU-path access to neural compute right now — a public, programmable surface that did not exist before. A rumored CoreAI framework, reported by Mark Gurman at Bloomberg in March 2026, could unify dispatch across the ANE and GPU Neural Accelerators at WWDC. But this is a single-source report with zero technical corroboration — no framework binary, no developer documentation, no Xcode headers, no job postings. Developer Ronald Mannak's widely-seen tweet connecting the CoreML overhead findings to the rumored CoreAI update captures the community mood: the technical pressure is real, and the timeline (WWDC, June 2026) is specific. The ANEMLL project's expert reaction is more cautious: "What we really need is lower-level ANE access and transparent ANECompiler diagnostics... an XLA/HLO-style compiler path for ANE would be a much stronger foundation than a higher-level unified framework."
+
+The reveal window is three months away. The question is not whether the ANE hardware is capable — 6.6 TFLOPS/W proves that it is. The question is whether Apple gives developers a framework that stops wasting half of it. The 16-core Neural Engine will continue doing what it was built for: Face ID, Live Text, computational photography at zero watts idle. The future of general-purpose on-device ML compute appears to be GPU-integrated, publicly programmable, and scaling with core count — unless WWDC rewrites that trajectory.
+
+---
+
+The M5 Max is not the best at any single metric. It is the only device that combines 128GB unified memory, 614 GB/s bandwidth, 40 Neural Accelerators, laptop portability, and 50-watt power draw. For models above 30 billion parameters, this combination has no equivalent at any price.
+
+Whether that matters depends on two open questions. First, whether large local models become a primary workflow rather than a curiosity — whether the gap between cloud inference and local inference narrows enough that practitioners choose the machine on their desk over the API in their browser. The privacy argument is real but insufficient on its own; what tips the balance is capability parity at the model sizes that fit in 128GB. Qwen 3.5's 27B with 128K context, running at 20+ tok/s via MLX, is approaching the threshold where local inference is not merely private but competitive.
+
+Second, whether the framework ecosystem — MLX, llama.cpp, Metal 4, and whatever Apple announces in June — matures fast enough to close the gap between measured performance and theoretical performance. Today, the gap between what the hardware can do and what developers can access through public APIs is the single largest source of wasted capability in the stack. The ANE's 6.6 TFLOPS/W sits behind CoreML's 2–4× overhead. The GPU Neural Accelerators are programmable via Metal 4 but the tooling is nascent. MLX achieves 20–30% more throughput than llama.cpp on the same hardware, suggesting that even on the GPU path, optimization is far from saturated.
+
+The architecture is in place. The software is catching up. And the stack, from transistor to token, is now visible enough to reason about — which is the prerequisite for building anything useful on top of it.
