@@ -188,6 +188,46 @@ terms:
       model quality — measured on a held-out validation set, not generated
       by the model. Lower is better.
 
+  - key: triton
+    pattern: "Triton"
+    section: "06"
+    shared: false
+    definition: >
+      OpenAI's open-source language for writing GPU kernels. Compiles to
+      optimized GPU code without requiring CUDA expertise. The standard
+      target for automated kernel optimization — AutoKernel modifies Triton
+      source and benchmarks the compiled result.
+
+  - key: cublas
+    pattern: "cuBLAS"
+    section: "06"
+    shared: false
+    definition: >
+      NVIDIA's hand-optimized linear algebra library for GPU. The
+      performance ceiling for matrix operations on NVIDIA hardware —
+      reaching 80–95% of cuBLAS is the benchmark for well-tuned custom
+      kernels.
+
+  - key: amdahls-law
+    pattern: "Amdahl's law"
+    section: "06"
+    shared: false
+    definition: >
+      The principle that a system's speedup is limited by the fraction of
+      work that benefits from the improvement. A 3× speedup on 5% of
+      execution time yields 1.02× overall; the same speedup on 60% yields
+      1.87×. AutoKernel uses this to prioritize which kernels to optimize.
+
+  - key: iou
+    pattern: "IOU"
+    section: "PS"
+    shared: false
+    definition: >
+      Intersection over Union. Measures overlap between retrieved results
+      and ground-truth results as a ratio from 0 to 1. A deterministic
+      retrieval metric — cheaper, faster, and more reproducible than
+      LLM-as-judge scoring.
+
   - key: tok-s
     pattern: "tokens per second"
     section: "02"
