@@ -213,6 +213,24 @@ The autoresearch-ANE fork makes this even sharper. Running the same ratchet patt
 
 trevin-creator's follow-up project, [[ref:tiny-lab|Tiny-Lab]], takes the pattern further — a dedicated experiment runner for Apple Silicon with a Claude-driven hypothesis queue, structured single-variable experimental design, and a JSONL ledger tracking WIN/LOSS/INVALID outcomes. Where autoresearch is a script you fork, Tiny-Lab is infrastructure: lanes, a `surface` CLI, dual evaluators (NumPy + MLX cross-check) scoring against a held-out TinyStories slice. The pattern is maturing from ad-hoc port to purpose-built experimental environment — which is itself an instance of the bottleneck shift described next.
 
+### The ratchet at the kernel layer
+
+[[ref:autokernel|AutoKernel]] applies the identical propose-benchmark-verify-merge loop to GPU kernel optimization rather than model architecture search. The system profiles a PyTorch model, identifies bottleneck kernels using Amdahl's law prioritization — a 1.5× speedup on a 60% kernel beats a 3× speedup on a 5% kernel — isolates each as a standalone Triton kernel, then runs an AI agent through edit-benchmark-verify cycles. Each experiment takes approximately 90 seconds: roughly 40 iterations per hour, 320 overnight across multiple kernels. The verification pipeline has five stages — smoke tests, shape sweeps, numerical stability checks, determinism validation, and edge case verification against PyTorch references. Well-tuned Triton kernels regularly reach 80–95% of cuBLAS performance.
+
+The structural parallel to Karpathy's autoresearch is exact: one mutable file (`kernel.py`), one immutable evaluation harness (`bench.py`), automated commit-or-revert based on measured improvement. The ratchet only moves forward, and it only moves forward on evidence. But the abstraction layer is different — kernel implementation rather than model architecture. And the hardware is different — NVIDIA H100, A100, RTX 4090 rather than Apple Silicon. Same pattern, different substrate, different optima. The nine supported kernel types — matmul, softmax, layernorm, rmsnorm, flash attention, fused MLP, cross-entropy, rotary embedding, parallel reduction — cover the foundational operations of modern deep learning.
+
+The point: the ratchet is not a technique. It is a structure. It works wherever you can separate what the agent modifies from how you measure improvement.
+
+### The ratchet under different constraints
+
+Paras Chopra's [[ref:autoresearch-sample-efficiency|autoresearch-sample-efficiency]] fork changes one variable in Karpathy's original design: the stopping condition. Instead of a fixed five-minute wall-clock budget, it imposes a fixed 10-million-token data budget. Training halts when `total_tokens >= TOKEN_BUDGET` rather than `training_time >= TIME_BUDGET`.
+
+The consequences cascade. Time-budgeted runs reward architectures that process data fastest — throughput is the lever. Token-budgeted runs reward architectures that extract the most learning per sample — sample efficiency is the lever. The agent explores regularization strategies, model sizing, and batch scheduling rather than speed optimizations. Approximately 50 experiments run overnight. The reported result: 14% validation loss reduction versus baseline.
+
+This is the "change the substrate, change the optimum" thesis applied to the constraint framing itself. The substrate is not the silicon — it is the budget. Hold compute constant, vary the budget dimension, and the optimization landscape reshapes. Time budgets on Apple Silicon discovered depth-4 as optimal. Token budgets on the same hardware would discover a different architecture entirely, because the selection pressure is different.
+
+The fork also makes experiments comparable across hardware platforms — a 10M token budget produces the same data exposure on an M4 as on an H100, isolating architectural quality from throughput advantage. This is a methodological contribution, not just a technical one.
+
 ### Persistent agents on local hardware
 
 Nous Research's [[ref:hermes-agent|Hermes Agent]] is not "run a model and get a response." It is a persistent agent that accumulates knowledge as reusable skill documents, becoming more capable over time. Running via llama.cpp on Apple Silicon with a Qwen model, the entire stack — silicon to framework to model to agent — fits on one machine with no cloud dependency.
@@ -267,4 +285,24 @@ Whether that matters depends on two open questions. First, whether large local m
 
 Second, whether the framework ecosystem — MLX, llama.cpp, Metal 4, and whatever Apple announces in June — matures fast enough to close the gap between measured performance and theoretical performance. Today, the gap between what the hardware can do and what developers can access through public APIs is the single largest source of wasted capability in the stack. The ANE's 6.6 TFLOPS/W sits behind CoreML's 2–4× overhead. The GPU Neural Accelerators are programmable via Metal 4 but the tooling is nascent. MLX achieves 20–30% more throughput than llama.cpp on the same hardware, suggesting that even on the GPU path, optimization is far from saturated.
 
+The ratchet pattern from Section 06 is already propagating beyond single machines. [[ref:spore|Spore's]] peer-to-peer protocol provides infrastructure for distributed ML experiments: signed results, task-scoped DAGs, hardware-aware verification where incompatible hardware classes cannot directly compare metrics, and a gossip mesh for distributing task manifests. Verifier nodes rerun compatible claims; mismatches trigger signed challenges; publishers cannot verify their own work. [[ref:hyperspace|Hyperspace]] takes the pattern further — a peer-to-peer agent network where agents train models, write papers, critique each other's work, and share compute with cryptographic verification of claimed resources. Both are early-stage. Neither has the kind of measured performance data that the rest of this essay demands. But they signal that the coordination layer for distributed autonomous experimentation is being built — and built on the same ratchet structure: propose, verify, merge if improved.
+
 The architecture is in place. The software is catching up. And the stack, from transistor to token, is now visible enough to reason about — which is the prerequisite for building anything useful on top of it.
+
+---
+
+<SectionDivider number="PS" label="EVALUATION AS ENVIRONMENT" client:visible />
+
+## Evaluation as environment
+
+The ratchet pattern in the preceding sections operates on model architecture and kernel implementation. But the same structure applies one level up — to the agentic systems built on top of the inference stack.
+
+[[ref:neural-avb|@neural_avb's]] evaluation framework for agentic harnesses makes the methodology explicit. Treat each agent module as an isolated black box. Control your independent variables — model choice, system prompt, tool availability. Run against production-logged test cases with deterministic metrics (IOU, precision, recall) over probabilistic ones (LLM-as-judge) wherever possible, because deterministic metrics are cheaper, faster, and 100% reliable. Record cost, latency, completion tokens, and error rates alongside accuracy. Visualize. Iterate.
+
+The structural parallel to autoresearch is exact: a mutable component (the agent configuration), an immutable evaluation harness (production test cases with ground-truth outputs), and a metric gate that determines whether changes merge. The loop is not yet automated — the experiments run manually, swapping model names and comparing IOU scores across bar charts and scatter plots. But the architecture is identical to the ratchet. The difference is that the human is still in the loop as the proposer, and the evaluation harness has not yet been handed to an agent.
+
+The Prime RL framing — "environments and evals are two sides of the same coin" — is the key insight. An evaluation harness IS an experimental environment. The test cases define the observation space. The metrics define the reward function. The agent configuration defines the action space. You can run prompt optimization methods or end-to-end RL training on this structure today. The transition from manual evaluation to automated ratchet is not a conceptual leap — it is an engineering task.
+
+The concrete finding that earns this postscript its place: replacing gpt-5-mini with gemini-3-flash-lite for a retrieval subagent revealed that Gemini's smaller model spontaneously performs auxiliary caching for downstream agents — a behavior the larger model rarely exhibited. This is the application-layer analog of the depth-4 discovery on Apple Silicon. Change one variable (the model), hold the evaluation environment constant, and an unexpected optimum emerges that you would never have predicted from the spec sheet. The evaluation harness made the invisible visible — which is, after all, the thesis of this entire essay.
+
+The open question is what happens when the ratchet optimizes not just model weights or kernel implementations but the agentic harness itself, including its own evaluation criteria. At that point, the environment and the agent co-evolve — and the human's role shifts from designing experiments to designing the criteria by which experiments are judged. The bottleneck moves up one more layer.

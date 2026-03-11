@@ -430,6 +430,94 @@ references:
       overhead findings. The technical pressure is real; the timeline is
       specific.
 
+  - key: autokernel
+    pattern: "AutoKernel"
+    section: "06"
+    title: "AutoKernel: AI-Powered GPU Kernel Optimization"
+    authors: "RightNow AI"
+    year: 2026
+    venue: "GitHub"
+    summary: >
+      Applies the propose-benchmark-verify-merge ratchet pattern to GPU
+      kernel optimization. Profiles bottleneck kernels via Amdahl's law,
+      runs AI agent through edit-benchmark-verify cycles (~90s per
+      experiment), five-stage verification pipeline. Triton kernels reach
+      80–95% of cuBLAS performance.
+    context: >
+      Demonstrates the ratchet pattern at a different abstraction layer
+      (kernel implementation rather than model architecture) and on
+      different hardware (NVIDIA GPUs rather than Apple Silicon). Same
+      structure, different substrate, different optima.
+
+  - key: autoresearch-sample-efficiency
+    pattern: "autoresearch-sample-efficiency"
+    section: "06"
+    title: "autoresearch-sample-efficiency: Token-Budgeted Autonomous Research"
+    authors: "Paras Chopra"
+    year: 2026
+    venue: "GitHub"
+    summary: >
+      Fork of Karpathy's autoresearch replacing the five-minute time budget
+      with a 10-million-token data budget. Rewards sample efficiency over
+      throughput. ~50 experiments overnight, 14% validation loss reduction.
+      Makes experiments comparable across hardware platforms.
+    context: >
+      Demonstrates the "change the substrate, change the optimum" thesis
+      applied to the constraint framing itself. The budget dimension — not
+      just the silicon — reshapes the optimization landscape.
+
+  - key: spore
+    pattern: "Spore"
+    section: "08"
+    title: "Spore: Peer-to-Peer Distributed ML Protocol"
+    authors: "SporeMesh"
+    year: 2026
+    venue: "GitHub"
+    summary: >
+      P2P infrastructure for distributed ML experiments: signed results,
+      task-scoped DAGs, hardware-aware verification, gossip mesh for task
+      manifests. Verifier nodes rerun compatible claims; publishers cannot
+      verify their own work.
+    context: >
+      Early-stage coordination infrastructure for the ratchet pattern
+      beyond single machines. No measured performance data yet, but the
+      architecture follows the propose-verify-merge structure.
+
+  - key: hyperspace
+    pattern: "Hyperspace"
+    section: "08"
+    title: "Hyperspace: Peer-to-Peer Agent Network"
+    authors: "Hyperspace"
+    year: 2026
+    venue: "agents.hyper.space"
+    summary: >
+      P2P agent network where agents train models, write papers, critique
+      each other's work, and share compute with cryptographic verification
+      of claimed resources.
+    context: >
+      Takes the distributed ratchet pattern further than Spore —
+      agents as both producers and verifiers. Early-stage without
+      measured performance data.
+
+  - key: neural-avb
+    pattern: "@neural_avb"
+    section: "PS"
+    title: "How to Design Experiments to Evaluate your Agentic Harness"
+    authors: "AVB (neural_avb)"
+    year: 2026
+    venue: "Blog / Technical writeup"
+    summary: >
+      Evaluation framework for agentic harnesses. Treats each agent module
+      as an isolated black box. Deterministic metrics (IOU, precision,
+      recall) over probabilistic ones. Records cost, latency, completion
+      tokens alongside accuracy. Discovered that gemini-3-flash-lite
+      spontaneously performs auxiliary caching — an unexpected optimum.
+    context: >
+      The application-layer analog of the autoresearch ratchet. Same
+      structure (mutable component, immutable eval harness, metric gate)
+      but not yet automated. The Prime RL insight — evals and environments
+      are two sides of the same coin — bridges to the postscript's thesis.
+
 links:
 
   - key: invisible-structures
