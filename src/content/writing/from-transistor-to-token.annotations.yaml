@@ -255,6 +255,7 @@ references:
     authors: "maderix"
     year: 2024
     venue: "GitHub"
+    url: "https://github.com/maderix/ANE"
     summary: >
       Reverse-engineering project (5,300 GitHub stars) that documented the
       ANE's internal architecture, measured 19 TFLOPS FP16, characterized
@@ -272,6 +273,7 @@ references:
     authors: "Orion team"
     year: 2026
     venue: "arXiv:2603.06728"
+    url: "https://arxiv.org/abs/2603.06728"
     summary: >
       Cataloged 20 ANE restrictions (14 previously undocumented) and
       characterized CoreML as a black-box scheduler that developers cannot
@@ -287,6 +289,7 @@ references:
     authors: "ncdrone"
     year: 2026
     venue: "GitHub"
+    url: "https://github.com/ncdrone/autoresearch-ANE"
     summary: >
       Fork of Karpathy's autoresearch running directly on the Apple Neural
       Engine via private APIs. Dynamic weight pipeline via IOSurface. 67.6M-
@@ -304,6 +307,7 @@ references:
     authors: "Andrej Karpathy"
     year: 2025
     venue: "GitHub"
+    url: "https://github.com/karpathy/autoresearch"
     summary: >
       Autonomous ML experimentation framework: 630 lines of mutable
       training code, an immutable evaluation harness, and a Markdown
@@ -321,6 +325,7 @@ references:
     authors: "trevin-creator"
     year: 2025
     venue: "GitHub"
+    url: "https://github.com/trevin-creator/autoresearch-mlx"
     summary: >
       Community port of autoresearch to Apple Silicon via MLX. Discovered
       that depth-4 models outperform depth-8 within fixed time budgets —
@@ -336,6 +341,7 @@ references:
     authors: "trevin-creator"
     year: 2026
     venue: "GitHub"
+    url: "https://github.com/trevin-creator/Tiny-Lab"
     summary: >
       Dedicated Apple Silicon experiment runner with Claude-driven
       hypothesis queue, structured single-variable design, JSONL ledger.
@@ -353,6 +359,7 @@ references:
     authors: "Ziskind"
     year: 2026
     venue: "Independent benchmark"
+    url: "https://youtu.be/XGe7ldwFLSE?si=yVjFO0Vv7FS1o25n"
     summary: >
       Stream Triad: 351 GB/s sustained on M5 Max (13% above M4 Max,
       exceeding M3 Ultra's 337 GB/s). Gemma 34B Q4 prefill: 4,468 tok/s.
@@ -369,6 +376,7 @@ references:
     authors: "Aakash Gupta"
     year: 2026
     venue: "Analysis"
+    url: "https://x.com/aakashgupta/status/2028909261540270085"
     summary: >
       Framing of the M5 as Apple designing silicon around one assumption:
       the primary pro laptop workload in 2026 is running LLMs locally.
@@ -384,6 +392,7 @@ references:
     authors: "EXO Labs"
     year: 2025
     venue: "GitHub (Apache 2.0)"
+    url: "https://github.com/exo-explore/exo"
     summary: >
       Open-source distributed inference framework (42K GitHub stars).
       Demonstrated automatic disaggregated inference across heterogeneous
@@ -400,6 +409,7 @@ references:
     authors: "Jeff Geerling"
     year: 2025
     venue: "Independent benchmark"
+    url: "https://www.jeffgeerling.com/blog/2025/15-tb-vram-on-mac-studio-rdma-over-thunderbolt-5"
     summary: >
       Testing of four M3 Ultra Mac Studios via EXO with RDMA. Qwen3 235B
       at 31.9 tok/s, DeepSeek V3.1 671B at 32.5 tok/s, Kimi K2 1T at
@@ -415,6 +425,7 @@ references:
     authors: "Alibaba / Qwen Team"
     year: 2026
     venue: "Technical report"
+    url: "https://qwenlm.github.io/blog/qwen3.5/"
     summary: >
       Model family using Gated DeltaNet hybrid architecture. 397B-A17B
       flagship, 35B-A3B mid-range, dense 0.8B–9B small series. 3:1
@@ -430,6 +441,7 @@ references:
     authors: "Nous Research"
     year: 2026
     venue: "GitHub"
+    url: "https://github.com/NousResearch/hermes-agent"
     summary: >
       Persistent local agent running via llama.cpp on Apple Silicon.
       Accumulates reusable skill documents over time, creating a
@@ -445,6 +457,7 @@ references:
     authors: "Ben Weinbach"
     year: 2026
     venue: "Creative Strategies"
+    url: "https://creativestrategies.com/research/m5-max-chiplets-thermals-and-performance-per-watt/"
     summary: >
       M5 Max analysis. ANE measured at 19.9 TFLOPS (vs M4's 15.8).
       Characterized the ANE as "a block-level accelerator" suited for
@@ -461,6 +474,7 @@ references:
     authors: "Ronald Mannak"
     year: 2026
     venue: "Twitter/X"
+    url: "https://x.com/ronaldmannak/status/1965480951049531614"
     summary: >
       Developer tweet (191K views) connecting CoreML overhead findings to
       the rumored CoreAI framework update for WWDC 2026. Captured community
@@ -477,6 +491,7 @@ references:
     authors: "RightNow AI"
     year: 2026
     venue: "GitHub"
+    url: "https://github.com/RightNow-AI/autokernel"
     summary: >
       Applies the propose-benchmark-verify-merge ratchet pattern to GPU
       kernel optimization. Profiles bottleneck kernels via Amdahl's law,
@@ -496,6 +511,7 @@ references:
     authors: "Paras Chopra"
     year: 2026
     venue: "GitHub"
+    url: "https://github.com/paraschopra/autoresearch-sample-efficiency-macos"
     summary: >
       Fork of Karpathy's autoresearch replacing the five-minute time budget
       with a 10-million-token data budget. Rewards sample efficiency over
@@ -513,6 +529,7 @@ references:
     authors: "SporeMesh"
     year: 2026
     venue: "GitHub"
+    url: "https://github.com/SporeMesh/spore"
     summary: >
       P2P infrastructure for distributed ML experiments: signed results,
       task-scoped DAGs, hardware-aware verification, gossip mesh for task
@@ -530,6 +547,7 @@ references:
     authors: "Hyperspace"
     year: 2026
     venue: "agents.hyper.space"
+    url: "https://hyper.space/"
     summary: >
       P2P agent network where agents train models, write papers, critique
       each other's work, and share compute with cryptographic verification
@@ -546,6 +564,7 @@ references:
     authors: "AVB (neural_avb)"
     year: 2026
     venue: "Blog / Technical writeup"
+    url: "https://x.com/neural_avb/status/2031417353666441266"
     summary: >
       Evaluation framework for agentic harnesses. Treats each agent module
       as an isolated black box. Deterministic metrics (IOU, precision,
@@ -565,6 +584,7 @@ references:
     authors: "Multiple sources"
     year: 2025–2026
     venue: "Bloomberg, iOS firmware, TF International Securities"
+    url: "https://x.com/markgurman/status/1987521391034573173"
     summary: >
       M5 Ultra confirmed through four independent streams: Gurman
       (Bloomberg, narrowing from "2026" to "middle of the year"),

@@ -315,6 +315,7 @@ references:
     authors: "UK AI Security Institute (formerly AISI)"
     year: 2025
     venue: "UK Government Publication"
+    url: "https://www.aisi.gov.uk/blog/safety-cases-at-aisi"
     summary: >
       Published safety case templates including inability arguments
       and end-to-end misuse safeguard cases using Goal Structuring
