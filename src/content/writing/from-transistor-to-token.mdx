@@ -21,7 +21,7 @@ import FTTStackCrossSection from '../../components/islands/FTTStackCrossSection.
 
 Apple's M4 [[term:ane|Apple Neural Engine]] is marketed at 38 [[term:tops|TOPS]]. A reverse-engineering project called [[ref:maderix|maderix]], with 5,300 GitHub stars and growing, measured 19 [[term:tflops|TFLOPS]]. The reconciliation is straightforward: Apple counts INT8 operations at twice the FP16 rate, following industry convention. But the hardware dequantizes INT8 inputs to FP16 before compute. The doubling is notational, not physical.
 
-This is not a gotcha. It is a lens — a [[link:circuitry|forensic]] approach to the stack. At every layer of the inference stack — from silicon to framework to system to model to application — the number you are given and the architecture underneath it diverge. Understanding on-device AI capability requires seeing through three layers of abstraction where presentation and architecture come apart. The gap is not deception. It is the distance between a spec sheet optimized for comparison shopping and an architecture optimized for computation.
+This is not a gotcha. It is a lens — a forensic approach to the stack. At every layer of the inference stack — from silicon to framework to system to model to application — the number you are given and the architecture underneath it diverge. Understanding on-device AI capability requires seeing through three layers of abstraction where presentation and architecture come apart. The gap is not deception. It is the distance between a spec sheet optimized for comparison shopping and an architecture optimized for computation.
 
 ### The ANE as convolution engine
 

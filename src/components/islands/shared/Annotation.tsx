@@ -44,6 +44,13 @@ function prefersReducedMotion(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+function urlNoun(url: string): string {
+  if (/github\.com/.test(url)) return "repo";
+  if (/x\.com|twitter\.com/.test(url)) return "post";
+  if (/youtu\.?be/.test(url)) return "video";
+  return "paper";
+}
+
 export function Annotation({ mode, term, content, children }: AnnotationProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -252,7 +259,7 @@ export function Annotation({ mode, term, content, children }: AnnotationProps) {
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
             >
-              View paper <span className="annotation-arrow">&rarr;</span>
+              View {urlNoun(c.url)} <span className="annotation-arrow">&rarr;</span>
             </a>
           )}
         </div>
