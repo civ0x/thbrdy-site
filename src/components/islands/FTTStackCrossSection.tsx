@@ -67,7 +67,7 @@ export default function FTTStackCrossSection() {
         }
         .ftt-stack-layer {
           display: grid;
-          grid-template-columns: 1fr 60px 1.4fr;
+          grid-template-columns: 1fr 85px 1.4fr;
           gap: 0.75rem;
           align-items: center;
           padding: 1rem 1rem;
