@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import NoticeCard from '../components/NoticeCard.astro';
+import PopaiCard from '../components/PopaiCard.astro';
 ---
 
 <Base>
@@ -38,20 +39,14 @@ import NoticeCard from '../components/NoticeCard.astro';
     </div>
 
     <div class="projects-grid">
+      <PopaiCard />
+      <NoticeCard />
       <ProjectCard
         title="Scholion"
         eyebrow="Research Infrastructure"
         description="Mapping epistemic dependencies in scientific reasoning. An interactive argument visualization tool grounded in Toulmin argumentation theory and truth-maintenance systems."
         tags={['Argumentation Theory', 'Graph Visualization', 'Epistemology']}
         href="/writing/scholion/"
-      />
-      <NoticeCard />
-      <ProjectCard
-        title="Learned Compilation"
-        eyebrow="Research Engineering"
-        description="Production ML compilers make four coupled decisions sequentially, leaving 15–30% of training throughput on the table. Investigating whether a learned planner can close the gap."
-        tags={['Coordination Theory', 'AI Acceleration', 'Research']}
-        href="/writing/learned-compilation/"
       />
       <ProjectCard
         title="Absolute Beginners++"

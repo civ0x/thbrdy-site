@@ -1,0 +1,108 @@
+---
+// No props — this is a one-off branded card
+---
+
+<a href="https://pop-ai.co" target="_blank" rel="noopener" class="popai-card">
+  <div class="popai-card__eyebrow">AI for the Rest of Us</div>
+  <svg class="popai-card__mark" viewBox="0 0 256 256" width="48" height="48" aria-label="Pop Artificial Intelligence wordmark">
+    <rect width="256" height="256" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="3"/>
+    <text x="128" y="120" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="100" fill="#1A1A1A" text-anchor="middle" letter-spacing="-4">POP</text>
+    <line x1="48" y1="138" x2="208" y2="138" stroke="#1A1A1A" stroke-width="2" opacity="0.3"/>
+    <text x="128" y="162" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="600" font-size="14.5" fill="#1A1A1A" text-anchor="middle" letter-spacing="5" opacity="0.6">ARTIFICIAL</text>
+    <text x="128" y="182" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="600" font-size="14.5" fill="#1A1A1A" text-anchor="middle" letter-spacing="5" opacity="0.6">INTELLIGENCE</text>
+  </svg>
+  <h3 class="popai-card__title">Pop Artificial Intelligence</h3>
+  <p class="popai-card__desc">
+    Understanding AI — mechanism, not marketing. A weekly newsletter making
+    complex technology navigable for intelligent non-specialists.
+  </p>
+  <div class="popai-card__tags">
+    <span class="popai-card__tag">Substack</span>
+    <span class="popai-card__tag">AI Explainers</span>
+    <span class="popai-card__tag">Weekly</span>
+  </div>
+  <span class="popai-card__arrow">&rarr;</span>
+</a>
+
+<style>
+  .popai-card {
+    display: block;
+    background: #FFFFFF;
+    border: 1px solid rgba(26, 26, 26, 0.08);
+    border-top: 2px solid transparent;
+    border-image: linear-gradient(90deg, transparent, #E63946, transparent) 1;
+    border-image-slice: 1 0 0 0;
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    position: relative;
+  }
+
+  .popai-card:hover {
+    border-color: rgba(230, 57, 70, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .popai-card__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #1A1A1A;
+    margin-bottom: 0.75rem;
+  }
+
+  .popai-card__mark {
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.5rem;
+    border-radius: 2px;
+  }
+
+  .popai-card__title {
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    color: #1A1A1A;
+    margin-bottom: 0.75rem;
+  }
+
+  .popai-card__desc {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    color: #555555;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .popai-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .popai-card__tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #1A1A1A;
+    border: 1px solid rgba(26, 26, 26, 0.15);
+    padding: 0.2rem 0.6rem;
+    border-radius: 2px;
+  }
+
+  .popai-card__arrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: #E63946;
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+  }
+</style>
