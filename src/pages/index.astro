@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import NoticeCard from '../components/NoticeCard.astro';
 ---
 
 <Base>
@@ -44,13 +45,7 @@ import ProjectCard from '../components/ProjectCard.astro';
         tags={['Argumentation Theory', 'Graph Visualization', 'Epistemology']}
         href="/writing/scholion/"
       />
-      <ProjectCard
-        title="Notice"
-        eyebrow="Contemplative Technology"
-        description="Interoceptive awareness training for Apple Watch and iPhone. Two-tier AI architecture integrating on-device models for real-time context with Claude for longitudinal pattern analysis."
-        tags={['SwiftUI', 'Apple Watch', 'AI Architecture']}
-        href="/notice/"
-      />
+      <NoticeCard />
       <ProjectCard
         title="Learned Compilation"
         eyebrow="Research Engineering"

@@ -1,0 +1,109 @@
+---
+// No props — this is a one-off branded card
+---
+
+<a href="/notice/" class="notice-card">
+  <div class="notice-card__eyebrow">Contemplative Technology</div>
+  <img
+    src="/images/enso-mark.png"
+    alt=""
+    class="notice-card__mark"
+    width="40"
+    height="40"
+    loading="lazy"
+  />
+  <h3 class="notice-card__title">Notice</h3>
+  <p class="notice-card__desc">
+    Interoceptive awareness training for Apple Watch and iPhone. Two-tier AI
+    architecture integrating on-device models for real-time context with Claude
+    for longitudinal pattern analysis.
+  </p>
+  <div class="notice-card__tags">
+    <span class="notice-card__tag">SwiftUI</span>
+    <span class="notice-card__tag">Apple Watch</span>
+    <span class="notice-card__tag">AI Architecture</span>
+  </div>
+  <span class="notice-card__arrow">&rarr;</span>
+</a>
+
+<style>
+  .notice-card {
+    display: block;
+    background: #FFFFFF;
+    border: 1px solid rgba(42, 37, 32, 0.08);
+    border-top: 2px solid transparent;
+    border-image: linear-gradient(90deg, transparent, #F0AF32, transparent) 1;
+    border-image-slice: 1 0 0 0;
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    position: relative;
+  }
+
+  .notice-card:hover {
+    border-color: rgba(240, 175, 50, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .notice-card__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #B9691E;
+    margin-bottom: 0.75rem;
+  }
+
+  .notice-card__mark {
+    display: block;
+    width: 40px;
+    height: auto;
+    margin-bottom: 0.5rem;
+  }
+
+  .notice-card__title {
+    font-family: 'Hiragino Kaku Gothic Pro', 'Hiragino Kaku Gothic ProN', 'Shippori Mincho', serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    color: #2A2520;
+    margin-bottom: 0.75rem;
+  }
+
+  .notice-card__desc {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 1rem;
+    color: #7A7068;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .notice-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .notice-card__tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #F0AF32;
+    border: 1px solid rgba(240, 175, 50, 0.2);
+    padding: 0.2rem 0.6rem;
+    border-radius: 2px;
+  }
+
+  .notice-card__arrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: #B9691E;
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+  }
+</style>
