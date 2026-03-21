@@ -1,0 +1,127 @@
+{
+  "campaign": "editorial-ai-tic-review",
+  "created": "2026-03-21",
+  "essays": [
+    {
+      "order": 1,
+      "slug": "scholion",
+      "file": "src/content/writing/scholion.mdx",
+      "prompt": "sessions/editorial/session-editorial-scholion.md",
+      "effort": "heavy",
+      "status": "done",
+      "completed_at": "2026-03-21",
+      "commit_sha": "caecfeb",
+      "notes": "Approved cycle 2. Reviewer flagged over-compression in cycle 1; restored Toulmin enumeration, specificity in survey, and 'hard vs impossible' framing."
+    },
+    {
+      "order": 2,
+      "slug": "notice-vision",
+      "file": "src/content/writing/notice-vision.mdx",
+      "prompt": "sessions/editorial/session-editorial-notice-vision.md",
+      "effort": "heavy",
+      "status": "done",
+      "completed_at": "2026-03-21",
+      "commit_sha": "4fbedc5",
+      "notes": "Approved cycle 2. Reviewer caught blockquote dangling reference, voice damage on witnessing→confirmation swap, affect labeling context loss. All fixed. Published (draft: false)."
+    },
+    {
+      "order": 3,
+      "slug": "valley-of-death",
+      "file": "src/content/writing/valley-of-death.mdx",
+      "prompt": "sessions/editorial/session-editorial-valley-of-death.md",
+      "effort": "heavy",
+      "status": "pending",
+      "completed_at": null,
+      "commit_sha": null,
+      "notes": null
+    },
+    {
+      "order": 4,
+      "slug": "notice",
+      "file": "src/content/writing/notice.mdx",
+      "prompt": "sessions/editorial/session-editorial-notice.md",
+      "effort": "medium",
+      "status": "pending",
+      "completed_at": null,
+      "commit_sha": null,
+      "notes": null
+    },
+    {
+      "order": 5,
+      "slug": "learned-compilation",
+      "file": "src/content/writing/learned-compilation.mdx",
+      "prompt": "sessions/editorial/session-editorial-learned-compilation.md",
+      "effort": "medium",
+      "status": "pending",
+      "completed_at": null,
+      "commit_sha": null,
+      "notes": null
+    },
+    {
+      "order": 6,
+      "slug": "the-circuitry-of-science",
+      "file": "src/content/writing/the-circuitry-of-science.mdx",
+      "prompt": "sessions/editorial/session-editorial-circuitry-of-science.md",
+      "effort": "medium",
+      "status": "pending",
+      "completed_at": null,
+      "commit_sha": null,
+      "notes": null
+    },
+    {
+      "order": 7,
+      "slug": "the-wrong-axis",
+      "file": "src/content/writing/the-wrong-axis.mdx",
+      "prompt": "sessions/editorial/session-editorial-the-wrong-axis.md",
+      "effort": "medium",
+      "status": "pending",
+      "completed_at": null,
+      "commit_sha": null,
+      "notes": null
+    },
+    {
+      "order": 8,
+      "slug": "from-transistor-to-token",
+      "file": "src/content/writing/from-transistor-to-token.mdx",
+      "prompt": "sessions/editorial/session-editorial-from-transistor-to-token.md",
+      "effort": "medium",
+      "status": "pending",
+      "completed_at": null,
+      "commit_sha": null,
+      "notes": null
+    },
+    {
+      "order": 9,
+      "slug": "coregulation",
+      "file": "src/content/writing/coregulation.mdx",
+      "prompt": "sessions/editorial/session-editorial-coregulation.md",
+      "effort": "light",
+      "status": "pending",
+      "completed_at": null,
+      "commit_sha": null,
+      "notes": null
+    },
+    {
+      "order": 10,
+      "slug": "ab-essay",
+      "file": "src/content/writing/ab-essay.mdx",
+      "prompt": "sessions/editorial/session-editorial-ab-essay.md",
+      "effort": "light",
+      "status": "pending",
+      "completed_at": null,
+      "commit_sha": null,
+      "notes": null
+    },
+    {
+      "order": 11,
+      "slug": "trust-topologies",
+      "file": "src/content/writing/trust-topologies.mdx",
+      "prompt": "sessions/editorial/session-editorial-trust-topologies.md",
+      "effort": "light",
+      "status": "pending",
+      "completed_at": null,
+      "commit_sha": null,
+      "notes": null
+    }
+  ]
+}
