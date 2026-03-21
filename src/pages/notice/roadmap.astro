@@ -4,13 +4,14 @@ import NoticeHubNav from '../../components/NoticeHubNav.astro';
 ---
 
 <Base title="Notice — Roadmap" description="What's shipped, what's next, and where Notice is headed. A living document.">
+  <div class="roadmap-page">
   <NoticeHubNav current="roadmap" />
   <section class="roadmap">
     <header class="roadmap-header">
       <div class="eyebrow">NOTICE</div>
       <h1 class="title">Roadmap</h1>
-      <p class="subtitle">A multi-device biometric awareness app for iPhone &mdash; training interoceptive awareness through contemplative AI reflection.</p>
-      <div class="last-updated">Last updated March 4, 2026</div>
+      <p class="subtitle">Training interoceptive awareness through AI-guided contemplative reflection.</p>
+      <div class="last-updated">Last updated March 21, 2026</div>
       <div class="roadmap-cta-top">
         <a href="https://notice.tools" target="_blank" rel="noopener noreferrer" class="roadmap-cta-btn">Sign Up for the Beta →</a>
       </div>
@@ -26,23 +27,61 @@ import NoticeHubNav from '../../components/NoticeHubNav.astro';
 
     <p>Notice is in closed beta via TestFlight with 8+ testers from the <a href="https://www.jhourney.io/" target="_blank" rel="noopener">Jhourney</a> contemplative community. The core loop works end-to-end: tap your Apple Watch, Garmin, or phone when you notice a shift &rarr; the app captures biometric context from whichever device delivered the data &rarr; you debrief with a felt-sense emotion picker &rarr; Claude generates a contemplative reflection grounded in your patterns. Oura Ring feeds overnight baseline context automatically &mdash; enriching the reflection without requiring a tap.</p>
 
-    <p>Fifteen development sessions have produced:</p>
+    <details class="roadmap-detail">
+      <summary>The core snap-debrief-reflection loop</summary>
+      <div class="detail-content">
+        <div class="detail-para">Watch tap or phone floating action button captures a Frame Snap with heart rate and HRV from HealthKit. The phone FAB (iOS 26 liquid glass) means you don't need a Watch to use Notice &mdash; it's a full-loop experience on iPhone alone. Debrief screen features a description-first layout and a two-layer felt-sense picker organized by somatic texture (Alive, Settled, Open, Heavy, Stirred, Tight &mdash; six groups &times; three emotion labels each, grounded in Gendlin's Focusing). Claude streams a contemplative reflection using a system prompt built on Jhourney pedagogy &mdash; orienting toward how you're relating to experience, never prescribing what to feel.</div>
+      </div>
+    </details>
 
-    <p><strong>The core snap-debrief-reflection loop.</strong> Watch tap or phone floating action button captures a Frame Snap with heart rate and HRV from HealthKit. The phone FAB (iOS 26 liquid glass) means you don't need a Watch to use Notice &mdash; it's a full-loop experience on iPhone alone. Debrief screen features a description-first layout and a two-layer felt-sense picker organized by somatic texture (Alive, Settled, Open, Heavy, Stirred, Tight &mdash; six groups &times; three emotion labels each, grounded in Gendlin's Focusing). Claude streams a contemplative reflection using a system prompt built on Jhourney pedagogy &mdash; orienting toward how you're relating to experience, never prescribing what to feel.</p>
+    <details class="roadmap-detail">
+      <summary>Three tiers of AI reflection</summary>
+      <div class="detail-content">
+        <div class="detail-para">Brief reflections at snap time (one sentence, oriented toward conductivity). Exploratory reflections during debrief (a paragraph, oriented toward curiosity). Daily and weekly synthesis reflections that surface longitudinal patterns across snaps &mdash; built hierarchically so weekly reflections consume daily syntheses rather than re-aggregating raw data.</div>
+      </div>
+    </details>
 
-    <p><strong>Three tiers of AI reflection.</strong> Brief reflections at snap time (one sentence, oriented toward conductivity). Exploratory reflections during debrief (a paragraph, oriented toward curiosity). Daily and weekly synthesis reflections that surface longitudinal patterns across snaps &mdash; built hierarchically so weekly reflections consume daily syntheses rather than re-aggregating raw data.</p>
+    <details class="roadmap-detail">
+      <summary>On-device intelligence via Apple Foundation Models</summary>
+      <div class="detail-content">
+        <div class="detail-para">A two-tier AI architecture: Tier 1 (Apple Foundation Models, on-device) handles context assembly &mdash; reading HealthKit trends, calendar, location, recent snaps, and producing a structured summary that strips all absolute values and identifying details. Tier 2 (Claude via cloud) sees only those summaries. The on-device interpreter runs in under a second. Context assembly completes in under three seconds. Nothing raw leaves the phone.</div>
+      </div>
+    </details>
 
-    <p><strong>On-device intelligence via Apple Foundation Models.</strong> A two-tier AI architecture: Tier 1 (Apple Foundation Models, on-device) handles context assembly &mdash; reading HealthKit trends, calendar, location, recent snaps, and producing a structured summary that strips all absolute values and identifying details. Tier 2 (Claude via cloud) sees only those summaries. The on-device interpreter runs in under a second. Context assembly completes in under three seconds. Nothing raw leaves the phone.</p>
+    <details class="roadmap-detail">
+      <summary>Voice-initiated snaps</summary>
+      <div class="detail-content">
+        <div class="detail-para">Siri and AirPods integration for hands-free capture. &ldquo;Hey Siri, I noticed something&rdquo; triggers a Frame Snap without looking at a screen &mdash; critical for capturing shifts during activities where pulling out a phone breaks the moment.</div>
+      </div>
+    </details>
 
-    <p><strong>Voice-initiated snaps.</strong> Siri and AirPods integration for hands-free capture. &ldquo;Hey Siri, I noticed something&rdquo; triggers a Frame Snap without looking at a screen &mdash; critical for capturing shifts during activities where pulling out a phone breaks the moment.</p>
+    <details class="roadmap-detail">
+      <summary>Stateless API proxy</summary>
+      <div class="detail-content">
+        <div class="detail-para">A Cloudflare Worker sits between the app and the Claude API, holding the API key server-side and validating device identity via Apple's App Attest before forwarding any request. No on-device key storage, rotation without app updates, per-device rate limiting.</div>
+      </div>
+    </details>
 
-    <p><strong>Stateless API proxy.</strong> A Cloudflare Worker sits between the app and the Claude API, holding the API key server-side and validating device identity via Apple's App Attest before forwarding any request. No on-device key storage, rotation without app updates, per-device rate limiting.</p>
+    <details class="roadmap-detail">
+      <summary>Privacy architecture as compliance strategy</summary>
+      <div class="detail-content">
+        <div class="detail-para">Privacy in a multi-device system is about what path data traveled, not a binary on/off. Apple Watch and Garmin data stays entirely on-device &mdash; raw biometrics never leave the phone. Oura data transits Oura&rsquo;s cloud (ring &rarr; Oura app &rarr; Oura Cloud &rarr; REST API &rarr; iPhone) but never touches Notice infrastructure &mdash; the fetch is client-side. All paths converge to the same de-identified format before reaching Claude. Only structured summaries transit through the proxy. This isn&rsquo;t just a privacy choice &mdash; it&rsquo;s a regulatory strategy that keeps Notice within the FDA&rsquo;s General Wellness Guidance and limits FTC Health Breach Notification Rule exposure.</div>
+      </div>
+    </details>
 
-    <p><strong>Privacy architecture as compliance strategy.</strong> Privacy in a multi-device system is about what path data traveled, not a binary on/off. Apple Watch and Garmin data stays entirely on-device &mdash; raw biometrics never leave the phone. Oura data transits Oura&rsquo;s cloud (ring &rarr; Oura app &rarr; Oura Cloud &rarr; REST API &rarr; iPhone) but never touches Notice infrastructure &mdash; the fetch is client-side. All paths converge to the same de-identified format before reaching Claude. Only structured summaries transit through the proxy. This isn&rsquo;t just a privacy choice &mdash; it&rsquo;s a regulatory strategy that keeps Notice within the FDA&rsquo;s General Wellness Guidance and limits FTC Health Breach Notification Rule exposure.</p>
+    <details class="roadmap-detail">
+      <summary>Multi-device biometric integration</summary>
+      <div class="detail-content">
+        <div class="detail-para">Three hardware ecosystems integrated through a single <code>BiometricSnapshot</code> protocol. Apple Watch captures snap-time HR and HRV (SDNN) via HealthKit and WatchConnectivity. Garmin Enduro 3 captures snap-time HR, HRV (RMSSD), stress, and Body Battery via the Connect IQ Companion SDK over BLE &mdash; topologically identical to Apple Watch, mechanically different. Oura Ring 3 provides overnight baseline context (nighttime RMSSD, sleep stages, readiness scores) via cloud REST API with OAuth authentication &mdash; a different trust topology that feeds the baseline context path rather than the snap-time biometric path.</div>
+      </div>
+    </details>
 
-    <p><strong>Multi-device biometric integration.</strong> Three hardware ecosystems integrated through a single <code>BiometricSnapshot</code> protocol. Apple Watch captures snap-time HR and HRV (SDNN) via HealthKit and WatchConnectivity. Garmin Enduro 3 captures snap-time HR, HRV (RMSSD), stress, and Body Battery via the Connect IQ Companion SDK over BLE &mdash; topologically identical to Apple Watch, mechanically different. Oura Ring 3 provides overnight baseline context (nighttime RMSSD, sleep stages, readiness scores) via cloud REST API with OAuth authentication &mdash; a different trust topology that feeds the baseline context path rather than the snap-time biometric path.</p>
-
-    <p><strong>Key architectural decisions.</strong> <code>BiometricSnapshot</code> normalizes all three sources into a single value type &mdash; downstream consumers never know which device delivered the data. SDNN and RMSSD are tracked as separate fields with separate relative descriptor functions, preventing the category error of comparing metrics that measure different physiological signals. Garmin button-press timestamps are preserved through the pipeline (converted from Garmin epoch) &mdash; the snap happened when the user pressed the button, not when the phone received the BLE packet. Relative descriptor functions (<code>relativeHRV</code>, <code>relativeHrvRMSSD</code>, <code>relativeStressScore</code>, <code>relativeBodyBattery</code>) strip absolute values before data reaches Claude. The full architectural analysis is in <a href="/writing/trust-topologies/">Trust Topologies</a>.</p>
+    <details class="roadmap-detail">
+      <summary>Key architectural decisions</summary>
+      <div class="detail-content">
+        <div class="detail-para"><code>BiometricSnapshot</code> normalizes all three sources into a single value type &mdash; downstream consumers never know which device delivered the data. SDNN and RMSSD are tracked as separate fields with separate relative descriptor functions, preventing the category error of comparing metrics that measure different physiological signals. Garmin button-press timestamps are preserved through the pipeline (converted from Garmin epoch) &mdash; the snap happened when the user pressed the button, not when the phone received the BLE packet. Relative descriptor functions (<code>relativeHRV</code>, <code>relativeHrvRMSSD</code>, <code>relativeStressScore</code>, <code>relativeBodyBattery</code>) strip absolute values before data reaches Claude. The full architectural analysis is in <a href="/writing/trust-topologies/">Trust Topologies</a>.</div>
+      </div>
+    </details>
 
     <!-- 02 NOW -->
     <div class="section-divider">
@@ -54,43 +93,81 @@ import NoticeHubNav from '../../components/NoticeHubNav.astro';
 
     <h3>On-Device Reflection Model</h3>
 
-    <p>The highest-leverage technical milestone. Moving <code>.brief</code> reflections on-device eliminates the largest cost center (~80% of API calls), makes the Core pricing tier viable at zero marginal cost, and delivers the privacy promise in its fullest form.</p>
+    <p>The highest-leverage technical milestone. Moving brief reflections on-device eliminates the largest cost center, makes the Core pricing tier viable at zero marginal cost, and delivers the privacy promise in its fullest form &mdash; nothing leaves the phone for the most common interaction.</p>
 
-    <p><strong>Runtime reality.</strong> MLX is currently blocked for 3B models on iPhone due to memory overhead (~15 GB for Llama 3.2 3B 4-bit vs. llama.cpp's ~3.67 GB). Two viable paths: llama.cpp for 3B models (4&ndash;8 second generation, higher quality) or MLX for 1B&ndash;1.7B models (under 2 seconds, lower ceiling).</p>
+    <details class="roadmap-detail">
+      <summary>Implementation detail</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Runtime reality.</strong> MLX is currently blocked for 3B models on iPhone due to memory overhead (~15 GB for Llama 3.2 3B 4-bit vs. llama.cpp's ~3.67 GB). Two viable paths: llama.cpp for 3B models (4&ndash;8 second generation, higher quality) or MLX for 1B&ndash;1.7B models (under 2 seconds, lower ceiling).</div>
+        <div class="detail-para"><strong>Model candidates.</strong> SmolLM3-3B is the leading candidate &mdash; purpose-built for on-device, strong instruction-following, Apache 2.0. Llama 3.2 3B is the safe default. Qwen3 1.7B for the MLX/small-model path. Recommendation: benchmark SmolLM3-3B via llama.cpp against Qwen3 1.7B via MLX on target hardware.</div>
+        <div class="detail-para"><strong>Training pipeline.</strong> Teacher-student distillation from Claude API. Target: 1,200 reflection examples plus 150 correction examples that demonstrate constraint boundaries. The correction examples are critical &mdash; LoRA fine-tuning on domain-specific output degrades general instruction-following without them.</div>
+        <div class="detail-para"><strong>Hybrid routing.</strong> <code>.brief</code> reflections: on-device primary, cloud fallback &mdash; covering snaps from all three device sources (Apple Watch, Garmin, Oura baseline). <code>.exploratory</code>: cloud primary for now. <code>.daily</code> and <code>.weekly</code> synthesis: always cloud. On-device <code>.brief</code> covers ~80% of API calls.</div>
+        <div class="detail-para"><strong>Three-tier evaluation.</strong> Tier 1: automated constraint gate (no diagnostic language, no raw biometric values, no prescriptive framing). Tier 2: LLM-as-judge scoring relational orientation, phenomenological precision, novelty, tone. Tier 3: blind A/B with experienced practitioners. Ship threshold: Tier 1 &gt;99% pass, Tier 2 within 15% of Claude baseline, Tier 3 preference &gt;40%.</div>
+      </div>
+    </details>
 
-    <p><strong>Model candidates.</strong> SmolLM3-3B is the leading candidate &mdash; purpose-built for on-device, strong instruction-following, Apache 2.0. Llama 3.2 3B is the safe default. Qwen3 1.7B for the MLX/small-model path. Recommendation: benchmark SmolLM3-3B via llama.cpp against Qwen3 1.7B via MLX on target hardware.</p>
+    <h3>Measuring Interoceptive Development</h3>
 
-    <p><strong>Training pipeline.</strong> Teacher-student distillation from Claude API. Target: 1,200 reflection examples plus 150 correction examples that demonstrate constraint boundaries. The correction examples are critical &mdash; LoRA fine-tuning on domain-specific output degrades general instruction-following without them.</p>
+    <p>The single most important metric Notice can surface. The temporal gap between when your body shifts and when you consciously register it &mdash; interoceptive lead time &mdash; is measurable and trainable. Shrinking that gap is interoceptive development, and it gives Notice a training outcome, a scaffolding decay signal, and a research contribution no competitor can replicate.</p>
 
-    <p><strong>Hybrid routing.</strong> <code>.brief</code> reflections: on-device primary, cloud fallback &mdash; covering snaps from all three device sources (Apple Watch, Garmin, Oura baseline). <code>.exploratory</code>: cloud primary for now. <code>.daily</code> and <code>.weekly</code> synthesis: always cloud. On-device <code>.brief</code> covers ~80% of API calls.</p>
+    <details class="roadmap-detail">
+      <summary>Implementation detail</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Interoceptive lead time.</strong> Multi-device support strengthens this metric: with both SDNN (Apple Watch) and RMSSD (Garmin/Oura) tracked as separate fields, the system has richer physiological signal diversity for detecting shifts &mdash; and temporal anchoring ensures that the &ldquo;when did you notice&rdquo; timestamp is faithful to the first-person act regardless of which device delivered the biometric data. This gives Notice: a training outcome that isn't a score, a scaffolding decay signal grounded in what the app actually trains, a data moat no competitor can replicate, and a research contribution validatable against MAIA-2 assessments.</div>
+        <div class="detail-para"><strong>Outcome measurement.</strong> Behavioral proxies already implicit in the data: emotion label diversity, snap frequency patterns, biometric-label convergence. Formal validated assessments (MAIA-2, FFMQ-15) as optional periodic check-ins.</div>
+      </div>
+    </details>
 
-    <p><strong>Three-tier evaluation.</strong> Tier 1: automated constraint gate (no diagnostic language, no raw biometric values, no prescriptive framing). Tier 2: LLM-as-judge scoring relational orientation, phenomenological precision, novelty, tone. Tier 3: blind A/B with experienced practitioners. Ship threshold: Tier 1 &gt;99% pass, Tier 2 within 15% of Claude baseline, Tier 3 preference &gt;40%.</p>
+    <h3>Scaffolding Decay</h3>
+
+    <p>The central design philosophy beyond the core loop. Notice is designed to make itself unnecessary &mdash; progressively reducing AI support as independent interoceptive capacity grows. Three phases: full support, reduced, minimal. The app never decides for you that you're ready; it notices, and invites.</p>
+
+    <details class="roadmap-detail">
+      <summary>Implementation detail</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Three phases.</strong> Full support (reflections after every snap, active suggestions, full biometric context), Reduced (reflections on-demand, simplified biometric display, suggestions fade), Minimal (no automatic reflections, the app becomes a quiet archive). Phase transitions triggered by behavioral signals &mdash; snap count thresholds, label diversity ceiling, biometric-label convergence &mdash; and confirmed by the user. The app never decides for you that you're ready.</div>
+      </div>
+    </details>
 
     <h3>Foundation Models Integration</h3>
 
-    <p>Apple's on-device Foundation Models need hardware validation. The interpreter should complete in under one second, context assembly in under three seconds &mdash; on physical devices, not simulators. If latency exceeds budget, fallback to direct framework calls is straightforward. Adapted Tool infrastructure exists for HealthKit, Calendar, Location, and recent snap retrieval. The key unknown: how the interpreter performs with complex multi-source assembly instructions on A17/A18 silicon under real memory pressure from HealthKit background delivery. Multi-device support makes this more relevant &mdash; the context window now includes data from three devices with different temporal characteristics (snap-time from Watch/Garmin, overnight baseline from Oura).</p>
+    <p>Apple's on-device Foundation Models handle context assembly &mdash; reading HealthKit trends, calendar, location, and recent snaps &mdash; without any data leaving the device. The key unknown is real-world performance under memory pressure on physical hardware.</p>
+
+    <details class="roadmap-detail">
+      <summary>Implementation detail</summary>
+      <div class="detail-content">
+        <div class="detail-para">The interpreter should complete in under one second, context assembly in under three seconds &mdash; on physical devices, not simulators. If latency exceeds budget, fallback to direct framework calls is straightforward. Adapted Tool infrastructure exists for HealthKit, Calendar, Location, and recent snap retrieval. The key unknown: how the interpreter performs with complex multi-source assembly instructions on A17/A18 silicon under real memory pressure from HealthKit background delivery. Multi-device support makes this more relevant &mdash; the context window now includes data from three devices with different temporal characteristics (snap-time from Watch/Garmin, overnight baseline from Oura).</div>
+      </div>
+    </details>
 
     <h3>Beta Support and Feedback</h3>
 
-    <p><strong>Structured feedback capture.</strong> TestFlight's built-in mechanism loses context. A lightweight in-app mechanism (shake to report, or a prompt after the 5th snap) captures context-rich feedback at the moment of use. The taxonomy resonance question &mdash; &ldquo;which words do you actually reach for?&rdquo; &mdash; is both a research question and an explicit feedback prompt.</p>
+    <p>Structured feedback capture during closed beta. The most valuable data isn't what active users do &mdash; it's why people stop. Tester segmentation by practice background and device configuration ensures feedback is interpreted correctly.</p>
 
-    <p><strong>Tester segmentation.</strong> Not all testers are the same. Experienced meditators push the felt-sense vocabulary hard; newer practitioners surface onboarding friction. A simple tracking table (practice background, device/Watch pairing, Apple Intelligence availability) lets you interpret feedback correctly.</p>
-
-    <p><strong>Lapsed tester outreach.</strong> The most valuable beta data isn't what active users do &mdash; it's why people stop. A simple email (not push notification) to lapsed testers surfaces the mundane friction that kills adoption. One lapsed-tester interview is worth twenty active-user feature requests.</p>
-
-    <p><strong>Bug reproduction context.</strong> A lightweight diagnostic log (stored locally, shared only on user-initiated report) capturing app state transitions and error codes &mdash; never snap content, emotion labels, or biometric data.</p>
+    <details class="roadmap-detail">
+      <summary>Implementation detail</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Structured feedback capture.</strong> TestFlight's built-in mechanism loses context. A lightweight in-app mechanism (shake to report, or a prompt after the 5th snap) captures context-rich feedback at the moment of use. The taxonomy resonance question &mdash; &ldquo;which words do you actually reach for?&rdquo; &mdash; is both a research question and an explicit feedback prompt.</div>
+        <div class="detail-para"><strong>Tester segmentation.</strong> Not all testers are the same. Experienced meditators push the felt-sense vocabulary hard; newer practitioners surface onboarding friction. A simple tracking table (practice background, device/Watch pairing, Apple Intelligence availability) lets you interpret feedback correctly.</div>
+        <div class="detail-para"><strong>Lapsed tester outreach.</strong> The most valuable beta data isn't what active users do &mdash; it's why people stop. A simple email (not push notification) to lapsed testers surfaces the mundane friction that kills adoption. One lapsed-tester interview is worth twenty active-user feature requests.</div>
+        <div class="detail-para"><strong>Bug reproduction context.</strong> A lightweight diagnostic log (stored locally, shared only on user-initiated report) capturing app state transitions and error codes &mdash; never snap content, emotion labels, or biometric data.</div>
+      </div>
+    </details>
 
     <h3>Engineering Resilience</h3>
 
-    <p><strong>Degraded and offline behavior.</strong> What happens when the Claude API is unreachable? When HealthKit returns no recent samples? When the Watch disconnects mid-snap? Snaps must capture and persist regardless. Each failure mode needs an explicit design: no-network (queue reflections), no-HealthKit-data (snap without biometrics), Watch-disconnect (phone-side snap still works), API-error (retry with backoff), Garmin-BLE-disconnect (snap persists on the watch and retransmits on reconnection), Oura-API-unavailable (baseline context is stale but snaps still work &mdash; the system degrades gracefully because Oura feeds context, not the core loop).</p>
+    <p>Graceful degradation across every failure mode &mdash; no network, no HealthKit data, Watch disconnect, API error, Garmin BLE dropout, Oura API unavailable. Snaps must capture and persist regardless. Cost control and crash reporting under privacy constraints.</p>
 
-    <p><strong>API cost control.</strong> Per-user usage budgets, a soft daily cap on exploratory reflections, batching daily synthesis to a single API call, and monitoring token usage per user during beta to establish the cost curve before setting prices.</p>
-
-    <p><strong>Crash reporting under privacy constraints.</strong> Most third-party crash reporting SDKs are risky under the FTC Health Breach Notification Rule. Apple's built-in crash reports via Xcode Organizer are the path of least resistance &mdash; no third-party SDK, data stays within Apple's ecosystem. MetricKit for performance diagnostics. No third-party analytics or crash reporting SDKs unless they can be proven to never exfiltrate health-adjacent data.</p>
-
-    <p><strong>SwiftData schema migration planning.</strong> Document the expected schema evolution now &mdash; future features will require new model fields and relationships. SwiftData lightweight migrations handle additive changes, but anything more complex needs explicit migration plans.</p>
-
-    <p><strong>API proxy and key management</strong> <span class="resolved-tag">(resolved)</span><strong>.</strong> Cloudflare Worker proxy with App Attest attestation. Eliminates all on-device key storage, enables rotation without app updates, provides per-device rate limiting and abuse detection, adds a server-side kill switch.</p>
+    <details class="roadmap-detail">
+      <summary>Implementation detail</summary>
+      <div class="detail-content">
+        <div class="detail-para"><strong>Degraded and offline behavior.</strong> What happens when the Claude API is unreachable? When HealthKit returns no recent samples? When the Watch disconnects mid-snap? Each failure mode needs an explicit design: no-network (queue reflections), no-HealthKit-data (snap without biometrics), Watch-disconnect (phone-side snap still works), API-error (retry with backoff), Garmin-BLE-disconnect (snap persists on the watch and retransmits on reconnection), Oura-API-unavailable (baseline context is stale but snaps still work &mdash; the system degrades gracefully because Oura feeds context, not the core loop).</div>
+        <div class="detail-para"><strong>API cost control.</strong> Per-user usage budgets, a soft daily cap on exploratory reflections, batching daily synthesis to a single API call, and monitoring token usage per user during beta to establish the cost curve before setting prices.</div>
+        <div class="detail-para"><strong>Crash reporting under privacy constraints.</strong> Most third-party crash reporting SDKs are risky under the FTC Health Breach Notification Rule. Apple's built-in crash reports via Xcode Organizer are the path of least resistance &mdash; no third-party SDK, data stays within Apple's ecosystem. MetricKit for performance diagnostics. No third-party analytics or crash reporting SDKs unless they can be proven to never exfiltrate health-adjacent data.</div>
+        <div class="detail-para"><strong>SwiftData schema migration planning.</strong> Document the expected schema evolution now &mdash; future features will require new model fields and relationships. SwiftData lightweight migrations handle additive changes, but anything more complex needs explicit migration plans.</div>
+        <div class="detail-para"><strong>API proxy and key management</strong> <span class="resolved-tag">(resolved)</span><strong>.</strong> Cloudflare Worker proxy with App Attest attestation. Eliminates all on-device key storage, enables rotation without app updates, provides per-device rate limiting and abuse detection, adds a server-side kill switch.</div>
+      </div>
+    </details>
 
     <!-- 03 LATER -->
     <div class="section-divider">
@@ -103,7 +180,6 @@ import NoticeHubNav from '../../components/NoticeHubNav.astro';
     <details class="roadmap-detail">
       <summary>Deepening the Reflection Layer</summary>
       <div class="detail-content">
-        <div class="detail-para"><strong>Scaffolding decay.</strong> The central design challenge beyond the MVP. Three phases: Full support (reflections after every snap, active suggestions, full biometric context), Reduced (reflections on-demand, simplified biometric display, suggestions fade), Minimal (no automatic reflections, the app becomes a quiet archive). Phase transitions triggered by behavioral signals &mdash; snap count thresholds, label diversity ceiling, biometric-label convergence &mdash; and confirmed by the user. The app never decides for you that you're ready.</div>
         <div class="detail-para"><strong>Snap depth calibration.</strong> Claude adapts reflection depth based on accumulated data density. Three tiers: Sparse (1&ndash;3 snaps, no pattern claims), Thin (4&ndash;15 snaps, tentative pattern observations), Rich (20+, full vocabulary). Prevents the most common failure mode: making confident claims about patterns that don't exist in the data.</div>
         <div class="detail-para"><strong>Biometric-label divergence detection.</strong> When the user's subjective label diverges from biometric data, the gap itself is information. Claude treats the user's felt sense as primary and frames the biometric data as a mirror. Over time, divergence patterns may reveal interoceptive blind spots or growing precision.</div>
         <div class="detail-para"><strong>Dam Model pattern detection.</strong> Claude's system prompt includes vocabulary for suppression-explosion oscillation, narrow emotional range, absence patterns, and rigidity. The deeper work is calibrating sensitivity.</div>
@@ -130,14 +206,6 @@ import NoticeHubNav from '../../components/NoticeHubNav.astro';
     </details>
 
     <details class="roadmap-detail">
-      <summary>Measuring What Matters</summary>
-      <div class="detail-content">
-        <div class="detail-para"><strong>Interoceptive lead time.</strong> The single most innovative metric Notice could surface. The temporal gap between biometric shift and conscious noticing is measurable and trainable. Shrinking that gap is interoceptive development. Multi-device support strengthens this metric: with both SDNN (Apple Watch) and RMSSD (Garmin/Oura) tracked as separate fields, the system has richer physiological signal diversity for detecting shifts &mdash; and temporal anchoring ensures that the &ldquo;when did you notice&rdquo; timestamp is faithful to the first-person act regardless of which device delivered the biometric data. This gives Notice: a training outcome that isn't a score, a scaffolding decay signal grounded in what the app actually trains, a data moat no competitor can replicate, and a research contribution validatable against MAIA-2 assessments.</div>
-        <div class="detail-para"><strong>Outcome measurement.</strong> Behavioral proxies already implicit in the data: emotion label diversity, snap frequency patterns, biometric-label convergence. Formal validated assessments (MAIA-2, FFMQ-15) as optional periodic check-ins.</div>
-      </div>
-    </details>
-
-    <details class="roadmap-detail">
       <summary>System-Initiated Awareness</summary>
       <div class="detail-content">
         <div class="detail-para"><strong>Passive biometric anomaly detection.</strong> When background HRV monitoring detects a significant shift, surface a Smart Stack widget: &ldquo;Your body shifted &mdash; did you notice something?&rdquo; Philosophically delicate &mdash; the app trains self-initiated noticing, not dependency on prompts.</div>
@@ -160,15 +228,20 @@ import NoticeHubNav from '../../components/NoticeHubNav.astro';
     </footer>
 
   </section>
+  </div>
 </Base>
 
 <style>
+  .roadmap-page {
+    padding-top: 60px;
+  }
+
   .roadmap {
     position: relative;
     z-index: 1;
     max-width: 800px;
     margin: 0 auto;
-    padding: 8rem 2rem 6rem;
+    padding: 3rem 2rem 6rem;
   }
 
   .roadmap-header {
@@ -418,9 +491,15 @@ import NoticeHubNav from '../../components/NoticeHubNav.astro';
   }
 
   /* Responsive */
+  @media (max-width: 900px) {
+    .roadmap-page {
+      padding-top: 50px;
+    }
+  }
+
   @media (max-width: 640px) {
     .roadmap {
-      padding: 8rem 1.25rem 4rem;
+      padding: 3rem 1.25rem 4rem;
     }
   }
 

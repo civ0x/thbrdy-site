@@ -32,7 +32,9 @@ const formattedDate = date.toLocaleDateString('en-US', {
 ---
 
 <Base title={`${title} — Thomas Brady`} description={description} type="article" image={ogImage}>
-  <slot name="before-article" />
+  <div class="before-article-slot">
+    <slot name="before-article" />
+  </div>
   <article class="post">
     <div class="section-divider">
       <span class="section-number">Essay</span>
@@ -340,6 +342,18 @@ const formattedDate = date.toLocaleDateString('en-US', {
 </Base>
 
 <style>
+  .before-article-slot:empty {
+    display: none;
+  }
+
+  .before-article-slot:not(:empty) {
+    padding-top: 60px;
+  }
+
+  .before-article-slot:not(:empty) + .post {
+    padding-top: 3rem;
+  }
+
   .post {
     position: relative;
     z-index: 1;
@@ -783,9 +797,19 @@ const formattedDate = date.toLocaleDateString('en-US', {
     }
   }
 
+  @media (max-width: 900px) {
+    .before-article-slot:not(:empty) {
+      padding-top: 50px;
+    }
+  }
+
   @media (max-width: 640px) {
     .post {
       padding: 6rem 1.5rem 4rem;
+    }
+
+    .before-article-slot:not(:empty) + .post {
+      padding-top: 2rem;
     }
 
     .post__related-grid {
