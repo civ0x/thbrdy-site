@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 ---
 
-<Base title="Notice" description="Multi-device biometric awareness for iPhone — training interoceptive awareness through contemplative AI reflection.">
+<Base title="Notice" description="Training interoceptive awareness through AI-guided contemplative reflection.">
   <div class="hub-page">
     <nav class="hub-nav" aria-label="Notice section navigation">
       <div class="hub-nav__inner">
@@ -12,11 +12,13 @@ import Base from '../../layouts/Base.astro';
         <div class="hub-nav__right">
           <a href="/notice/vision/" class="hub-nav__link">Vision</a>
           <span class="hub-nav__sep">&middot;</span>
+          <a href="/writing/notice/" class="hub-nav__link">Build</a>
+          <span class="hub-nav__sep">&middot;</span>
+          <a href="/notice/roadmap/" class="hub-nav__link">Roadmap</a>
+          <span class="hub-nav__sep">&middot;</span>
           <a href="/notice/deck/" class="hub-nav__link">Deck</a>
           <span class="hub-nav__sep">&middot;</span>
           <a href="/notice/brief/" class="hub-nav__link">Brief</a>
-          <span class="hub-nav__sep">&middot;</span>
-          <a href="/notice/roadmap/" class="hub-nav__link">Roadmap</a>
         </div>
       </div>
     </nav>
@@ -26,11 +28,17 @@ import Base from '../../layouts/Base.astro';
       <img src="/images/enso-transparent.png" alt="" class="notice-header__enso" width="60" height="60" />
       <h1 class="notice-header__title">Notice</h1>
       <p class="notice-header__subtitle"><em>Making the body's intelligence visible and navigable.</em></p>
-      <p class="notice-header__desc">Multi-device biometric awareness for iPhone — training interoceptive awareness through contemplative AI reflection.</p>
+      <p class="notice-header__desc">Training interoceptive awareness through AI-guided contemplative reflection.</p>
       <a href="https://notice.tools" target="_blank" rel="noopener noreferrer" class="notice-cta-btn">Sign Up for the Beta →</a>
     </header>
 
-    <div class="card-grid">
+    <div class="builder-note reveal">
+      <p>The gap between what your body knows and what you consciously register is measurable. Heart rate variability drops before anxiety arrives. Breathing shallows before you notice you're bracing. Interoceptive signals travel a dedicated neural pathway, but conscious access to those signals varies enormously — and it's trainable.</p>
+      <p>Notice trains that skill. The core interaction — a Frame Snap — captures a biometric snapshot the moment you notice a shift, then pairs it with a contemplative AI reflection that orients toward <em>how you're meeting your experience</em>, not what the experience supposedly is. Over time, the system measures what I'm calling <strong>interoceptive lead time</strong>: the temporal gap between when your body shifts and when you consciously register it. Shrinking that gap <em>is</em> interoceptive development. As far as I can tell, no one else is measuring it.</p>
+      <p>The app is designed to get quieter as you get better — <strong>scaffolding decay</strong>, the deliberate reduction of AI support as independent capacity grows. The value isn't in screen time captured. It's in the skill built.</p>
+    </div>
+
+    <div class="card-grid card-grid--top">
 
       <a class="notice-card reveal" href="/notice/vision/" style="transition-delay: 0ms">
         <div class="card-eyebrow">VISION</div>
@@ -38,7 +46,25 @@ import Base from '../../layouts/Base.astro';
         <p class="card-desc">The full vision — what Notice is, why it exists, and where it's going. The science, the architecture, the market.</p>
       </a>
 
-      <div class="notice-card notice-card--compound reveal" style="transition-delay: 100ms">
+      <a class="notice-card reveal" href="/writing/notice/" style="transition-delay: 100ms">
+        <div class="card-eyebrow">THE BUILD</div>
+        <h2 class="card-title">24 Hours to a Working Product</h2>
+        <p class="card-desc">From zero Swift experience to a live beta — the design-first development process, three iterative loops, and what agentic AI actually changes about shipping.</p>
+      </a>
+
+      <a class="notice-card reveal" href="/notice/roadmap/" style="transition-delay: 200ms">
+        <div class="card-eyebrow">ROADMAP</div>
+        <h2 class="card-title">What's Next</h2>
+        <p class="card-desc">What's shipped, what's in progress, and where Notice is headed. A living document.</p>
+      </a>
+
+    </div>
+
+    <div class="card-section-label">FOR INVESTORS</div>
+
+    <div class="card-grid card-grid--bottom">
+
+      <div class="notice-card notice-card--compound reveal" style="transition-delay: 0ms">
         <a class="card-main-link" href="/notice/deck/">
           <div class="card-eyebrow">INVESTOR DECK</div>
           <h2 class="card-title">The Pitch</h2>
@@ -49,7 +75,7 @@ import Base from '../../layouts/Base.astro';
         </div>
       </div>
 
-      <div class="notice-card notice-card--compound reveal" style="transition-delay: 200ms">
+      <div class="notice-card notice-card--compound reveal" style="transition-delay: 100ms">
         <a class="card-main-link" href="/notice/brief/">
           <div class="card-eyebrow">INVESTOR BRIEF</div>
           <h2 class="card-title">The One-Pager</h2>
@@ -59,12 +85,6 @@ import Base from '../../layouts/Base.astro';
           <a href="/notice-investor-brief.pdf" target="_blank" rel="noopener">PDF version ↗</a>
         </div>
       </div>
-
-      <a class="notice-card reveal" href="/notice/roadmap/" style="transition-delay: 300ms">
-        <div class="card-eyebrow">ROADMAP</div>
-        <h2 class="card-title">What's Next</h2>
-        <p class="card-desc">What's shipped, what's in progress, and where Notice is headed. A living document.</p>
-      </a>
 
     </div>
 
@@ -193,13 +213,61 @@ import Base from '../../layouts/Base.astro';
     margin: 0 auto;
   }
 
+  /* ── Builder's Note ── */
+  .builder-note {
+    max-width: 620px;
+    margin: 2.5rem auto 0;
+    padding: 2rem 1.5rem 0;
+    border-top: 1px solid var(--border);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-mid);
+  }
+
+  .builder-note p {
+    margin: 0 0 1.25rem;
+  }
+
+  .builder-note p:last-child {
+    margin-bottom: 0;
+  }
+
+  .builder-note strong {
+    color: var(--text);
+  }
+
   /* ── Card Grid ── */
   .card-grid {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .card-grid--top {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-top: 3rem;
+  }
+
+  .card-grid--bottom {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
+    margin-top: 0;
+  }
+
+  .card-section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    text-align: center;
     max-width: 780px;
-    margin: 3rem auto;
+    margin: 2.5rem auto 0.75rem;
     padding: 0 1.5rem;
   }
 
@@ -382,7 +450,11 @@ import Base from '../../layouts/Base.astro';
       gap: 0.4rem;
     }
 
-    .card-grid {
+    .card-grid--top {
+      grid-template-columns: 1fr;
+    }
+
+    .card-grid--bottom {
       grid-template-columns: 1fr;
     }
 
