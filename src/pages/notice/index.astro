@@ -1,27 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
+import NoticeHubNav from '../../components/NoticeHubNav.astro';
 ---
 
 <Base title="Notice" description="Training interoceptive awareness through AI-guided contemplative reflection.">
   <div class="hub-page">
-    <nav class="hub-nav" aria-label="Notice section navigation">
-      <div class="hub-nav__inner">
-        <div class="hub-nav__left">
-          <span class="hub-nav__eyebrow">NOTICE</span>
-        </div>
-        <div class="hub-nav__right">
-          <a href="/notice/vision/" class="hub-nav__link">Vision</a>
-          <span class="hub-nav__sep">&middot;</span>
-          <a href="/writing/notice/" class="hub-nav__link">Build</a>
-          <span class="hub-nav__sep">&middot;</span>
-          <a href="/notice/roadmap/" class="hub-nav__link">Roadmap</a>
-          <span class="hub-nav__sep">&middot;</span>
-          <a href="/notice/deck/" class="hub-nav__link">Deck</a>
-          <span class="hub-nav__sep">&middot;</span>
-          <a href="/notice/brief/" class="hub-nav__link">Brief</a>
-        </div>
-      </div>
-    </nav>
+    <NoticeHubNav current="hub" />
 
     <header class="notice-header">
       <div class="notice-header__eyebrow">NOTICE</div>
@@ -105,63 +89,6 @@ import Base from '../../layouts/Base.astro';
   .hub-page {
     position: relative;
     padding-top: 60px;
-  }
-
-  /* ── Hub Navigation Bar ── */
-  .hub-nav {
-    padding: 0.75rem 2rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-  }
-
-  .hub-nav__inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .hub-nav__left {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-  }
-
-  .hub-nav__eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    font-weight: 500;
-    letter-spacing: 0.25em;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .hub-nav__right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .hub-nav__link {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .hub-nav__link:hover {
-    color: var(--accent);
-  }
-
-  .hub-nav__sep {
-    color: var(--text-faint);
-    font-size: 0.65rem;
   }
 
   /* ── Header ── */
@@ -440,16 +367,6 @@ import Base from '../../layouts/Base.astro';
 
   /* ── Responsive: Phone ── */
   @media (max-width: 640px) {
-    .hub-nav {
-      padding: 0.5rem 1rem;
-    }
-
-    .hub-nav__inner {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.4rem;
-    }
-
     .card-grid--top {
       grid-template-columns: 1fr;
     }

@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import NoticeHubNav from '../../components/NoticeHubNav.astro';
 import { NoticeInteractionFlow } from '../../components/islands/NoticeInteractionFlow.tsx';
 import NoticeVisionLeadTime from '../../components/islands/NoticeVisionLeadTime.tsx';
 import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitiveGap.tsx';
@@ -7,25 +8,7 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
 
 <Base title="Notice — Investor Deck" description="Interactive investor deck for Notice: multi-device AI-assisted interoception training.">
   <div class="deck-page">
-    <header class="deck-header">
-      <div class="deck-header__inner">
-        <div class="deck-header__left">
-          <span class="deck-header__eyebrow">NOTICE</span>
-          <span class="deck-header__title">Investor Deck</span>
-        </div>
-        <div class="deck-header__right">
-          <a href="/notice/vision/" class="deck-header__link">Vision</a>
-          <span class="deck-header__sep">&middot;</span>
-          <a href="/notice/brief/" class="deck-header__link">Brief</a>
-          <span class="deck-header__sep">&middot;</span>
-          <a href="/notice/roadmap/" class="deck-header__link">Roadmap</a>
-          <span class="deck-header__sep">&middot;</span>
-          <a href="/notice-investor-deck-v2.pdf" class="deck-header__link">PDF</a>
-          <span class="deck-header__sep">&middot;</span>
-          <a href="/notice/" class="deck-header__link">&larr; Notice Hub</a>
-        </div>
-      </div>
-    </header>
+    <NoticeHubNav current="deck" />
 
     <div class="deck" id="deck">
 
@@ -276,70 +259,6 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
     flex-direction: column;
     height: 100vh;
     padding-top: 60px; /* clear fixed nav */
-  }
-
-  .deck-header {
-    flex-shrink: 0;
-    padding: 0.75rem 2rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-  }
-
-  .deck-header__inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .deck-header__left {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-  }
-
-  .deck-header__eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    font-weight: 500;
-    letter-spacing: 0.25em;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .deck-header__title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .deck-header__right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .deck-header__link {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .deck-header__link:hover {
-    color: var(--accent);
-  }
-
-  .deck-header__sep {
-    color: var(--text-faint);
-    font-size: 0.65rem;
   }
 
   /* ── Deck scroll container ── */
@@ -942,16 +861,6 @@ import { NoticeCompetitiveGap } from '../../components/islands/NoticeCompetitive
 
   /* ── Responsive: Phone ── */
   @media (max-width: 640px) {
-    .deck-header {
-      padding: 0.5rem 1rem;
-    }
-
-    .deck-header__inner {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.4rem;
-    }
-
     .slide {
       padding: 3rem 1.25rem;
     }

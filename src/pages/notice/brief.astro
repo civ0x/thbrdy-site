@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import NoticeHubNav from '../../components/NoticeHubNav.astro';
 import { NoticeInteractionFlow } from '../../components/islands/NoticeInteractionFlow.tsx';
 import NoticeVisionLeadTime from '../../components/islands/NoticeVisionLeadTime.tsx';
 import { NoticeArchitectureDiagram } from '../../components/islands/NoticeArchitectureDiagram.tsx';
@@ -9,25 +10,7 @@ import NoticeVisionExpansionRings from '../../components/islands/NoticeVisionExp
 
 <Base title="Notice — Investor Brief" description="The one-page case for interoceptive training as a product category.">
   <div class="brief-page">
-    <header class="brief-header">
-      <div class="brief-header__inner">
-        <div class="brief-header__left">
-          <span class="brief-header__eyebrow">NOTICE</span>
-          <span class="brief-header__title">Investor Brief</span>
-        </div>
-        <div class="brief-header__right">
-          <a href="/notice/vision/" class="brief-header__link">Vision</a>
-          <span class="brief-header__sep">&middot;</span>
-          <a href="/notice/deck/" class="brief-header__link">Deck</a>
-          <span class="brief-header__sep">&middot;</span>
-          <a href="/notice/roadmap/" class="brief-header__link">Roadmap</a>
-          <span class="brief-header__sep">&middot;</span>
-          <a href="/notice-investor-brief.pdf" class="brief-header__link">PDF</a>
-          <span class="brief-header__sep">&middot;</span>
-          <a href="/notice/" class="brief-header__link">&larr; Notice Hub</a>
-        </div>
-      </div>
-    </header>
+    <NoticeHubNav current="brief" />
 
     <article class="brief">
 
@@ -178,69 +161,6 @@ import NoticeVisionExpansionRings from '../../components/islands/NoticeVisionExp
   .brief-page {
     position: relative;
     padding-top: 60px;
-  }
-
-  .brief-header {
-    padding: 0.75rem 2rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-  }
-
-  .brief-header__inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .brief-header__left {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-  }
-
-  .brief-header__eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    font-weight: 500;
-    letter-spacing: 0.25em;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .brief-header__title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .brief-header__right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .brief-header__link {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .brief-header__link:hover {
-    color: var(--accent);
-  }
-
-  .brief-header__sep {
-    color: var(--text-faint);
-    font-size: 0.65rem;
   }
 
   /* ── Article Layout ── */
@@ -513,16 +433,6 @@ import NoticeVisionExpansionRings from '../../components/islands/NoticeVisionExp
 
   /* ── Responsive: Phone ── */
   @media (max-width: 640px) {
-    .brief-header {
-      padding: 0.5rem 1rem;
-    }
-
-    .brief-header__inner {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.4rem;
-    }
-
     .brief {
       padding: 0 1.25rem 4rem;
     }

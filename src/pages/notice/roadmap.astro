@@ -1,8 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
+import NoticeHubNav from '../../components/NoticeHubNav.astro';
 ---
 
 <Base title="Notice — Roadmap" description="What's shipped, what's next, and where Notice is headed. A living document.">
+  <NoticeHubNav current="roadmap" />
   <section class="roadmap">
     <header class="roadmap-header">
       <div class="eyebrow">NOTICE</div>
@@ -12,7 +14,6 @@ import Base from '../../layouts/Base.astro';
       <div class="roadmap-cta-top">
         <a href="https://notice.tools" target="_blank" rel="noopener noreferrer" class="roadmap-cta-btn">Sign Up for the Beta →</a>
       </div>
-      <a class="back-link" href="/notice/">← Notice</a>
     </header>
 
     <!-- 01 WHAT'S SHIPPED -->
@@ -208,19 +209,6 @@ import Base from '../../layouts/Base.astro';
     letter-spacing: 0.08em;
     color: var(--text-muted);
     margin-bottom: 0.75rem;
-  }
-
-  .back-link {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--accent);
-    text-decoration: none;
-    letter-spacing: 0.02em;
-    transition: opacity 0.2s ease;
-  }
-
-  .back-link:hover {
-    opacity: 0.7;
   }
 
   /* Section dividers */

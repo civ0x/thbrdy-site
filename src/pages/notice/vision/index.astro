@@ -1,6 +1,7 @@
 ---
 import { getEntry, render } from 'astro:content';
 import PostLayout from '../../../layouts/PostLayout.astro';
+import NoticeHubNav from '../../../components/NoticeHubNav.astro';
 
 const post = await getEntry('writing', 'notice-vision');
 if (!post) throw new Error('notice-vision entry not found');
@@ -19,105 +20,6 @@ const minutesRead = Math.max(1, Math.round(words / 250));
   minutesRead={minutesRead}
   ogImage={`/images/og/${post.id}.png`}
 >
-  <header slot="before-article" class="vision-hub-nav">
-    <div class="vision-hub-nav__inner">
-      <div class="vision-hub-nav__left">
-        <span class="vision-hub-nav__eyebrow">NOTICE</span>
-        <span class="vision-hub-nav__title">Vision</span>
-      </div>
-      <div class="vision-hub-nav__right">
-        <a href="/notice/deck/" class="vision-hub-nav__link">Deck</a>
-        <span class="vision-hub-nav__sep">&middot;</span>
-        <a href="/notice/brief/" class="vision-hub-nav__link">Brief</a>
-        <span class="vision-hub-nav__sep">&middot;</span>
-        <a href="/notice/roadmap/" class="vision-hub-nav__link">Roadmap</a>
-        <span class="vision-hub-nav__sep">&middot;</span>
-        <a href="/notice/" class="vision-hub-nav__link">&larr; Notice Hub</a>
-      </div>
-    </div>
-  </header>
+  <NoticeHubNav slot="before-article" current="vision" />
   <Content />
 </PostLayout>
-
-<style>
-  .vision-hub-nav {
-    padding: 0.75rem 2rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-  }
-
-  .vision-hub-nav__inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .vision-hub-nav__left {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-  }
-
-  .vision-hub-nav__eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    font-weight: 500;
-    letter-spacing: 0.25em;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .vision-hub-nav__title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .vision-hub-nav__right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .vision-hub-nav__link {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .vision-hub-nav__link:hover {
-    color: var(--accent);
-  }
-
-  .vision-hub-nav__sep {
-    color: var(--text-faint);
-    font-size: 0.65rem;
-  }
-
-  @media (max-width: 640px) {
-    .vision-hub-nav {
-      padding: 0.75rem 1.5rem;
-    }
-
-    .vision-hub-nav__inner {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .vision-hub-nav__link {
-      transition: none;
-    }
-  }
-</style>
