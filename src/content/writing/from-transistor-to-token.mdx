@@ -39,7 +39,7 @@ Sixteen neural engine cores are present in every M5 variant, unchanged from M4. 
 
 Before the scaling story, the efficiency story. At 2.8 watts peak power, the M4 ANE achieves 6.6 TFLOPS/W. The M4 base GPU manages 1.0 TFLOPS/W. For datacenter comparison: the A100 delivers 0.08 TFLOPS/W, and the H100 0.13 TFLOPS/W. The ANE is 50–80× more energy-efficient per floating-point operation than the best datacenter GPUs on the planet.
 
-Not marketing. Physics. But physics applied to a specific computation pattern, accessed through CoreML, which wastes most of it.
+Not marketing. Physics. But physics applied to a specific computation pattern, accessed through CoreML — whose overhead wastes most of the advantage.
 
 [[term:coreml|CoreML]], Apple's public machine learning framework, adds 2–4× overhead for small operations compared to direct ANE access. The dispatch floor is roughly 0.095 milliseconds per operation, which means that for a 256×256 matrix multiplication taking 0.006ms of actual ANE compute, CoreML's XPC and IOKit overhead consumes 94% of wall-clock time. There is a 119-compile-per-process ceiling. The scheduler is a black box: the [[ref:orion-paper|Orion paper]] (arXiv:2603.06728) cataloged 20 ANE restrictions, 14 of them previously undocumented. Developers cannot force ANE execution, cannot inspect ANE programs, and cannot perform gradient computation on the hardware. If a single layer in a model is not ANE-compatible, CoreML may fall the entire model back to CPU.
 
@@ -75,7 +75,7 @@ This is a bet against Apple's own prior architecture. The ANE was the answer to 
 
 ### Two regimes of inference
 
-This is the conceptual hinge of the entire system-level story, and it is the distinction that most benchmark summaries collapse into a single number.
+This distinction — prefill versus decode — is what most benchmark summaries collapse into a single number.
 
 *[[term:prefill|Prefill]]* is the first phase of LLM inference: processing the entire input prompt at once. It is compute-bound. More FLOPS means faster prefill. The M5 Max's Neural Accelerators deliver 3.5–4× improvement over the M4 Max. A 10,000-token prompt that took 81 seconds on M4 Max drops to 18 seconds on M5 Max, according to MacStories benchmarks. This transforms long-context workflows from "wait minutes" to "wait seconds."
 
@@ -149,11 +149,9 @@ The ecosystem is converging accordingly: MLX for compute, [[term:jaccl|JACCL]] f
 
 ### The inference machine thesis
 
-Aakash [[ref:gupta-analysis|Gupta's]] framing crystallizes what the spec sheet implies: "This is Apple designing silicon around one assumption — the primary workload for a pro laptop in 2026 is running LLMs locally."
+Aakash [[ref:gupta-analysis|Gupta's]] framing puts it plainly: "This is Apple designing silicon around one assumption — the primary workload for a pro laptop in 2026 is running LLMs locally."
 
 The pricing is evidence. The $200 "price increase" on the M5 Pro is functionally zero: Apple doubled the base storage to absorb it. The inference configurations, 128GB unified memory for loading 70B+ models, start at $5,000. Apple name-dropped LM Studio, a third-party local inference application, in its own press materials. The M5 press release leads with AI compute metrics before mentioning video editing.
-
-None of this proves the thesis. All of it is consistent with it.
 
 <PullQuote client:visible slug="from-transistor-to-token" quoteIndex={3}>No single spec is best in class; the package is.</PullQuote>
 
@@ -161,7 +159,7 @@ None of this proves the thesis. All of it is consistent with it.
 
 ## Convergent design
 
-The hardware defines what is possible. The question is what runs on it, and whether the models being built elsewhere happen to fit the constraints Apple's silicon imposes.
+The hardware defines what is possible. The question is what runs on it, and whether the models being built elsewhere fit Apple's constraints or do not.
 
 [[ref:qwen35|Qwen 3.5]], released by Alibaba in 2026, provides the most instructive case study. The architecture replaces 75% of standard attention layers with [[term:gated-deltanet|Gated DeltaNet]], a recurrent mechanism that maintains a fixed-size state matrix instead of a growing key-value cache. The core equation:
 
@@ -181,7 +179,7 @@ The 3:1 ratio of DeltaNet layers to full attention layers was empirically tuned 
 
 [[term:moe|Mixture of Experts]] compounds the advantage. The 397B flagship [[term:active-parameters|activates only 17B parameters]] per token — 10 routed experts plus 1 shared expert out of 512 total. At Q4 quantization, per-token memory reads are 8.5 GB. On M5 Max at 614 GB/s, the theoretical ceiling is roughly 72 tok/s. The 35B-A3B variant activates only 3B parameters per token — Ziskind chose this model for his M5 Max benchmarks because it is designed for this hardware profile.
 
-The smaller dense models punch above their weight. The 9B model scores 81.7 on GPQA Diamond. There is a disputed baseline — GPT-OSS-120B was reported at 71.5 in one evaluation and 80.1 by VentureBeat, which would narrow Qwen 3.5 9B's margin from 10.2 points to 1.6. But Artificial Analysis independently rates it the highest Intelligence Index among all sub-10B models.
+The smaller dense models are disproportionately strong. The 9B model scores 81.7 on GPQA Diamond. There is a disputed baseline — GPT-OSS-120B was reported at 71.5 in one evaluation and 80.1 by VentureBeat, which would narrow Qwen 3.5 9B's margin from 10.2 points to 1.6. But Artificial Analysis independently rates it the highest Intelligence Index among all sub-10B models.
 
 The convergence is not limited to Qwen. Kimi Linear independently arrived at a 3:1 hybrid ratio. Granite 4.0 pushes to 9:1. RecurrentGemma uses approximately 2:1. RWKV-7 eliminates full [[term:linear-attention|attention]] entirely. The cautionary counterexample: MiniMax abandoned hybrid linear attention after quality degradation on complex multi-hop reasoning at scale. The ratio is empirical, not theoretically derived, and may not hold as models grow larger.
 
@@ -245,7 +243,7 @@ The skill-document loop mirrors autoresearch's ratchet. Both accumulate structur
 
 The ratchet has failure modes that its elegance can obscure.
 
-The random seed incident: the agent's "improvement" was changing seed 42 to 137, achieving lower validation loss through what amounted to evaluation-set overfitting. The metric gate is only as good as the metric. High failure rates — 26 of 35 experiments crashed on one M4 Mini run. The five-minute budget constrains useful scale to 10 million parameters. And GitHub Issue #22, titled "Low creativity," captures the deeper limitation: the agent mostly tweaks hyperparameters rather than exploring novel architectures. As Karpathy put it, "The LLM feels unwilling to creatively pursue a research direction."
+A documented failure: the agent's "improvement" was changing seed 42 to 137, achieving lower validation loss through evaluation-set overfitting. The metric gate is only as good as the metric. High failure rates — 26 of 35 experiments crashed on one M4 Mini run. The five-minute budget constrains useful scale to 10 million parameters. And GitHub Issue #22, titled "Low creativity," captures the deeper limitation: the agent mostly tweaks hyperparameters rather than exploring novel architectures. As Karpathy put it, "The LLM feels unwilling to creatively pursue a research direction."
 
 Hermes's capability depends entirely on the quality of the model driving it — which brings the argument full circle, back to the stack beneath. The agent layer cannot outrun the model layer, which cannot outrun the framework layer, which cannot outrun the silicon. Each layer inherits the constraints of everything below it. A brilliant `program.md` running on a model that hallucinates evaluations produces nothing. A sophisticated skill-document architecture running on a model too small for multi-step reasoning produces noise that accumulates rather than knowledge that compounds.
 
@@ -255,9 +253,9 @@ Hermes's capability depends entirely on the quality of the model driving it — 
 
 <PullQuote client:visible slug="from-transistor-to-token" quoteIndex={4}>The human's role is shifting from running experiments to designing experimental environments.</PullQuote>
 
-Compute used to be the constraint. For decades, the question "how fast can we train?" dominated machine learning research, and the answer was always "get more FLOPS." Then bandwidth became the constraint. The transition from training-bound to inference-bound workloads moved the bottleneck from compute to memory: how fast can we read model weights determines how fast we can generate tokens, and no amount of additional FLOPS changes that equation.
+Compute used to be the constraint. For decades, the question "how fast can we train?" dominated machine learning research, and the answer was always "get more FLOPS." Then bandwidth became the constraint. As inference workloads scaled, the bottleneck shifted from compute to memory bandwidth: how fast can we read model weights determines how fast we can generate tokens, and no amount of additional FLOPS changes that equation.
 
-Now the constraint is shifting again, upward through the stack. Model architecture is solving the bandwidth problem: Qwen 3.5's linear attention layers reduce per-token memory reads by orders of magnitude. Agent design is the next bottleneck: autoresearch's `program.md` and Hermes's skill documents are the specification layer that determines what the hardware-model-framework stack actually *does*. And above that, the human's specification of what the system should optimize — the design of the experimental environment rather than the running of experiments within it.
+Now the constraint is shifting again, upward through the stack. Model architecture is solving the bandwidth problem: Qwen 3.5's linear attention layers reduce per-token memory reads by orders of magnitude. Agent design is the next bottleneck: autoresearch's `program.md` and Hermes's skill documents are the specification layer that determines what the hardware-model-framework stack actually *does*. And above that, the human's experimental design — what metrics matter, which constraints to impose, what the system optimizes for.
 
 Each upward shift does not eliminate the layer below. The silicon still matters. The framework still matters. The model architecture still matters. But each becomes table stakes rather than the differentiator. The M5 Max's 614 GB/s is necessary for 70B inference but not sufficient for useful 70B inference — you also need the right quantization, the right framework, and a prompt worth computing.
 
@@ -279,7 +277,7 @@ Weinbach's characterization captures the disconnect precisely: the ANE is "a blo
 
 Apple may be approaching the framework problem from two directions. Metal 4 Tensor APIs give developers transparent GPU-path access to neural compute right now — a public, programmable surface that did not exist before. A rumored CoreAI framework, reported by Mark Gurman at Bloomberg in March 2026, could unify dispatch across the ANE and GPU Neural Accelerators at WWDC. But this is a single-source report with zero technical corroboration: no framework binary, no developer documentation, no Xcode headers, no job postings. Developer Ronald [[ref:mannak-tweet|Mannak's]] widely-seen tweet connecting the CoreML overhead findings to the rumored CoreAI update captures the community mood: the technical pressure is real, and the timeline (WWDC, June 2026) is specific. The ANEMLL project's expert reaction is more cautious: "What we really need is lower-level ANE access and transparent ANECompiler diagnostics... an XLA/HLO-style compiler path for ANE would be a much stronger foundation than a higher-level unified API."
 
-The M5 Ultra raises a question the M5 Max's architecture makes newly interesting. Every prior Ultra bonded two Max dies via UltraFusion. But the M5 Max is already a two-die chiplet, CPU tile and GPU tile bonded via SoIC-MH. If the Ultra bonds two Max packages, the result is four dies on an interposer, unprecedented for Apple Silicon. Apple's patents describe multi-die interconnects with stitched interposers supporting multiple metal layers, and TSMC's CoWoS-S5 packaging supports the area required. An alternative theory — that the Fusion Architecture's modular tile design lets Apple assemble the Ultra from separate CPU and GPU tiles without literally doubling the Max — would explain why Apple skipped the M4 Ultra entirely, shipping Mac Studio with M3 Ultra instead. Whether the M5 Ultra is four dies or a new modular assembly, the answer will shape thermal headroom, yield economics, and whether Apple can exceed the 2× Max formula for the first time. The reveal window is the same as the CoreAI framework: WWDC, June 2026.
+The M5 Ultra raises a question the M5 Max's architecture makes newly interesting. Every prior Ultra bonded two Max dies via UltraFusion. But the M5 Max is already a two-die chiplet, CPU tile and GPU tile bonded via SoIC-MH. If the Ultra bonds two Max packages, the result is four dies on an interposer, unprecedented for Apple Silicon. Apple's patents describe multi-die interconnects with stitched interposers supporting multiple metal layers, and TSMC's CoWoS-S5 packaging supports the area required. An alternative theory — that the Fusion Architecture's modular tile design lets Apple assemble the Ultra from separate CPU and GPU tiles without literally doubling the Max — would explain why Apple skipped the M4 Ultra entirely, shipping Mac Studio with M3 Ultra instead. Whether the M5 Ultra is four dies or a new modular assembly, the answer will shape thermal headroom, yield economics, and whether Apple can exceed the 2× GPU core doubling that has defined every prior Ultra. The reveal window is the same as the CoreAI framework: WWDC, June 2026.
 
 The reveal window is three months away. The question is not whether the ANE hardware is capable — 6.6 TFLOPS/W proves that it is. The question is whether Apple gives developers a framework that stops wasting half of it. The 16-core Neural Engine will continue doing what it was built for: Face ID, Live Text, computational photography at zero watts idle. The future of general-purpose on-device ML compute appears to be GPU-integrated, publicly programmable, and scaling with core count — unless WWDC rewrites that trajectory.
 
@@ -287,13 +285,13 @@ The reveal window is three months away. The question is not whether the ANE hard
 
 The M5 Max is not the best at any single metric. It is the only device that combines 128GB unified memory, 614 GB/s bandwidth, 40 Neural Accelerators, laptop portability, and 50-watt power draw. For models above 30 billion parameters, this combination has no equivalent at any price.
 
-Whether that matters depends on two open questions. First, whether large local models become a primary workflow rather than a curiosity — whether the gap between cloud inference and local inference narrows enough that practitioners choose the machine on their desk over the API in their browser. The privacy argument is real but insufficient on its own; what tips the balance is capability parity at the model sizes that fit in 128GB. Qwen 3.5's 27B with 128K context, running at 20+ tok/s via MLX, is approaching the threshold where local inference is not merely private but competitive.
+The M5 Max's advantage rests on two conditions. First, whether large local models become a primary workflow rather than a curiosity — whether the gap between cloud inference and local inference narrows enough that practitioners choose the machine on their desk over the API in their browser. The privacy argument is real but insufficient on its own; what tips the balance is capability parity at the model sizes that fit in 128GB. Qwen 3.5's 27B with 128K context, running at 20+ tok/s via MLX, is approaching the threshold where local inference is not merely private but competitive.
 
 Second, whether the software ecosystem (MLX, llama.cpp, Metal 4, and whatever Apple announces in June) matures fast enough to close the gap between measured performance and theoretical performance. Today, the gap between what the hardware can do and what developers can access through public APIs is the single largest source of wasted capability in the stack. The ANE's 6.6 TFLOPS/W sits behind CoreML's 2–4× overhead. The GPU Neural Accelerators are programmable via Metal 4 but the tooling is nascent. MLX achieves 20–30% more throughput than llama.cpp on the same hardware, suggesting that even on the GPU path, optimization is far from saturated.
 
 The ratchet pattern extends beyond single machines. If the single-machine loop works — propose, evaluate, merge if improved — the natural question is what a distributed version looks like. Two early projects sketch the answer. [[ref:spore|Spore]] provides a peer-to-peer protocol for ML experiments where verifier nodes rerun compatible claims, mismatches trigger signed challenges, and publishers cannot verify their own work — the ratchet's "immutable evaluation harness" implemented as a gossip network with hardware-aware verification. [[ref:hyperspace|Hyperspace]] pushes further: a peer-to-peer agent network where agents train models, critique each other's output, and share compute with cryptographic verification of claimed resources. Both are early-stage. Neither has the kind of measured performance data that the rest of this essay demands. But they signal that the coordination layer for distributed autonomous experimentation is being built.
 
-The architecture is in place. The software is catching up. And the stack, from transistor to token, is now visible enough to reason about, the prerequisite for building anything useful on top of it.
+The stack, from transistor to token, is now visible enough to reason about. That is the prerequisite for building anything useful on top of it — and for knowing when you cannot.
 
 ---
 
