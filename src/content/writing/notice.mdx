@@ -21,9 +21,9 @@ import { NoticeArchitectureDiagram } from '../../components/islands/NoticeArchit
 
 Your body knows things before you do. Right now, as you read this, your heart rate carries information about how you're meeting this moment. Your HRV encodes something about your autonomic state. Your gut is doing something. You're probably not aware of any of it.
 
-This isn't a failure of attention. It's the normal human condition. Research on interoception — the felt sense of your own body — shows that most people are surprisingly poor at reading their own physiological signals in real time. Bud Craig's work on the insular cortex explains the mechanism: conscious awareness genuinely lags behind physiological reality. You're stressed before you know you're stressed. The body leads; the story follows.
+Research on interoception — the felt sense of your own body — shows that most people are poor at reading their own physiological signals in real time. Bud Craig's work on the insular cortex explains the mechanism: conscious awareness genuinely lags behind physiological reality. You're stressed before you know you're stressed. The body leads; the story follows.
 
-This creates a gap between three existing product categories. Meditation apps (Headspace, Calm, Waking Up) handle contemplative experiences but not moment-of-capture logging. Mood trackers (How We Feel, Daylio) handle labeling but miss biometric integration and contemplative depth. Health platforms (Oura, WHOOP) excel at biometric-behavioral correlation but lack emotional granularity and philosophical grounding. None of them train the underlying capacity — the ability to read your own states in real time.
+But existing products splinter what should be integrated. Meditation apps (Headspace, Calm, Waking Up) handle contemplative experiences but not moment-of-capture logging. Mood trackers (How We Feel, Daylio) handle labeling but miss biometric integration and contemplative depth. Health platforms (Oura, WHOOP) excel at biometric-behavioral correlation but lack emotional granularity and philosophical grounding. None of them train the underlying capacity — the ability to read your own states in real time.
 
 <NoticeCompetitiveGap client:visible />
 
@@ -33,7 +33,7 @@ This creates a gap between three existing product categories. Meditation apps (H
 
 Contemplative traditions have been training this capacity for millennia — noting practice (Mahasi Sayadaw), somatic-phenomenological methods (Gendlin's Focusing), jhana through embodied emotional awareness (Brasington, Armstrong), sensory decomposition (Shinzen Young's "See Hear Feel"). Different methods, same target: noticing what's arising in your experience without collapsing into reactivity.
 
-For me personally, the thing that cracked this open was a jhana retreat. I learned to feel things I'd been walking around with my whole life but couldn't name — to notice the felt sense of an emotion in my body, to distinguish between what was arising and how I was relating to it. The framework I encountered there — recursive self-acceptance, the window of tolerance, the insight that you can't anxiously monitor your way to wellbeing — became the design foundations for everything I'm building.
+A jhana retreat cracked this open. I learned to feel things I'd been walking around with my whole life but couldn't name — to notice the felt sense of an emotion in my body, to distinguish between what was arising and how I was relating to it. The framework I encountered there — recursive self-acceptance, the window of tolerance, the insight that you can't anxiously monitor your way to wellbeing — became the design foundations for everything I'm building.
 
 I came back from retreat and nothing existed that held what I'd learned. The meditation apps wanted me to follow guided sessions. The mood trackers wanted me to rate my day on a scale. The health platforms wanted to show me a readiness score. None of them asked the question the practice had taught me to ask: *what are you actually feeling in your body right now, and how are you meeting it?*
 
@@ -45,9 +45,7 @@ So I built the thing I wanted.
 
 Notice is live on TestFlight with beta testers from the Jhourney community. I designed and built it in roughly three working days of effort — not contiguous, and not linear. It was my first iOS app. I had zero Swift experience going in. The primary development tool was the Claude Agent SDK running natively in Xcode 26.3.
 
-I want to be clear about something: I wasn't building for a market. I was building for myself. The conversations I had with other practitioners along the way — and the beta testing with the Jhourney community — were a form of external dialogue to help me reason through design decisions, not customer discovery in the conventional sense. The people I talked to share the problem because they share the practice. But the taste and the vision for what this should feel like were mine.
-
-The build was iterative loops of research, design, build, ship, learn, repeat.
+I built this for myself, not for a market. The conversations I had with other practitioners along the way — and the beta testing with the Jhourney community — were a form of external dialogue to help me reason through design decisions, not customer discovery in the conventional sense. The people I talked to share the problem because they share the practice. But the taste and the vision for what this should feel like were mine.
 
 <NoticeBuildTimeline client:visible />
 
@@ -55,7 +53,7 @@ The build was iterative loops of research, design, build, ship, learn, repeat.
 
 I started by translating research into documents that would guide both me and the AI agent. A 6,000-word foundation document converting neuroscience (Craig, Barrett, Garfinkel) and contemplative frameworks (Jhourney's Dam Model, frame-dependence philosophy) into specific design constraints. A CLAUDE.md encoding architectural guidelines, anti-patterns, and scope tiers. A DECISIONS.md logging every open question with evidence and options.
 
-These aren't documentation for documentation's sake. They're prompt engineering for an agentic development workflow. The CLAUDE.md was more consequential than any Swift file the agent would produce. The system prompt for the AI reflection layer — encoding ten constraints drawn from contemplative philosophy — was the highest-leverage artifact in the entire product.
+They were prompt engineering artifacts — more consequential than any code the agent produced. The system prompt for the AI reflection layer — encoding ten constraints drawn from contemplative philosophy — was the highest-leverage artifact in the entire product.
 
 Then I built. Xcode 26.3's Claude Agent integration turned hours of building into a complete application. The agent could see Xcode Previews, reason across the full project structure, search Apple's documentation, and iterate autonomously. I gave it goals and design constraints; it produced working code. By the end of the first working day, I had a running app on my Watch and phone: tap to snap, biometric capture, emotion picker, Claude streaming reflections, SwiftData persistence. I pushed a beta to my own devices.
 
@@ -81,7 +79,7 @@ I also integrated Apple's on-device Foundation Models for the felt-sense interpr
 
 The total was about 24 hours of effort. The enabling constraint was that I'd invested heavily in the design documents — not as a sequential phase, but as the primary artifact that made everything downstream possible. Each loop started with research and design updates to the foundation doc, CLAUDE.md, and DECISIONS.md; then the agent built against those constraints.
 
-The quality of agentic output is bounded by the quality of input context. The gap between "I understand this problem deeply" and "I can ship a working solution in an unfamiliar stack" has collapsed — but only if you do the design work. The agent doesn't replace product thinking. It removes the bottleneck between product thinking and shipped code.
+The quality of agentic output is bounded by the quality of input context. The gap between "I understand this problem deeply" and "I can ship a working solution in an unfamiliar stack" has collapsed — but only if you do the design work. The agent removes the bottleneck between product thinking and shipped code.
 
 <SectionDivider client:visible number="04" label="The Interaction" />
 
@@ -93,7 +91,7 @@ The quality of agentic output is bounded by the quality of input context. The ga
 
 The critical design decision: you commit your subjective assessment before you see the biometric data. You say "I feel tense" and then discover your HRV is 22ms below your weekly average. Over time, that feedback loop trains calibration between felt sense and physiology. The data validates your noticing rather than replacing it.
 
-The interaction design draws on Lisa Feldman Barrett's constructed emotion theory — emotions aren't pre-formed things you detect but constructions from raw affect plus whatever conceptual frame you bring to the moment. The same physiological activation becomes anxiety or excitement depending on how you meet it. This is an instance of a deeper principle: all experience is [frame-dependent](https://softmax.com/blog/the-frame-dependent-mind), and the skill worth cultivating isn't finding the "true" read of your state but learning to navigate between frames with flexibility and discernment. The emotion picker isn't a labeling exercise — it's the instrument through which users practice constructing their experience more deliberately, discovering that the frame they bring to a sensation is itself a choice.
+Lisa Feldman Barrett's constructed emotion theory explains why this works: emotions aren't pre-formed things you detect but constructions from raw affect plus whatever conceptual frame you bring to the moment. The same physiological activation becomes anxiety or excitement depending on how you meet it. All experience is [frame-dependent](https://softmax.com/blog/the-frame-dependent-mind), and the skill worth cultivating isn't finding the "true" read of your state but learning to navigate between frames with flexibility and discernment. The emotion picker isn't a labeling exercise — it's the instrument through which users practice constructing their experience more deliberately, discovering that the frame they bring to a sensation is itself a choice.
 
 <SectionDivider client:visible number="05" label="The Architecture" />
 
@@ -117,11 +115,13 @@ Every context source beyond HealthKit is independently optional. No permission w
 
 Claude API (Sonnet) handles longitudinal pattern analysis and contemplative reframing. The system prompt encodes ten constraints from the contemplative foundations: curiosity over correction, process over outcome, recursive self-acceptance, window of tolerance awareness, frame navigation not prescription. It never pathologizes. It validates subjective experience over objective data. It surfaces absence and detects emotional rigidity. The voice is warm, concise, grounded — a wise friend who noticed something, not a therapist chatbot.
 
+The architecture is solid. What I can't know yet is whether the interaction trains the capacity.
+
 <SectionDivider client:visible number="06" label="Honest Limits" />
 
 ## Honest Limits
 
-I don't know if this will work. The hypothesis is testable but unproven. The contemplative traditions are unanimous that you can't strive your way to awareness. The hardest design problem might be building a tool that embodies non-striving.
+The hypothesis is testable. I don't know the answer yet. The contemplative traditions are unanimous that you can't strive your way to awareness. The hardest design problem might be building a tool that embodies non-striving.
 
 What I'm watching: Do users snap less over time (scaffolding working) or more (dependency)? Does emotion label diversity increase (granularity developing) or narrow (habit)? Do users start qualifying their labels — "picked anxious but it's more like anticipation" — signaling their felt sense outgrowing the taxonomy? These are the behavioral proxies for the capacity I'm trying to train.
 
