@@ -14,4 +14,22 @@ const writing = defineCollection({
   }),
 });
 
-export const collections = { writing };
+const stories = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/stories' }),
+  schema: z.object({
+    project: z.enum(['scholion', 'notice', 'thbrdy-dev', 'pre-pando', 'other']),
+    shape: z.enum([
+      'design-decision',
+      'failure-mode',
+      'problem-and-method',
+      'star-with-design-decision',
+      'outcome-reframe',
+    ]),
+    agentRelevance: z.enum(['agent', 'partial', 'adjacent']),
+    tagline: z.string().max(80),
+    questions: z.array(z.string()).min(1).max(3),
+    handles: z.array(z.string()).min(1).max(3),
+  }),
+});
+
+export const collections = { writing, stories };
