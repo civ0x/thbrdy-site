@@ -1,0 +1,880 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { marked } from 'marked';
+
+interface Props {
+  selectedStory: CollectionEntry<'stories'>;
+  linkPrefix: string;
+}
+
+const { selectedStory, linkPrefix } = Astro.props;
+
+const stories = await getCollection('stories');
+
+const corpus = stories.map((s) => ({
+  id: s.id,
+  href: `${linkPrefix}${s.id}/`,
+  project: s.data.project,
+  tagline: s.data.tagline,
+  questions: s.data.questions,
+  handles: s.data.handles,
+}));
+
+const ribbonInitial = corpus
+  .slice()
+  .sort((a, b) => a.tagline.localeCompare(b.tagline))
+  .slice(0, 5);
+
+function splitBody(body: string): Record<string, string> {
+  const sections: Record<string, string> = {};
+  const regex = /^## (.+?)$\n([\s\S]*?)(?=^## |$(?![\s\S]))/gm;
+  let match;
+  while ((match = regex.exec(body)) !== null) {
+    sections[match[1].trim()] = marked.parse(match[2].trim()) as string;
+  }
+  return sections;
+}
+
+const sections = splitBody(selectedStory.body ?? '');
+const orientation = sections['Project orientation'] ?? '';
+const opener = sections['Opener'] ?? '';
+const punchline = sections['Punchline'] ?? '';
+const arcBeats = sections['Arc beats'] ?? '';
+const verify = sections['Verify'] ?? '';
+
+const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
+---
+
+<Base
+  title={`${selectedStory.data.tagline} — Prep`}
+  description={selectedStory.data.tagline}
+>
+  <section class="prep">
+    <form class="prep__search" role="search" onsubmit="return false;">
+      <label class="prep__search-label" for="prep-search-input">Search stories</label>
+      <input
+        id="prep-search-input"
+        class="prep__search-input"
+        type="search"
+        inputmode="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Type a question, a tagline, or a handle…"
+        aria-controls="prep-ribbon"
+        aria-autocomplete="list"
+      />
+      <p id="prep-search-status" class="prep__search-status" aria-live="polite">
+        Top {ribbonInitial.length} alphabetical
+      </p>
+    </form>
+
+    <nav
+      id="prep-ribbon"
+      class="prep__ribbon"
+      role="listbox"
+      aria-label="Story ribbon"
+    >
+      {ribbonInitial.map((s, idx) => (
+        <a
+          href={s.href}
+          id={`prep-ribbon-${s.id}`}
+          class={`prep__ribbon-item ${s.id === selectedStory.id ? 'prep__ribbon-item--selected' : ''}`}
+          data-story-id={s.id}
+          role="option"
+          aria-selected={s.id === selectedStory.id ? 'true' : 'false'}
+          tabindex={idx === 0 ? 0 : -1}
+        >
+          <span class="prep__ribbon-project">{s.project}</span>
+          <span class="prep__ribbon-tagline">{s.tagline}</span>
+        </a>
+      ))}
+    </nav>
+
+    <article class="prep__focus" data-story-id={selectedStory.id}>
+      <header class="prep__focus-header">
+        <div class="prep__focus-tags">
+          <span class="prep__tag prep__tag--project">{selectedStory.data.project}</span>
+          <span class="prep__tag">{selectedStory.data.shape}</span>
+          <span class="prep__tag">{selectedStory.data.agentRelevance}</span>
+        </div>
+        <h1 class="prep__focus-tagline">{selectedStory.data.tagline}</h1>
+        <button
+          id="prep-mode-toggle"
+          class="prep__mode-toggle"
+          type="button"
+          aria-pressed="false"
+          aria-label="Toggle deploy or drilling mode"
+        >
+          <span class="prep__mode-label" data-deploy-label="Deploy" data-drilling-label="Drilling">Deploy</span>
+        </button>
+      </header>
+
+      <section class="prep__above" aria-label="Deploy content">
+        <div class="prep__cue prep__cue--orientation">
+          <p class="prep__cue-label">Project · {selectedStory.data.project}</p>
+          <div class="prep__prose" set:html={orientation} />
+        </div>
+
+        <div class="prep__verbatim prep__verbatim--opener">
+          <p class="prep__verbatim-label">Opener</p>
+          <div class="prep__prose" set:html={opener} />
+        </div>
+
+        <div class="prep__verbatim prep__verbatim--punchline">
+          <p class="prep__verbatim-label">Punchline</p>
+          <div class="prep__prose" set:html={punchline} />
+        </div>
+      </section>
+
+      <details class="prep__details prep__details--beats">
+        <summary class="prep__summary">Arc beats &amp; handles</summary>
+        <div class="prep__details-body">
+          <div class="prep__cue">
+            <p class="prep__cue-label">Arc beats</p>
+            <div class="prep__prose" set:html={arcBeats} />
+          </div>
+          <div class="prep__cue">
+            <p class="prep__cue-label">Handles</p>
+            <ul class="prep__handles">
+              {selectedStory.data.handles.map((h) => <li>{h}</li>)}
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <details class="prep__details prep__details--verify">
+        <summary class="prep__summary">Verify items</summary>
+        <div class="prep__details-body">
+          <div class="prep__cue prep__cue--verify">
+            <div class="prep__prose" set:html={verify} />
+          </div>
+        </div>
+      </details>
+    </article>
+  </section>
+</Base>
+
+<script type="application/json" id="prep-corpus" is:inline set:html={corpusJson}></script>
+
+<script>
+  import Fuse from 'fuse.js';
+
+  type Entry = {
+    id: string;
+    href: string;
+    project: string;
+    tagline: string;
+    questions: string[];
+    handles: string[];
+  };
+
+  type Frecency = { [id: string]: number[] };
+
+  const HALF_LIFE_MS = 14 * 24 * 3600 * 1000;
+  const PRUNE_BEFORE_MS = 6 * HALF_LIFE_MS;
+  const ALPHA = 0.5;
+  const FRECENCY_KEY = 'prep:v1:frecency';
+  const MODE_KEY = 'prep:v1:mode';
+  const SCHEMA_KEY = 'prep:v1:_schema_version';
+
+  const corpus: Entry[] = JSON.parse(
+    document.getElementById('prep-corpus')!.textContent!
+  );
+
+  const fuse = new Fuse(corpus, {
+    keys: [
+      { name: 'questions', weight: 0.6 },
+      { name: 'handles', weight: 0.2 },
+      { name: 'tagline', weight: 0.2 },
+    ],
+    includeScore: true,
+    threshold: 0.4,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+  });
+
+  const input = document.getElementById('prep-search-input') as HTMLInputElement;
+  const ribbon = document.getElementById('prep-ribbon') as HTMLElement;
+  const status = document.getElementById('prep-search-status') as HTMLElement;
+  const focusPane = document.querySelector('.prep__focus') as HTMLElement;
+  const selectedStoryId = focusPane.dataset.storyId!;
+
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function readFrecency(): Frecency {
+    try {
+      const raw = localStorage.getItem(FRECENCY_KEY);
+      return raw ? (JSON.parse(raw) as Frecency) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeFrecency(frec: Frecency): void {
+    try {
+      localStorage.setItem(FRECENCY_KEY, JSON.stringify(frec));
+      if (!localStorage.getItem(SCHEMA_KEY)) {
+        localStorage.setItem(SCHEMA_KEY, '1');
+      }
+    } catch {}
+  }
+
+  function frecencyWeight(timestamps: number[] | undefined, now: number): number {
+    if (!timestamps || timestamps.length === 0) return 0;
+    return timestamps.reduce(
+      (sum, t) => sum + Math.exp(-(now - t) / HALF_LIFE_MS),
+      0
+    );
+  }
+
+  function recordClick(id: string): void {
+    const now = Date.now();
+    const frec = readFrecency();
+    const existing = (frec[id] || []).filter((t) => t > now - PRUNE_BEFORE_MS);
+    existing.push(now);
+    frec[id] = existing;
+    writeFrecency(frec);
+  }
+
+  function renderRibbon(entries: Entry[], statusText: string): void {
+    if (entries.length === 0) {
+      ribbon.innerHTML = '<p class="prep__ribbon-empty">No matches.</p>';
+      status.textContent = statusText;
+      input.removeAttribute('aria-activedescendant');
+      return;
+    }
+    ribbon.innerHTML = entries
+      .map((e, idx) => {
+        const isSelected = e.id === selectedStoryId;
+        return `<a
+          href="${escapeHtml(e.href)}"
+          id="prep-ribbon-${escapeHtml(e.id)}"
+          class="prep__ribbon-item${isSelected ? ' prep__ribbon-item--selected' : ''}"
+          data-story-id="${escapeHtml(e.id)}"
+          role="option"
+          aria-selected="${isSelected ? 'true' : 'false'}"
+          tabindex="${idx === 0 ? '0' : '-1'}">
+          <span class="prep__ribbon-project">${escapeHtml(e.project)}</span>
+          <span class="prep__ribbon-tagline">${escapeHtml(e.tagline)}</span>
+        </a>`;
+      })
+      .join('');
+    status.textContent = statusText;
+    selectedRibbonIndex = 0;
+    applyRibbonSelection();
+  }
+
+  let selectedRibbonIndex = 0;
+
+  function ribbonItems(): HTMLAnchorElement[] {
+    return Array.from(ribbon.querySelectorAll<HTMLAnchorElement>('.prep__ribbon-item'));
+  }
+
+  function applyRibbonSelection(): void {
+    const items = ribbonItems();
+    if (items.length === 0) {
+      input.removeAttribute('aria-activedescendant');
+      return;
+    }
+    const idx = Math.max(0, Math.min(items.length - 1, selectedRibbonIndex));
+    items.forEach((item, i) => {
+      item.setAttribute('tabindex', i === idx ? '0' : '-1');
+      // Keep visual "currently viewing" highlight separate from keyboard
+      // selection: --selected stays on the current story; we use focus ring
+      // for keyboard nav.
+    });
+    input.setAttribute('aria-activedescendant', items[idx].id);
+    items[idx].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    selectedRibbonIndex = idx;
+  }
+
+  function alphabetical(entries: Entry[]): Entry[] {
+    return entries.slice().sort((a, b) => a.tagline.localeCompare(b.tagline));
+  }
+
+  function byFrecency(entries: Entry[], frec: Frecency, now: number): Entry[] {
+    return entries
+      .map((e) => ({ entry: e, weight: frecencyWeight(frec[e.id], now) }))
+      .sort((a, b) => {
+        if (b.weight !== a.weight) return b.weight - a.weight;
+        return a.entry.tagline.localeCompare(b.entry.tagline);
+      })
+      .map((x) => x.entry);
+  }
+
+  function hasAnyFrecency(frec: Frecency, now: number): boolean {
+    return Object.values(frec).some((ts) => frecencyWeight(ts, now) > 0);
+  }
+
+  function update(): void {
+    const now = Date.now();
+    const frec = readFrecency();
+    const q = input.value.trim();
+
+    if (q.length === 0) {
+      if (hasAnyFrecency(frec, now)) {
+        const top = byFrecency(corpus, frec, now).slice(0, 5);
+        renderRibbon(top, `Top ${top.length} by recency`);
+      } else {
+        const top = alphabetical(corpus).slice(0, 5);
+        renderRibbon(top, `Top ${top.length} alphabetical`);
+      }
+      return;
+    }
+
+    const fuseResults = fuse.search(q);
+    if (fuseResults.length === 0) {
+      renderRibbon([], 'No matches.');
+      return;
+    }
+
+    const ranked = fuseResults
+      .map((r) => ({
+        item: r.item,
+        finalScore:
+          (r.score ?? 1) / (1 + ALPHA * frecencyWeight(frec[r.item.id], now)),
+      }))
+      .sort((a, b) => a.finalScore - b.finalScore)
+      .map((r) => r.item);
+
+    const top = ranked.slice(0, 5);
+    renderRibbon(top, `${top.length} of ${ranked.length} matches`);
+  }
+
+  // ============================================================
+  // Mode toggle (Deploy / Drilling)
+  // ============================================================
+  const modeToggle = document.getElementById('prep-mode-toggle') as HTMLButtonElement;
+  const modeLabel = modeToggle.querySelector('.prep__mode-label') as HTMLElement;
+  const detailsEls = Array.from(
+    document.querySelectorAll<HTMLDetailsElement>('.prep__details')
+  );
+
+  type Mode = 'deploy' | 'drilling';
+
+  function readMode(): Mode {
+    try {
+      const v = localStorage.getItem(MODE_KEY);
+      return v === 'drilling' ? 'drilling' : 'deploy';
+    } catch {
+      return 'deploy';
+    }
+  }
+
+  function writeMode(m: Mode): void {
+    try {
+      localStorage.setItem(MODE_KEY, m);
+    } catch {}
+  }
+
+  function applyMode(m: Mode): void {
+    const isDrilling = m === 'drilling';
+    modeToggle.setAttribute('aria-pressed', String(isDrilling));
+    modeLabel.textContent = isDrilling
+      ? modeLabel.dataset.drillingLabel!
+      : modeLabel.dataset.deployLabel!;
+    detailsEls.forEach((d) => {
+      if (isDrilling) {
+        d.setAttribute('open', '');
+      } else {
+        d.removeAttribute('open');
+      }
+    });
+    document.body.dataset.prepMode = m;
+  }
+
+  modeToggle.addEventListener('click', () => {
+    const next: Mode = readMode() === 'deploy' ? 'drilling' : 'deploy';
+    writeMode(next);
+    applyMode(next);
+  });
+
+  // ============================================================
+  // Click delegation: persist frecency before navigation
+  // ============================================================
+  ribbon.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const link = target.closest('.prep__ribbon-item') as HTMLAnchorElement | null;
+    if (link && link.dataset.storyId) {
+      recordClick(link.dataset.storyId);
+    }
+  });
+
+  input.addEventListener('input', update);
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedRibbonIndex += 1;
+      applyRibbonSelection();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedRibbonIndex -= 1;
+      applyRibbonSelection();
+    } else if (e.key === 'Enter') {
+      const items = ribbonItems();
+      const selected = items[selectedRibbonIndex];
+      if (selected && selected.dataset.storyId) {
+        e.preventDefault();
+        recordClick(selected.dataset.storyId);
+        window.location.href = selected.href;
+      }
+    } else if (e.key === 'Escape') {
+      if (input.value !== '') {
+        e.preventDefault();
+        input.value = '';
+        update();
+      } else {
+        input.blur();
+      }
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    // Cmd+K / Ctrl+K — focus search from anywhere
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      input.focus();
+      input.select();
+      return;
+    }
+    // `d` — toggle Deploy/Drilling mode when not typing in an input
+    if (
+      e.key.toLowerCase() === 'd' &&
+      !e.metaKey &&
+      !e.ctrlKey &&
+      !e.altKey
+    ) {
+      const target = e.target as HTMLElement;
+      const inField =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable);
+      if (!inField) {
+        e.preventDefault();
+        modeToggle.click();
+      }
+    }
+  });
+
+  // ============================================================
+  // Initial hydration
+  // ============================================================
+  applyMode(readMode());
+
+  const initialFrec = readFrecency();
+  if (hasAnyFrecency(initialFrec, Date.now()) || input.value.length > 0) {
+    update();
+  } else {
+    applyRibbonSelection();
+  }
+</script>
+
+<style is:global>
+  .prep {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 5rem 2rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* === Search === */
+  .prep__search {
+    margin-bottom: 1.5rem;
+  }
+
+  .prep__search-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .prep__search-input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--bg-warm);
+    border: 1px solid var(--border-mid);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .prep__search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .prep__search-input::placeholder {
+    color: var(--text-faint);
+  }
+
+  .prep__search-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0.5rem 0 0;
+  }
+
+  /* === Ribbon === */
+  .prep__ribbon {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.25rem 0 1rem;
+    margin: 0 -2rem 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    scroll-padding-inline: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prep__ribbon-item {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 140px;
+    max-width: 200px;
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--bg-warm);
+    transition: border-color 0.15s ease, background 0.15s ease;
+    outline: none;
+    min-height: 44px;
+  }
+
+  .prep__ribbon-item:hover,
+  .prep__ribbon-item:focus {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .prep__ribbon-item--selected {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+
+  .prep__ribbon-project {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .prep__ribbon-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.3;
+    /* truncate to 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .prep__ribbon-empty {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--text-light);
+    padding: 0.5rem 0;
+    margin: 0;
+  }
+
+  /* === Focus pane === */
+  .prep__focus {
+    /* nothing — just a column */
+  }
+
+  .prep__focus-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "tags toggle"
+      "tagline toggle";
+    gap: 0.5rem 1rem;
+    align-items: start;
+    margin-bottom: 2rem;
+  }
+
+  .prep__focus-tags {
+    grid-area: tags;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .prep__tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-mid);
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--border-mid);
+    border-radius: 2px;
+  }
+
+  .prep__tag--project {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .prep__focus-tagline {
+    grid-area: tagline;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 1.65rem;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  /* === Mode toggle === */
+  .prep__mode-toggle {
+    grid-area: toggle;
+    align-self: start;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-mid);
+    background: var(--bg-warm);
+    border: 1px solid var(--border-mid);
+    border-radius: 2px;
+    padding: 0.5rem 0.75rem;
+    min-height: 44px;
+    min-width: 44px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+
+  .prep__mode-toggle:hover,
+  .prep__mode-toggle:focus {
+    border-color: var(--accent);
+    color: var(--text);
+    outline: none;
+  }
+
+  .prep__mode-toggle[aria-pressed="true"] {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* === Above-fold === */
+  .prep__above {
+    margin-bottom: 1.5rem;
+  }
+
+  .prep__cue-label,
+  .prep__verbatim-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.5rem;
+  }
+
+  .prep__cue {
+    margin-bottom: 1.75rem;
+  }
+
+  .prep__cue .prep__prose {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-mid);
+    line-height: 1.55;
+  }
+
+  .prep__cue .prep__prose p {
+    margin: 0 0 0.75rem;
+  }
+
+  .prep__verbatim {
+    margin-bottom: 1.75rem;
+  }
+
+  .prep__verbatim .prep__prose {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  .prep__verbatim .prep__prose p {
+    margin: 0 0 0.85rem;
+  }
+
+  .prep__verbatim--opener .prep__prose {
+    border-left: 3px solid var(--accent);
+    padding-left: 1.25rem;
+  }
+
+  .prep__verbatim--punchline {
+    border-top: 1px solid var(--border-mid);
+    border-bottom: 1px solid var(--border-mid);
+    padding: 1.25rem 0;
+    margin-top: 2rem;
+  }
+
+  .prep__verbatim--punchline .prep__prose {
+    font-weight: 600;
+    font-size: 1.3rem;
+    font-style: italic;
+  }
+
+  /* === Below-fold (details) === */
+  .prep__details {
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  .prep__details:last-of-type {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prep__summary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-mid);
+    padding: 1rem 0;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+  }
+
+  .prep__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .prep__summary::before {
+    content: '▸';
+    color: var(--accent);
+    transition: transform 0.15s ease;
+    display: inline-block;
+  }
+
+  details[open] > .prep__summary::before {
+    transform: rotate(90deg);
+  }
+
+  .prep__summary:hover,
+  .prep__summary:focus {
+    color: var(--accent);
+    outline: none;
+  }
+
+  .prep__details-body {
+    padding: 0.5rem 0 1.5rem;
+  }
+
+  .prep__details-body .prep__cue {
+    margin-bottom: 1.25rem;
+  }
+
+  .prep__details-body .prep__cue:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Arc beats and verify share the same cue-prose typography */
+  .prep__details-body .prep__cue .prep__prose ul {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-mid);
+    line-height: 1.55;
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .prep__details-body .prep__cue .prep__prose li {
+    margin: 0.4rem 0;
+  }
+
+  .prep__cue--verify .prep__prose {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    line-height: 1.55;
+  }
+
+  .prep__cue--verify .prep__prose ul {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  .prep__handles {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-light);
+    font-style: italic;
+    line-height: 1.55;
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .prep__handles li {
+    margin: 0.4rem 0;
+  }
+
+  /* === Responsive === */
+  @media (max-width: 640px) {
+    .prep {
+      padding: 4rem 1.25rem 3rem;
+    }
+
+    .prep__ribbon {
+      margin: 0 -1.25rem 1.5rem;
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+      scroll-padding-inline: 1.25rem;
+    }
+
+    .prep__focus-tagline {
+      font-size: 1.35rem;
+    }
+
+    .prep__verbatim .prep__prose {
+      font-size: 1.1rem;
+    }
+
+    .prep__verbatim--punchline .prep__prose {
+      font-size: 1.2rem;
+    }
+  }
+</style>
