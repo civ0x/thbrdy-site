@@ -69,6 +69,59 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       </p>
     </form>
 
+    <details class="prep__portfolio">
+      <summary class="prep__portfolio-summary">
+        <span class="prep__portfolio-summary-label" id="prep-portfolio-label">Portfolio</span>
+      </summary>
+      <div class="prep__portfolio-body">
+        <label class="prep__portfolio-field">
+          <span class="prep__portfolio-field-label">Loop name</span>
+          <input
+            id="prep-portfolio-name"
+            type="text"
+            class="prep__portfolio-name"
+            placeholder="e.g., Onebrief 2026-05-20"
+            autocomplete="off"
+          />
+        </label>
+
+        <fieldset class="prep__portfolio-fieldset">
+          <legend class="prep__portfolio-fieldset-legend">Stories in this portfolio</legend>
+          <ul class="prep__portfolio-checklist">
+            {corpus
+              .slice()
+              .sort((a, b) => a.tagline.localeCompare(b.tagline))
+              .map((s) => (
+                <li>
+                  <label class="prep__portfolio-check">
+                    <input
+                      type="checkbox"
+                      class="prep__portfolio-checkbox"
+                      data-story-id={s.id}
+                    />
+                    <span class="prep__portfolio-check-project">{s.project}</span>
+                    <span class="prep__portfolio-check-tagline">{s.tagline}</span>
+                  </label>
+                </li>
+              ))}
+          </ul>
+        </fieldset>
+
+        <div class="prep__portfolio-actions">
+          <button id="prep-portfolio-save" class="prep__portfolio-button" type="button">
+            Save portfolio
+          </button>
+          <button
+            id="prep-portfolio-clear"
+            class="prep__portfolio-button prep__portfolio-button--secondary"
+            type="button"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+    </details>
+
     <nav
       id="prep-ribbon"
       class="prep__ribbon"
@@ -171,11 +224,18 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
 
   type Frecency = { [id: string]: number[] };
 
+  type Portfolio = {
+    name: string;
+    storyIds: string[];
+    updatedAt: number;
+  };
+
   const HALF_LIFE_MS = 14 * 24 * 3600 * 1000;
   const PRUNE_BEFORE_MS = 6 * HALF_LIFE_MS;
   const ALPHA = 0.5;
   const FRECENCY_KEY = 'prep:v1:frecency';
   const MODE_KEY = 'prep:v1:mode';
+  const PORTFOLIO_KEY = 'prep:v1:portfolio';
   const SCHEMA_KEY = 'prep:v1:_schema_version';
 
   const corpus: Entry[] = JSON.parse(
@@ -224,6 +284,42 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       if (!localStorage.getItem(SCHEMA_KEY)) {
         localStorage.setItem(SCHEMA_KEY, '1');
       }
+    } catch {}
+  }
+
+  function readPortfolio(): Portfolio | null {
+    try {
+      const raw = localStorage.getItem(PORTFOLIO_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as Portfolio;
+      if (
+        !parsed ||
+        typeof parsed.name !== 'string' ||
+        !Array.isArray(parsed.storyIds) ||
+        typeof parsed.updatedAt !== 'number'
+      ) return null;
+      const validIds = new Set(corpus.map((e) => e.id));
+      const filtered = parsed.storyIds.filter((id) => validIds.has(id));
+      if (filtered.length === 0) return null;
+      return { ...parsed, storyIds: filtered };
+    } catch {
+      return null;
+    }
+  }
+
+  function writePortfolio(name: string, storyIds: string[]): void {
+    try {
+      const p: Portfolio = { name, storyIds, updatedAt: Date.now() };
+      localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(p));
+      if (!localStorage.getItem(SCHEMA_KEY)) {
+        localStorage.setItem(SCHEMA_KEY, '1');
+      }
+    } catch {}
+  }
+
+  function clearPortfolio(): void {
+    try {
+      localStorage.removeItem(PORTFOLIO_KEY);
     } catch {}
   }
 
@@ -317,10 +413,20 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   function update(): void {
     const now = Date.now();
     const frec = readFrecency();
+    const portfolio = readPortfolio();
     const q = input.value.trim();
 
     if (q.length === 0) {
-      if (hasAnyFrecency(frec, now)) {
+      if (portfolio) {
+        const ids = new Set(portfolio.storyIds);
+        const portfolioCorpus = corpus.filter((e) => ids.has(e.id));
+        const top = byFrecency(portfolioCorpus, frec, now).slice(0, 5);
+        const label =
+          portfolio.name.trim().length > 0
+            ? `Portfolio: ${portfolio.name}`
+            : `Portfolio (${portfolio.storyIds.length})`;
+        renderRibbon(top, label);
+      } else if (hasAnyFrecency(frec, now)) {
         const top = byFrecency(corpus, frec, now).slice(0, 5);
         renderRibbon(top, `Top ${top.length} by recency`);
       } else {
@@ -398,6 +504,68 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   });
 
   // ============================================================
+  // Portfolio editor
+  // ============================================================
+  const portfolioDetails = document.querySelector(
+    '.prep__portfolio'
+  ) as HTMLDetailsElement;
+  const portfolioLabel = document.getElementById('prep-portfolio-label')!;
+  const portfolioName = document.getElementById(
+    'prep-portfolio-name'
+  ) as HTMLInputElement;
+  const portfolioCheckboxes = Array.from(
+    document.querySelectorAll<HTMLInputElement>('.prep__portfolio-checkbox')
+  );
+  const portfolioSave = document.getElementById(
+    'prep-portfolio-save'
+  ) as HTMLButtonElement;
+  const portfolioClear = document.getElementById(
+    'prep-portfolio-clear'
+  ) as HTMLButtonElement;
+
+  function syncPortfolioUI(): void {
+    const p = readPortfolio();
+    const checkedIds = new Set(p?.storyIds ?? []);
+    portfolioCheckboxes.forEach((cb) => {
+      cb.checked = checkedIds.has(cb.dataset.storyId!);
+    });
+    portfolioName.value = p?.name ?? '';
+    if (p) {
+      portfolioLabel.textContent =
+        p.name.trim().length > 0
+          ? `Portfolio: ${p.name}`
+          : `Portfolio (${p.storyIds.length} ${p.storyIds.length === 1 ? 'story' : 'stories'})`;
+      portfolioDetails.classList.add('prep__portfolio--active');
+      portfolioClear.disabled = false;
+    } else {
+      portfolioLabel.textContent = 'Portfolio';
+      portfolioDetails.classList.remove('prep__portfolio--active');
+      portfolioClear.disabled = true;
+    }
+  }
+
+  portfolioSave.addEventListener('click', () => {
+    const name = portfolioName.value.trim();
+    const ids = portfolioCheckboxes
+      .filter((cb) => cb.checked)
+      .map((cb) => cb.dataset.storyId!);
+    if (ids.length === 0) {
+      clearPortfolio();
+    } else {
+      writePortfolio(name, ids);
+    }
+    syncPortfolioUI();
+    portfolioDetails.removeAttribute('open');
+    update();
+  });
+
+  portfolioClear.addEventListener('click', () => {
+    clearPortfolio();
+    syncPortfolioUI();
+    update();
+  });
+
+  // ============================================================
   // Click delegation: persist frecency before navigation
   // ============================================================
   ribbon.addEventListener('click', (e) => {
@@ -470,9 +638,15 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   // Initial hydration
   // ============================================================
   applyMode(readMode());
+  syncPortfolioUI();
 
   const initialFrec = readFrecency();
-  if (hasAnyFrecency(initialFrec, Date.now()) || input.value.length > 0) {
+  const initialPortfolio = readPortfolio();
+  if (
+    initialPortfolio ||
+    hasAnyFrecency(initialFrec, Date.now()) ||
+    input.value.length > 0
+  ) {
     update();
   } else {
     applyRibbonSelection();
@@ -536,6 +710,216 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     text-transform: uppercase;
     color: var(--text-muted);
     margin: 0.5rem 0 0;
+  }
+
+  /* === Portfolio editor === */
+  .prep__portfolio {
+    margin: 0 0 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--bg-warm);
+  }
+
+  .prep__portfolio-summary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-mid);
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+  }
+
+  .prep__portfolio-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .prep__portfolio-summary::before {
+    content: '▸';
+    color: var(--accent);
+    transition: transform 0.15s ease;
+    display: inline-block;
+  }
+
+  .prep__portfolio[open] > .prep__portfolio-summary::before {
+    transform: rotate(90deg);
+  }
+
+  .prep__portfolio-summary:hover,
+  .prep__portfolio-summary:focus {
+    color: var(--accent);
+    outline: none;
+  }
+
+  .prep__portfolio--active > .prep__portfolio-summary {
+    color: var(--accent);
+  }
+
+  .prep__portfolio--active > .prep__portfolio-summary::after {
+    content: '●';
+    color: var(--accent);
+    font-size: 0.5rem;
+    margin-left: auto;
+  }
+
+  .prep__portfolio-body {
+    padding: 0.75rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .prep__portfolio-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .prep__portfolio-field-label,
+  .prep__portfolio-fieldset-legend {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0;
+  }
+
+  .prep__portfolio-name {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0.6rem 0.8rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border-mid);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .prep__portfolio-name:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .prep__portfolio-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .prep__portfolio-fieldset-legend {
+    margin-bottom: 0.5rem;
+  }
+
+  .prep__portfolio-checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .prep__portfolio-check {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    min-height: 44px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .prep__portfolio-check:hover {
+    background: var(--accent-dim);
+    border-color: var(--border-mid);
+  }
+
+  .prep__portfolio-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .prep__portfolio-check-project {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .prep__portfolio-check-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .prep__portfolio-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .prep__portfolio-button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 0.6rem 1rem;
+    min-height: 44px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .prep__portfolio-button:hover,
+  .prep__portfolio-button:focus {
+    background: var(--text);
+    border-color: var(--text);
+    outline: none;
+  }
+
+  .prep__portfolio-button--secondary {
+    color: var(--text-mid);
+    background: transparent;
+    border-color: var(--border-mid);
+  }
+
+  .prep__portfolio-button--secondary:hover,
+  .prep__portfolio-button--secondary:focus {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-color: var(--accent);
+  }
+
+  .prep__portfolio-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .prep__portfolio-button:disabled:hover {
+    background: transparent;
+    border-color: var(--border-mid);
+    color: var(--text-mid);
   }
 
   /* === Ribbon === */
@@ -863,6 +1247,27 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       padding-left: 1.25rem;
       padding-right: 1.25rem;
       scroll-padding-inline: 1.25rem;
+    }
+
+    .prep__portfolio-summary {
+      padding: 0.75rem 0.85rem;
+    }
+
+    .prep__portfolio-body {
+      padding: 0.75rem 0.85rem 0.85rem;
+    }
+
+    .prep__portfolio-check {
+      padding: 0.5rem 0.5rem;
+      grid-template-columns: auto 1fr;
+    }
+
+    .prep__portfolio-check-project {
+      grid-column: 2 / 3;
+    }
+
+    .prep__portfolio-check-tagline {
+      grid-column: 2 / 3;
     }
 
     .prep__focus-tagline {
