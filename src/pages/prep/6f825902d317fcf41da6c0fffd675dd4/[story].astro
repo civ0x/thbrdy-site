@@ -1,0 +1,183 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const stories = await getCollection('stories');
+  return stories.map(story => ({
+    params: { story: story.id },
+    props: { story },
+  }));
+}
+
+const { story } = Astro.props;
+const { Content } = await render(story);
+---
+
+<Base title={`${story.data.tagline} — Prep`} description={story.data.tagline}>
+  <article class="prep-story">
+    <nav class="prep-story__back">
+      <a href="../">← All stories</a>
+    </nav>
+
+    <header class="prep-story__header">
+      <div class="prep-story__meta">
+        <span class="prep-story__tag prep-story__tag--project">{story.data.project}</span>
+        <span class="prep-story__tag">{story.data.shape}</span>
+        <span class="prep-story__tag">{story.data.agentRelevance}</span>
+      </div>
+      <h1 class="prep-story__tagline">{story.data.tagline}</h1>
+    </header>
+
+    <section class="prep-story__hooks">
+      <h2 class="prep-story__hooks-label">Questions this story answers</h2>
+      <ul class="prep-story__hooks-list">
+        {story.data.questions.map(q => <li>{q}</li>)}
+      </ul>
+
+      <h2 class="prep-story__hooks-label">Handles</h2>
+      <ul class="prep-story__hooks-list">
+        {story.data.handles.map(h => <li>{h}</li>)}
+      </ul>
+    </section>
+
+    <section class="prep-story__body">
+      <Content />
+    </section>
+  </article>
+</Base>
+
+<style>
+  .prep-story {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 4rem 2rem 5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .prep-story__back {
+    margin-bottom: 2.5rem;
+  }
+
+  .prep-story__back a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .prep-story__back a:hover {
+    color: var(--accent);
+  }
+
+  .prep-story__header {
+    margin-bottom: 2.5rem;
+  }
+
+  .prep-story__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .prep-story__tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-mid);
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-mid);
+    border-radius: 2px;
+  }
+
+  .prep-story__tag--project {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .prep-story__tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 1.75rem;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .prep-story__hooks {
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+
+  .prep-story__hooks-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .prep-story__hooks-label:first-child {
+    margin-top: 0;
+  }
+
+  .prep-story__hooks-list {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    padding-left: 1.25rem;
+    margin: 0;
+  }
+
+  .prep-story__hooks-list li {
+    margin: 0.25rem 0;
+  }
+
+  .prep-story__body :global(h2) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 2.5rem 0 0.75rem;
+  }
+
+  .prep-story__body :global(p) {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    color: var(--text);
+    line-height: 1.6;
+    margin: 0 0 1rem;
+  }
+
+  .prep-story__body :global(ul) {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    padding-left: 1.25rem;
+  }
+
+  .prep-story__body :global(li) {
+    margin: 0.4rem 0;
+  }
+
+  @media (max-width: 640px) {
+    .prep-story {
+      padding: 3rem 1.25rem 4rem;
+    }
+
+    .prep-story__tagline {
+      font-size: 1.4rem;
+    }
+  }
+</style>

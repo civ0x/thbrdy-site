@@ -1,0 +1,133 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const stories = (await getCollection('stories'))
+  .sort((a, b) => a.data.tagline.localeCompare(b.data.tagline));
+---
+
+<Base title="Prep — stories" description="Interview prep stories.">
+  <section class="prep-index">
+    <header class="prep-index__header">
+      <p class="prep-index__eyebrow">Prep · {stories.length} {stories.length === 1 ? 'story' : 'stories'}</p>
+      <h1 class="prep-index__title">Stories</h1>
+    </header>
+
+    {stories.length === 0 && (
+      <p class="prep-index__empty">No stories yet.</p>
+    )}
+
+    <ul class="prep-index__list">
+      {stories.map(story => (
+        <li class="prep-index__item">
+          <a href={`${story.id}/`} class="prep-index__link">
+            <span class="prep-index__project">{story.data.project}</span>
+            <span class="prep-index__tagline">{story.data.tagline}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .prep-index {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .prep-index__header {
+    margin-bottom: 3rem;
+  }
+
+  .prep-index__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.75rem;
+  }
+
+  .prep-index__title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 2rem;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .prep-index__empty {
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--text-light);
+    font-style: italic;
+  }
+
+  .prep-index__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .prep-index__item {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prep-index__item:first-child {
+    border-top: 1px solid var(--border);
+  }
+
+  .prep-index__link {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 1rem 0;
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.2s ease;
+    min-height: 44px;
+  }
+
+  .prep-index__link:hover {
+    background: var(--accent-dim);
+    margin: 0 -1rem;
+    padding: 1rem;
+  }
+
+  .prep-index__project {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .prep-index__tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .prep-index {
+      padding: 5rem 1.25rem 3rem;
+    }
+
+    .prep-index__link {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+      padding: 0.875rem 0;
+    }
+
+    .prep-index__link:hover {
+      margin: 0 -0.75rem;
+      padding: 0.875rem 0.75rem;
+    }
+  }
+</style>
