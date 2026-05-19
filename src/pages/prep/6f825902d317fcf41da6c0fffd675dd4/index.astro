@@ -2,8 +2,22 @@
 import Base from '../../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 
-const stories = (await getCollection('stories'))
-  .sort((a, b) => a.data.tagline.localeCompare(b.data.tagline));
+const stories = await getCollection('stories');
+
+const corpus = stories.map(s => ({
+  id: s.id,
+  href: `${s.id}/`,
+  project: s.data.project,
+  tagline: s.data.tagline,
+  questions: s.data.questions,
+  handles: s.data.handles,
+}));
+
+const initialSorted = corpus
+  .slice()
+  .sort((a, b) => a.tagline.localeCompare(b.tagline));
+
+const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
 ---
 
 <Base title="Prep — stories" description="Interview prep stories.">
@@ -13,22 +27,303 @@ const stories = (await getCollection('stories'))
       <h1 class="prep-index__title">Stories</h1>
     </header>
 
-    {stories.length === 0 && (
-      <p class="prep-index__empty">No stories yet.</p>
-    )}
+    <form class="prep-search" role="search" onsubmit="return false;">
+      <label class="prep-search__label" for="prep-search-input">Search stories</label>
+      <input
+        id="prep-search-input"
+        class="prep-search__input"
+        type="search"
+        inputmode="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Type a question, a tagline, or a handle…"
+        autofocus
+        aria-controls="prep-results"
+        aria-autocomplete="list"
+      />
+      <p id="prep-search-status" class="prep-search__status" aria-live="polite">{stories.length} stories — alphabetical</p>
+    </form>
 
-    <ul class="prep-index__list">
-      {stories.map(story => (
+    <ul
+      id="prep-results"
+      class="prep-index__list"
+      role="listbox"
+      aria-label="Search results"
+    >
+      {initialSorted.map((story, idx) => (
         <li class="prep-index__item">
-          <a href={`${story.id}/`} class="prep-index__link">
-            <span class="prep-index__project">{story.data.project}</span>
-            <span class="prep-index__tagline">{story.data.tagline}</span>
+          <a
+            href={story.href}
+            id={`prep-result-${story.id}`}
+            class="prep-index__link"
+            data-story-id={story.id}
+            role="option"
+            aria-selected="false"
+            tabindex={idx === 0 ? 0 : -1}
+          >
+            <span class="prep-index__project">{story.project}</span>
+            <span class="prep-index__tagline">{story.tagline}</span>
           </a>
         </li>
       ))}
     </ul>
   </section>
 </Base>
+
+<script type="application/json" id="prep-corpus" is:inline set:html={corpusJson}></script>
+
+<script>
+  import Fuse from 'fuse.js';
+
+  type Entry = {
+    id: string;
+    href: string;
+    project: string;
+    tagline: string;
+    questions: string[];
+    handles: string[];
+  };
+
+  type Frecency = { [id: string]: number[] };
+
+  const HALF_LIFE_MS = 14 * 24 * 3600 * 1000;
+  const PRUNE_BEFORE_MS = 6 * HALF_LIFE_MS;
+  const ALPHA = 0.5;
+  const FRECENCY_KEY = 'prep:v1:frecency';
+  const SCHEMA_KEY = 'prep:v1:_schema_version';
+
+  const corpus: Entry[] = JSON.parse(
+    document.getElementById('prep-corpus')!.textContent!
+  );
+
+  const fuse = new Fuse(corpus, {
+    keys: [
+      { name: 'questions', weight: 0.6 },
+      { name: 'handles', weight: 0.2 },
+      { name: 'tagline', weight: 0.2 },
+    ],
+    includeScore: true,
+    threshold: 0.4,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+  });
+
+  const input = document.getElementById('prep-search-input') as HTMLInputElement;
+  const list = document.getElementById('prep-results') as HTMLUListElement;
+  const status = document.getElementById('prep-search-status') as HTMLParagraphElement;
+
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function readFrecency(): Frecency {
+    try {
+      const raw = localStorage.getItem(FRECENCY_KEY);
+      return raw ? (JSON.parse(raw) as Frecency) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeFrecency(frec: Frecency): void {
+    try {
+      localStorage.setItem(FRECENCY_KEY, JSON.stringify(frec));
+      if (!localStorage.getItem(SCHEMA_KEY)) {
+        localStorage.setItem(SCHEMA_KEY, '1');
+      }
+    } catch {
+      // localStorage unavailable (private mode, quota, etc.) — silently degrade
+    }
+  }
+
+  function frecencyWeight(timestamps: number[] | undefined, now: number): number {
+    if (!timestamps || timestamps.length === 0) return 0;
+    return timestamps.reduce(
+      (sum, t) => sum + Math.exp(-(now - t) / HALF_LIFE_MS),
+      0
+    );
+  }
+
+  function recordClick(id: string): void {
+    const now = Date.now();
+    const frec = readFrecency();
+    const existing = (frec[id] || []).filter((t) => t > now - PRUNE_BEFORE_MS);
+    existing.push(now);
+    frec[id] = existing;
+    writeFrecency(frec);
+  }
+
+  function renderResults(entries: Entry[], statusText: string): void {
+    if (entries.length === 0) {
+      list.innerHTML = '<li class="prep-index__empty">No matches.</li>';
+      status.textContent = statusText;
+      return;
+    }
+    list.innerHTML = entries
+      .map(
+        (e) => `<li class="prep-index__item">
+          <a href="${escapeHtml(e.href)}"
+             id="prep-result-${escapeHtml(e.id)}"
+             class="prep-index__link"
+             data-story-id="${escapeHtml(e.id)}"
+             role="option"
+             aria-selected="false"
+             tabindex="-1">
+            <span class="prep-index__project">${escapeHtml(e.project)}</span>
+            <span class="prep-index__tagline">${escapeHtml(e.tagline)}</span>
+          </a>
+        </li>`
+      )
+      .join('');
+    status.textContent = statusText;
+  }
+
+  function alphabetical(entries: Entry[]): Entry[] {
+    return entries.slice().sort((a, b) => a.tagline.localeCompare(b.tagline));
+  }
+
+  function byFrecency(entries: Entry[], frec: Frecency, now: number): Entry[] {
+    return entries
+      .map((e) => ({ entry: e, weight: frecencyWeight(frec[e.id], now) }))
+      .sort((a, b) => {
+        if (b.weight !== a.weight) return b.weight - a.weight;
+        return a.entry.tagline.localeCompare(b.entry.tagline);
+      })
+      .map((x) => x.entry);
+  }
+
+  function hasAnyFrecency(frec: Frecency, now: number): boolean {
+    return Object.values(frec).some(
+      (ts) => frecencyWeight(ts, now) > 0
+    );
+  }
+
+  let selectedIndex = 0;
+
+  function visibleLinks(): HTMLAnchorElement[] {
+    return Array.from(list.querySelectorAll<HTMLAnchorElement>('.prep-index__link'));
+  }
+
+  function updateSelection(newIndex: number): void {
+    const links = visibleLinks();
+    if (links.length === 0) {
+      input.removeAttribute('aria-activedescendant');
+      selectedIndex = 0;
+      return;
+    }
+    const clamped = Math.max(0, Math.min(links.length - 1, newIndex));
+    links.forEach((l, i) => {
+      l.setAttribute('aria-selected', i === clamped ? 'true' : 'false');
+      l.setAttribute('tabindex', i === clamped ? '0' : '-1');
+    });
+    input.setAttribute('aria-activedescendant', links[clamped].id);
+    selectedIndex = clamped;
+    links[clamped].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+
+  function update(): void {
+    const now = Date.now();
+    const frec = readFrecency();
+    const q = input.value.trim();
+
+    if (q.length === 0) {
+      if (hasAnyFrecency(frec, now)) {
+        const top = byFrecency(corpus, frec, now).slice(0, 5);
+        renderResults(top, `Top ${top.length} by recency`);
+      } else {
+        const sorted = alphabetical(corpus);
+        renderResults(sorted, `${sorted.length} stories — alphabetical`);
+      }
+      updateSelection(0);
+      return;
+    }
+
+    const fuseResults = fuse.search(q);
+    if (fuseResults.length === 0) {
+      renderResults([], 'No matches.');
+      updateSelection(0);
+      return;
+    }
+
+    // Fuse scores are lower-is-better. Divide by the frecency boost so frequent
+    // stories sink to lower scores (better rank).
+    const ranked = fuseResults
+      .map((r) => ({
+        item: r.item,
+        finalScore: (r.score ?? 1) / (1 + ALPHA * frecencyWeight(frec[r.item.id], now)),
+      }))
+      .sort((a, b) => a.finalScore - b.finalScore)
+      .map((r) => r.item);
+
+    const top = ranked.slice(0, 5);
+    renderResults(top, `${top.length} of ${ranked.length} matches`);
+    updateSelection(0);
+  }
+
+  // Click delegation: persist frecency before the browser navigates.
+  // localStorage writes are synchronous, so this completes before the link's
+  // default navigation fires.
+  list.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const link = target.closest('.prep-index__link') as HTMLAnchorElement | null;
+    if (link && link.dataset.storyId) {
+      recordClick(link.dataset.storyId);
+    }
+  });
+
+  input.addEventListener('input', update);
+
+  // Combobox keyboard handling: input stays focused, selection moves virtually.
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      updateSelection(selectedIndex + 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      updateSelection(selectedIndex - 1);
+    } else if (e.key === 'Enter') {
+      const links = visibleLinks();
+      const selected = links[selectedIndex];
+      if (selected && selected.dataset.storyId) {
+        e.preventDefault();
+        recordClick(selected.dataset.storyId);
+        window.location.href = selected.href;
+      }
+    } else if (e.key === 'Escape') {
+      if (input.value !== '') {
+        e.preventDefault();
+        input.value = '';
+        update();
+      } else {
+        input.blur();
+      }
+    }
+  });
+
+  // Global Cmd+K / Ctrl+K focuses search from anywhere on the page.
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      input.focus();
+      input.select();
+    }
+  });
+
+  // Initial hydration: if frecency exists, re-render by recency. Otherwise
+  // keep the server-rendered alphabetical list. Either way, mark the first
+  // result as virtually selected so Enter / arrows work immediately.
+  const initialFrec = readFrecency();
+  if (hasAnyFrecency(initialFrec, Date.now())) {
+    update();
+  } else {
+    updateSelection(0);
+  }
+</script>
 
 <style>
   .prep-index {
@@ -40,7 +335,7 @@ const stories = (await getCollection('stories'))
   }
 
   .prep-index__header {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
   }
 
   .prep-index__eyebrow {
@@ -61,10 +356,61 @@ const stories = (await getCollection('stories'))
     line-height: 1.2;
   }
 
+  .prep-search {
+    margin-bottom: 2rem;
+  }
+
+  .prep-search__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .prep-search__input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--bg-warm);
+    border: 1px solid var(--border-mid);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .prep-search__input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .prep-search__input::placeholder {
+    color: var(--text-faint);
+  }
+
+  .prep-search__status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0.5rem 0 0;
+  }
+
   .prep-index__empty {
     font-family: 'Cormorant Garamond', serif;
     color: var(--text-light);
     font-style: italic;
+    padding: 1.5rem 0;
+    list-style: none;
   }
 
   .prep-index__list {
@@ -91,12 +437,20 @@ const stories = (await getCollection('stories'))
     color: var(--text);
     transition: background 0.2s ease;
     min-height: 44px;
+    outline: none;
   }
 
-  .prep-index__link:hover {
+  .prep-index__link:hover,
+  .prep-index__link:focus,
+  .prep-index__link[aria-selected="true"] {
     background: var(--accent-dim);
     margin: 0 -1rem;
     padding: 1rem;
+  }
+
+  .prep-index__link:focus,
+  .prep-index__link[aria-selected="true"] {
+    box-shadow: inset 0 0 0 2px var(--accent);
   }
 
   .prep-index__project {
@@ -125,7 +479,9 @@ const stories = (await getCollection('stories'))
       padding: 0.875rem 0;
     }
 
-    .prep-index__link:hover {
+    .prep-index__link:hover,
+    .prep-index__link:focus,
+    .prep-index__link[aria-selected="true"] {
       margin: 0 -0.75rem;
       padding: 0.875rem 0.75rem;
     }
