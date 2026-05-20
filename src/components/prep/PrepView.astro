@@ -5,16 +5,31 @@ import { marked } from 'marked';
 
 interface Props {
   selectedStory: CollectionEntry<'stories'>;
-  linkPrefix: string;
+  // linkPrefix kept for backwards compatibility but no longer used;
+  // hrefs are now absolute, derived from Astro.url.pathname.
+  linkPrefix?: string;
 }
 
-const { selectedStory, linkPrefix } = Astro.props;
+const { selectedStory } = Astro.props;
 
 const stories = await getCollection('stories');
 
+// Derive an absolute base path for story links. The page's pathname is
+// either /prep/<slug>/ (index) or /prep/<slug>/<story-id>/ (detail), with or
+// without trailing slash depending on whether the server canonicalizes. We
+// derive a stable absolute base (always ending in /) so hrefs work regardless
+// of trailing-slash handling — the previous relative-href approach broke when
+// the page URL lacked a trailing slash (browser resolved against the parent).
+const corpusIds = new Set(stories.map((s) => s.id));
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+const lastSegment = pathSegments[pathSegments.length - 1] ?? '';
+const isDetail = corpusIds.has(lastSegment);
+const baseSegments = isDetail ? pathSegments.slice(0, -1) : pathSegments;
+const basePath = '/' + baseSegments.join('/') + '/';
+
 const corpus = stories.map((s) => ({
   id: s.id,
-  href: `${linkPrefix}${s.id}/`,
+  href: `${basePath}${s.id}/`,
   project: s.data.project,
   shape: s.data.shape,
   tagline: s.data.tagline,
