@@ -17,7 +17,16 @@ const writing = defineCollection({
 const stories = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/stories' }),
   schema: z.object({
-    project: z.enum(['scholion', 'notice', 'thbrdy-dev', 'pre-pando', 'other']),
+    project: z.enum([
+      'scholion',
+      'notice',
+      'thbrdy-dev',
+      'pop-ai',
+      'silicon-golem',
+      'editorial',
+      'pre-pando',
+      'other',
+    ]),
     shape: z.enum([
       'design-decision',
       'failure-mode',
