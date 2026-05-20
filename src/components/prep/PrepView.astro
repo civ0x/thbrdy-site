@@ -16,10 +16,18 @@ const corpus = stories.map((s) => ({
   id: s.id,
   href: `${linkPrefix}${s.id}/`,
   project: s.data.project,
+  shape: s.data.shape,
   tagline: s.data.tagline,
   questions: s.data.questions,
   handles: s.data.handles,
 }));
+
+const uniqueProjects = Array.from(
+  new Set(corpus.map((s) => s.project))
+).sort();
+const uniqueShapes = Array.from(
+  new Set(corpus.map((s) => s.shape))
+).sort();
 
 const ribbonInitial = corpus
   .slice()
@@ -144,6 +152,31 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       </div>
     </details>
 
+    <div class="prep__chips" id="prep-chips" aria-label="Filter by project or shape">
+      {uniqueProjects.map((p) => (
+        <button
+          type="button"
+          class="prep__chip prep__chip--project"
+          data-facet="project"
+          data-value={p}
+          aria-pressed="false"
+        >
+          <span class="prep__chip-sigil">@</span>{p}
+        </button>
+      ))}
+      {uniqueShapes.map((sh) => (
+        <button
+          type="button"
+          class="prep__chip prep__chip--shape"
+          data-facet="shape"
+          data-value={sh}
+          aria-pressed="false"
+        >
+          <span class="prep__chip-sigil">#</span>{sh}
+        </button>
+      ))}
+    </div>
+
     <nav
       id="prep-ribbon"
       class="prep__ribbon"
@@ -239,6 +272,7 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     id: string;
     href: string;
     project: string;
+    shape: string;
     tagline: string;
     questions: string[];
     handles: string[];
@@ -666,6 +700,28 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     return entries.slice().sort((a, b) => a.tagline.localeCompare(b.tagline));
   }
 
+  // Chip filters: in-page state (not persisted; resets on navigation).
+  // Within facet = OR; across facets = AND.
+  const activeProjectChips = new Set<string>();
+  const activeShapeChips = new Set<string>();
+
+  function applyChipFilter(entries: Entry[]): Entry[] {
+    if (activeProjectChips.size === 0 && activeShapeChips.size === 0) {
+      return entries;
+    }
+    return entries.filter((e) => {
+      const projectOk =
+        activeProjectChips.size === 0 || activeProjectChips.has(e.project);
+      const shapeOk =
+        activeShapeChips.size === 0 || activeShapeChips.has(e.shape);
+      return projectOk && shapeOk;
+    });
+  }
+
+  function hasActiveChips(): boolean {
+    return activeProjectChips.size > 0 || activeShapeChips.size > 0;
+  }
+
   function byFrecency(entries: Entry[], frec: Frecency, now: number): Entry[] {
     return entries
       .map((e) => ({ entry: e, weight: frecencyWeight(frec[e.id], now) }))
@@ -687,21 +743,24 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     const q = input.value.trim();
 
     if (q.length === 0) {
+      const scopeSuffix = hasActiveChips() ? ' · scoped' : '';
       if (portfolio) {
         const ids = new Set(portfolio.storyIds);
-        const portfolioCorpus = corpus.filter((e) => ids.has(e.id));
+        const portfolioCorpus = applyChipFilter(
+          corpus.filter((e) => ids.has(e.id))
+        );
         const top = byFrecency(portfolioCorpus, frec, now).slice(0, 5);
         const label =
           portfolio.name.trim().length > 0
-            ? `Portfolio: ${portfolio.name}`
-            : `Portfolio (${portfolio.storyIds.length})`;
+            ? `Portfolio: ${portfolio.name}${scopeSuffix}`
+            : `Portfolio (${portfolio.storyIds.length})${scopeSuffix}`;
         renderRibbon(top, label);
       } else if (hasAnyFrecency(frec, now)) {
-        const top = byFrecency(corpus, frec, now).slice(0, 5);
-        renderRibbon(top, `Top ${top.length} by recency`);
+        const top = byFrecency(applyChipFilter(corpus), frec, now).slice(0, 5);
+        renderRibbon(top, `Top ${top.length} by recency${scopeSuffix}`);
       } else {
-        const top = alphabetical(corpus).slice(0, 5);
-        renderRibbon(top, `Top ${top.length} alphabetical`);
+        const top = alphabetical(applyChipFilter(corpus)).slice(0, 5);
+        renderRibbon(top, `Top ${top.length} alphabetical${scopeSuffix}`);
       }
       return;
     }
@@ -715,7 +774,10 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     const queryFrec = readQueryFrecency();
     const queryBucket = queryFrec[normalizeQuery(q)] ?? {};
 
+    const scopedItems = applyChipFilter(fuseResults.map((r) => r.item));
+    const scopedIds = new Set(scopedItems.map((i) => i.id));
     const ranked = fuseResults
+      .filter((r) => scopedIds.has(r.item.id))
       .map((r) => {
         const globalW = frecencyWeight(frec[r.item.id], now);
         const queryW = frecencyWeight(queryBucket[r.item.id], now);
@@ -728,8 +790,14 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       .sort((a, b) => a.finalScore - b.finalScore)
       .map((r) => r.item);
 
+    if (ranked.length === 0) {
+      renderRibbon([], 'No matches in current scope.');
+      return;
+    }
+
+    const scopeSuffix = hasActiveChips() ? ' · scoped' : '';
     const top = ranked.slice(0, 5);
-    renderRibbon(top, `${top.length} of ${ranked.length} matches`);
+    renderRibbon(top, `${top.length} of ${ranked.length} matches${scopeSuffix}`);
   }
 
   // ============================================================
@@ -1140,6 +1208,39 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     );
     const checkedCount = checkboxes.filter((cb) => cb.checked).length;
     updateVerifySummary(checkedCount, verifyTotalItems);
+  });
+
+  // ============================================================
+  // Chip filters (project / shape)
+  // ============================================================
+  const chipsContainer = document.getElementById('prep-chips') as HTMLElement;
+
+  chipsContainer.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+    const chip = target.closest('.prep__chip') as HTMLButtonElement | null;
+    if (!chip) return;
+    e.preventDefault();
+    const facet = chip.dataset.facet;
+    const value = chip.dataset.value;
+    if (!facet || !value) return;
+    const set =
+      facet === 'project'
+        ? activeProjectChips
+        : facet === 'shape'
+        ? activeShapeChips
+        : null;
+    if (!set) return;
+    if (set.has(value)) {
+      set.delete(value);
+      chip.setAttribute('aria-pressed', 'false');
+      chip.classList.remove('prep__chip--active');
+    } else {
+      set.add(value);
+      chip.setAttribute('aria-pressed', 'true');
+      chip.classList.add('prep__chip--active');
+    }
+    update();
   });
 
   // ============================================================
@@ -1570,6 +1671,57 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   .prep__portfolio-pill-dot {
     font-size: 0.5rem;
     color: var(--accent);
+  }
+
+  /* === Chip filters === */
+  .prep__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0 0 1rem;
+    padding: 0.25rem 0;
+  }
+
+  .prep__chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border-mid);
+    border-radius: 999px;
+    padding: 0.3rem 0.6rem;
+    min-height: 28px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .prep__chip-sigil {
+    color: var(--text-faint);
+    font-weight: 500;
+  }
+
+  .prep__chip:hover,
+  .prep__chip:focus {
+    color: var(--accent);
+    border-color: var(--accent);
+    outline: none;
+  }
+
+  .prep__chip:hover .prep__chip-sigil,
+  .prep__chip:focus .prep__chip-sigil,
+  .prep__chip--active .prep__chip-sigil {
+    color: var(--accent);
+  }
+
+  .prep__chip--active {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-color: var(--accent);
   }
 
   /* === Coverage gap view === */
