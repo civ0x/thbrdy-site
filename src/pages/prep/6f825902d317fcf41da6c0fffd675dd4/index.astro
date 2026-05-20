@@ -1,4 +1,5 @@
 ---
+import Base from '../../../layouts/Base.astro';
 import PrepView from '../../../components/prep/PrepView.astro';
 import { getCollection } from 'astro:content';
 
@@ -8,4 +9,16 @@ const defaultStory = stories
   .sort((a, b) => a.data.tagline.localeCompare(b.data.tagline))[0];
 ---
 
-<PrepView selectedStory={defaultStory} linkPrefix="" />
+{defaultStory ? (
+  <PrepView selectedStory={defaultStory} linkPrefix="" />
+) : (
+  <Base title="Prep — no stories" description="Empty stories collection.">
+    <section style="max-width: 600px; margin: 0 auto; padding: 5rem 2rem;">
+      <p style="font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--text-light); font-style: italic;">
+        No stories in the collection yet. Add markdown files under
+        <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">src/content/stories/</code>
+        and rebuild.
+      </p>
+    </section>
+  </Base>
+)}
