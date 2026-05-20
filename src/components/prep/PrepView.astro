@@ -72,6 +72,7 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     <details class="prep__portfolio">
       <summary class="prep__portfolio-summary">
         <span class="prep__portfolio-summary-label" id="prep-portfolio-label">Portfolio</span>
+        <span class="prep__portfolio-summary-gaps" id="prep-portfolio-summary-gaps"></span>
       </summary>
       <div class="prep__portfolio-body">
         <label class="prep__portfolio-field">
@@ -84,6 +85,19 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
             autocomplete="off"
           />
         </label>
+
+        <div class="prep__portfolio-coverage">
+          <p class="prep__portfolio-coverage-summary" id="prep-portfolio-coverage-summary">
+            Coverage: 0 of 0 questions
+          </p>
+          <details class="prep__portfolio-gaps">
+            <summary class="prep__portfolio-gaps-summary">
+              Uncovered questions
+              <span class="prep__portfolio-gaps-count" id="prep-portfolio-gaps-count"></span>
+            </summary>
+            <ul class="prep__portfolio-gaps-list" id="prep-portfolio-gaps-list"></ul>
+          </details>
+        </div>
 
         <fieldset class="prep__portfolio-fieldset">
           <legend class="prep__portfolio-fieldset-legend">Stories in this portfolio</legend>
@@ -595,6 +609,21 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   const portfolioClear = document.getElementById(
     'prep-portfolio-clear'
   ) as HTMLButtonElement;
+  const portfolioSummaryGaps = document.getElementById(
+    'prep-portfolio-summary-gaps'
+  ) as HTMLElement;
+  const coverageSummary = document.getElementById(
+    'prep-portfolio-coverage-summary'
+  ) as HTMLElement;
+  const gapsCount = document.getElementById(
+    'prep-portfolio-gaps-count'
+  ) as HTMLElement;
+  const gapsList = document.getElementById(
+    'prep-portfolio-gaps-list'
+  ) as HTMLUListElement;
+  const gapsDetails = gapsList.closest(
+    'details'
+  ) as HTMLDetailsElement | null;
 
   function syncPortfolioUI(): void {
     const p = readPortfolio();
@@ -615,7 +644,104 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       portfolioDetails.classList.remove('prep__portfolio--active');
       portfolioClear.disabled = true;
     }
+    renderCoverageInEditor();
+    updateSavedPortfolioGapBadge();
   }
+
+  // ============================================================
+  // Coverage-gap view
+  // ============================================================
+  type CoverageItem = { storyId: string; project: string; question: string };
+
+  function computeCoverage(
+    selectedIds: Set<string>
+  ): { covered: CoverageItem[]; uncovered: CoverageItem[]; total: number } {
+    const covered: CoverageItem[] = [];
+    const uncovered: CoverageItem[] = [];
+    corpus.forEach((entry) => {
+      entry.questions.forEach((q) => {
+        const row: CoverageItem = {
+          storyId: entry.id,
+          project: entry.project,
+          question: q,
+        };
+        if (selectedIds.has(entry.id)) covered.push(row);
+        else uncovered.push(row);
+      });
+    });
+    return { covered, uncovered, total: covered.length + uncovered.length };
+  }
+
+  function renderCoverageInEditor(): void {
+    const checkedIds = new Set(
+      portfolioCheckboxes
+        .filter((cb) => cb.checked)
+        .map((cb) => cb.dataset.storyId!)
+    );
+    const { covered, uncovered, total } = computeCoverage(checkedIds);
+    coverageSummary.textContent = `Coverage: ${covered.length} of ${total} questions`;
+    if (uncovered.length === 0) {
+      gapsCount.textContent = '';
+      gapsList.innerHTML = '';
+      if (gapsDetails) {
+        gapsDetails.removeAttribute('open');
+        gapsDetails.style.display = checkedIds.size > 0 ? 'none' : '';
+      }
+    } else {
+      gapsCount.textContent = ` (${uncovered.length})`;
+      if (gapsDetails) gapsDetails.style.display = '';
+      gapsList.innerHTML = uncovered
+        .map(
+          (item) => `<li class="prep__portfolio-gap">
+            <button
+              class="prep__portfolio-gap-add"
+              type="button"
+              data-story-id="${escapeHtml(item.storyId)}"
+              aria-label="Add ${escapeHtml(item.project)} story to portfolio"
+              title="Add to portfolio"
+            >+</button>
+            <span class="prep__portfolio-gap-project">${escapeHtml(item.project)}</span>
+            <span class="prep__portfolio-gap-question">${escapeHtml(item.question)}</span>
+          </li>`
+        )
+        .join('');
+    }
+  }
+
+  function updateSavedPortfolioGapBadge(): void {
+    const p = readPortfolio();
+    if (!p) {
+      portfolioSummaryGaps.textContent = '';
+      return;
+    }
+    const savedIds = new Set(p.storyIds);
+    const { uncovered } = computeCoverage(savedIds);
+    portfolioSummaryGaps.textContent =
+      uncovered.length > 0 ? ` · ${uncovered.length} gaps` : '';
+  }
+
+  // Live re-render coverage as user toggles portfolio checkboxes
+  portfolioCheckboxes.forEach((cb) => {
+    cb.addEventListener('change', renderCoverageInEditor);
+  });
+
+  // "+" button on a gap row checks the corresponding story's checkbox in the
+  // editor's in-progress selection (doesn't save until user clicks Save).
+  gapsList.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+    const btn = target.closest(
+      '.prep__portfolio-gap-add'
+    ) as HTMLButtonElement | null;
+    if (!btn || !btn.dataset.storyId) return;
+    e.preventDefault();
+    const id = btn.dataset.storyId;
+    const cb = portfolioCheckboxes.find((c) => c.dataset.storyId === id);
+    if (cb && !cb.checked) {
+      cb.checked = true;
+      renderCoverageInEditor();
+    }
+  });
 
   portfolioSave.addEventListener('click', () => {
     const name = portfolioName.value.trim();
@@ -1110,6 +1236,133 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     background: transparent;
     border-color: var(--border-mid);
     color: var(--text-mid);
+  }
+
+  /* === Coverage gap view === */
+  .prep__portfolio-summary-gaps {
+    margin-left: 0.4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-transform: none;
+  }
+
+  .prep__portfolio-coverage {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .prep__portfolio-coverage-summary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--text-mid);
+    margin: 0;
+  }
+
+  .prep__portfolio-gaps {
+    margin: 0;
+  }
+
+  .prep__portfolio-gaps-summary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0;
+    min-height: 44px;
+  }
+
+  .prep__portfolio-gaps-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .prep__portfolio-gaps-summary::before {
+    content: '▸';
+    color: var(--accent);
+    transition: transform 0.15s ease;
+    display: inline-block;
+  }
+
+  .prep__portfolio-gaps[open] > .prep__portfolio-gaps-summary::before {
+    transform: rotate(90deg);
+  }
+
+  .prep__portfolio-gaps-summary:hover,
+  .prep__portfolio-gaps-summary:focus {
+    color: var(--accent);
+    outline: none;
+  }
+
+  .prep__portfolio-gaps-count {
+    color: var(--accent);
+    text-transform: none;
+    letter-spacing: 0.05em;
+  }
+
+  .prep__portfolio-gaps-list {
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .prep__portfolio-gap {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--bg);
+  }
+
+  .prep__portfolio-gap-add {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .prep__portfolio-gap-add:hover,
+  .prep__portfolio-gap-add:focus {
+    background: var(--accent);
+    color: var(--bg);
+    outline: none;
+  }
+
+  .prep__portfolio-gap-project {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .prep__portfolio-gap-question {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.35;
   }
 
   /* === Ribbon === */
