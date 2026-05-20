@@ -75,6 +75,14 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
         <span class="prep__portfolio-summary-gaps" id="prep-portfolio-summary-gaps"></span>
       </summary>
       <div class="prep__portfolio-body">
+        <nav
+          id="prep-portfolio-picker"
+          class="prep__portfolio-picker"
+          aria-label="Saved portfolios"
+        >
+          <!-- pills rendered at runtime -->
+        </nav>
+
         <label class="prep__portfolio-field">
           <span class="prep__portfolio-field-label">Loop name</span>
           <input
@@ -126,11 +134,11 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
             Save portfolio
           </button>
           <button
-            id="prep-portfolio-clear"
+            id="prep-portfolio-delete"
             class="prep__portfolio-button prep__portfolio-button--secondary"
             type="button"
           >
-            Clear
+            Delete
           </button>
         </div>
       </div>
@@ -239,9 +247,16 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   type Frecency = { [id: string]: number[] };
 
   type Portfolio = {
+    id: string;
     name: string;
     storyIds: string[];
     updatedAt: number;
+    createdAt: number;
+  };
+
+  type PortfoliosState = {
+    items: Portfolio[];
+    activeId: string | null;
   };
 
   type VerifyState = {
@@ -253,7 +268,8 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   const ALPHA = 0.5;
   const FRECENCY_KEY = 'prep:v1:frecency';
   const MODE_KEY = 'prep:v1:mode';
-  const PORTFOLIO_KEY = 'prep:v1:portfolio';
+  const PORTFOLIO_KEY = 'prep:v1:portfolio'; // legacy single-portfolio key (migrated)
+  const PORTFOLIOS_KEY = 'prep:v1:portfolios';
   const VERIFY_KEY = 'prep:v1:verify';
   const SCHEMA_KEY = 'prep:v1:_schema_version';
 
@@ -306,40 +322,144 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     } catch {}
   }
 
-  function readPortfolio(): Portfolio | null {
+  function genPortfolioId(): string {
+    // Cheap stable-ish ID; collision risk negligible at single-user scale.
+    return `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  function readPortfolios(): PortfoliosState {
     try {
-      const raw = localStorage.getItem(PORTFOLIO_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as Portfolio;
-      if (
-        !parsed ||
-        typeof parsed.name !== 'string' ||
-        !Array.isArray(parsed.storyIds) ||
-        typeof parsed.updatedAt !== 'number'
-      ) return null;
+      // One-shot migration: legacy single-portfolio → multi-portfolio shape.
+      const legacy = localStorage.getItem(PORTFOLIO_KEY);
+      const current = localStorage.getItem(PORTFOLIOS_KEY);
+      if (legacy && !current) {
+        try {
+          const old = JSON.parse(legacy) as Portfolio;
+          if (
+            old &&
+            typeof old.name === 'string' &&
+            Array.isArray(old.storyIds) &&
+            typeof old.updatedAt === 'number'
+          ) {
+            const migrated: Portfolio = {
+              id: genPortfolioId(),
+              name: old.name,
+              storyIds: old.storyIds,
+              updatedAt: old.updatedAt,
+              createdAt: old.updatedAt,
+            };
+            const state: PortfoliosState = {
+              items: [migrated],
+              activeId: migrated.id,
+            };
+            localStorage.setItem(PORTFOLIOS_KEY, JSON.stringify(state));
+            localStorage.removeItem(PORTFOLIO_KEY);
+          } else {
+            localStorage.removeItem(PORTFOLIO_KEY);
+          }
+        } catch {
+          localStorage.removeItem(PORTFOLIO_KEY);
+        }
+      }
+
+      const raw = localStorage.getItem(PORTFOLIOS_KEY);
+      if (!raw) return { items: [], activeId: null };
+      const parsed = JSON.parse(raw) as PortfoliosState;
+      if (!parsed || !Array.isArray(parsed.items)) {
+        return { items: [], activeId: null };
+      }
       const validIds = new Set(corpus.map((e) => e.id));
-      const filtered = parsed.storyIds.filter((id) => validIds.has(id));
-      if (filtered.length === 0) return null;
-      return { ...parsed, storyIds: filtered };
+      const items: Portfolio[] = [];
+      for (const p of parsed.items) {
+        if (
+          !p ||
+          typeof p.id !== 'string' ||
+          typeof p.name !== 'string' ||
+          !Array.isArray(p.storyIds) ||
+          typeof p.updatedAt !== 'number'
+        ) continue;
+        const filtered = p.storyIds.filter((id) => validIds.has(id));
+        if (filtered.length === 0) continue;
+        items.push({
+          ...p,
+          storyIds: filtered,
+          createdAt: typeof p.createdAt === 'number' ? p.createdAt : p.updatedAt,
+        });
+      }
+      const validActiveIds = new Set(items.map((p) => p.id));
+      const activeId =
+        typeof parsed.activeId === 'string' && validActiveIds.has(parsed.activeId)
+          ? parsed.activeId
+          : null;
+      return { items, activeId };
     } catch {
-      return null;
+      return { items: [], activeId: null };
     }
   }
 
-  function writePortfolio(name: string, storyIds: string[]): void {
+  function writePortfolios(state: PortfoliosState): void {
     try {
-      const p: Portfolio = { name, storyIds, updatedAt: Date.now() };
-      localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(p));
+      if (state.items.length === 0) {
+        localStorage.removeItem(PORTFOLIOS_KEY);
+        return;
+      }
+      localStorage.setItem(PORTFOLIOS_KEY, JSON.stringify(state));
       if (!localStorage.getItem(SCHEMA_KEY)) {
         localStorage.setItem(SCHEMA_KEY, '1');
       }
     } catch {}
   }
 
-  function clearPortfolio(): void {
-    try {
-      localStorage.removeItem(PORTFOLIO_KEY);
-    } catch {}
+  function readPortfolio(): Portfolio | null {
+    // Façade: returns the active portfolio if one is set.
+    const { items, activeId } = readPortfolios();
+    if (!activeId) return null;
+    return items.find((p) => p.id === activeId) ?? null;
+  }
+
+  function upsertPortfolio(
+    id: string | null,
+    name: string,
+    storyIds: string[],
+    activate: boolean
+  ): string {
+    const state = readPortfolios();
+    const now = Date.now();
+    if (id) {
+      const existing = state.items.find((p) => p.id === id);
+      if (existing) {
+        existing.name = name;
+        existing.storyIds = storyIds;
+        existing.updatedAt = now;
+      }
+    } else {
+      const newId = genPortfolioId();
+      state.items.push({
+        id: newId,
+        name,
+        storyIds,
+        createdAt: now,
+        updatedAt: now,
+      });
+      id = newId;
+    }
+    if (activate) state.activeId = id;
+    writePortfolios(state);
+    return id;
+  }
+
+  function deletePortfolio(id: string): void {
+    const state = readPortfolios();
+    state.items = state.items.filter((p) => p.id !== id);
+    if (state.activeId === id) state.activeId = null;
+    writePortfolios(state);
+  }
+
+  function setActivePortfolio(id: string | null): void {
+    const state = readPortfolios();
+    if (id !== null && !state.items.some((p) => p.id === id)) return;
+    state.activeId = id;
+    writePortfolios(state);
   }
 
   function itemKey(text: string): string {
@@ -606,9 +726,12 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   const portfolioSave = document.getElementById(
     'prep-portfolio-save'
   ) as HTMLButtonElement;
-  const portfolioClear = document.getElementById(
-    'prep-portfolio-clear'
+  const portfolioDelete = document.getElementById(
+    'prep-portfolio-delete'
   ) as HTMLButtonElement;
+  const portfolioPicker = document.getElementById(
+    'prep-portfolio-picker'
+  ) as HTMLElement;
   const portfolioSummaryGaps = document.getElementById(
     'prep-portfolio-summary-gaps'
   ) as HTMLElement;
@@ -625,26 +748,74 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     'details'
   ) as HTMLDetailsElement | null;
 
-  function syncPortfolioUI(): void {
-    const p = readPortfolio();
+  // Editor's currently-displayed portfolio ID (null = new/unsaved draft).
+  let editorPortfolioId: string | null = null;
+
+  function loadPortfolioIntoEditor(p: Portfolio | null): void {
+    editorPortfolioId = p?.id ?? null;
+    portfolioName.value = p?.name ?? '';
     const checkedIds = new Set(p?.storyIds ?? []);
     portfolioCheckboxes.forEach((cb) => {
       cb.checked = checkedIds.has(cb.dataset.storyId!);
     });
-    portfolioName.value = p?.name ?? '';
+    portfolioDelete.disabled = !p;
+    renderPortfolioPicker();
+    renderCoverageInEditor();
+  }
+
+  function renderPortfolioPicker(): void {
+    const { items, activeId } = readPortfolios();
+    const pills: string[] = [];
+    pills.push(
+      `<button
+        type="button"
+        class="prep__portfolio-pill prep__portfolio-pill--new${editorPortfolioId === null ? ' prep__portfolio-pill--editing' : ''}"
+        data-action="new"
+      >+ New</button>`
+    );
+    for (const p of items) {
+      const isActive = p.id === activeId;
+      const isEditing = p.id === editorPortfolioId;
+      const cls = [
+        'prep__portfolio-pill',
+        isActive ? 'prep__portfolio-pill--active' : '',
+        isEditing ? 'prep__portfolio-pill--editing' : '',
+      ]
+        .filter(Boolean)
+        .join(' ');
+      const labelText =
+        p.name.trim().length > 0
+          ? p.name
+          : `${p.storyIds.length} ${p.storyIds.length === 1 ? 'story' : 'stories'}`;
+      pills.push(
+        `<button
+          type="button"
+          class="${cls}"
+          data-portfolio-id="${escapeHtml(p.id)}"
+        >${escapeHtml(labelText)}${isActive ? '<span class="prep__portfolio-pill-dot" aria-label="Active">●</span>' : ''}</button>`
+      );
+    }
+    portfolioPicker.innerHTML = pills.join('');
+  }
+
+  function syncPortfolioUI(): void {
+    const p = readPortfolio();
     if (p) {
       portfolioLabel.textContent =
         p.name.trim().length > 0
           ? `Portfolio: ${p.name}`
           : `Portfolio (${p.storyIds.length} ${p.storyIds.length === 1 ? 'story' : 'stories'})`;
       portfolioDetails.classList.add('prep__portfolio--active');
-      portfolioClear.disabled = false;
     } else {
       portfolioLabel.textContent = 'Portfolio';
       portfolioDetails.classList.remove('prep__portfolio--active');
-      portfolioClear.disabled = true;
     }
-    renderCoverageInEditor();
+    // Editor loads the active portfolio by default; user can switch via pills.
+    const target =
+      editorPortfolioId !== null
+        ? readPortfolios().items.find((q) => q.id === editorPortfolioId) ?? p
+        : p;
+    loadPortfolioIntoEditor(target);
     updateSavedPortfolioGapBadge();
   }
 
@@ -749,17 +920,46 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       .filter((cb) => cb.checked)
       .map((cb) => cb.dataset.storyId!);
     if (ids.length === 0) {
-      clearPortfolio();
+      // Empty selection on Save → if editing existing, delete it; if new, no-op.
+      if (editorPortfolioId !== null) {
+        deletePortfolio(editorPortfolioId);
+        editorPortfolioId = null;
+      }
     } else {
-      writePortfolio(name, ids);
+      // Save activates the saved portfolio (selection = activation).
+      const id = upsertPortfolio(editorPortfolioId, name, ids, true);
+      editorPortfolioId = id;
     }
     syncPortfolioUI();
     portfolioDetails.removeAttribute('open');
     update();
   });
 
-  portfolioClear.addEventListener('click', () => {
-    clearPortfolio();
+  portfolioDelete.addEventListener('click', () => {
+    if (editorPortfolioId === null) return;
+    deletePortfolio(editorPortfolioId);
+    editorPortfolioId = null;
+    syncPortfolioUI();
+    update();
+  });
+
+  portfolioPicker.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+    const pill = target.closest('.prep__portfolio-pill') as HTMLButtonElement | null;
+    if (!pill) return;
+    e.preventDefault();
+    if (pill.dataset.action === 'new') {
+      // Start a fresh draft — don't change active.
+      loadPortfolioIntoEditor(null);
+      portfolioName.focus();
+      return;
+    }
+    const id = pill.dataset.portfolioId;
+    if (!id) return;
+    // Pill click = load into editor AND activate (selection = activation).
+    editorPortfolioId = id;
+    setActivePortfolio(id);
     syncPortfolioUI();
     update();
   });
@@ -1236,6 +1436,70 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     background: transparent;
     border-color: var(--border-mid);
     color: var(--text-mid);
+  }
+
+  /* === Portfolio picker (multi-portfolio pills) === */
+  .prep__portfolio-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0 0 0.25rem;
+  }
+
+  .prep__portfolio-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    color: var(--text-mid);
+    background: var(--bg);
+    border: 1px solid var(--border-mid);
+    border-radius: 999px;
+    padding: 0.4rem 0.75rem;
+    min-height: 32px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .prep__portfolio-pill:hover,
+  .prep__portfolio-pill:focus {
+    color: var(--accent);
+    border-color: var(--accent);
+    outline: none;
+  }
+
+  .prep__portfolio-pill--new {
+    color: var(--accent);
+    border-style: dashed;
+  }
+
+  .prep__portfolio-pill--editing {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .prep__portfolio-pill--active {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .prep__portfolio-pill--active.prep__portfolio-pill--editing {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  .prep__portfolio-pill-dot {
+    font-size: 0.5rem;
+    color: var(--accent);
   }
 
   /* === Coverage gap view === */
