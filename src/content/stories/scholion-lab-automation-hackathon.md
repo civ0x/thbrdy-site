@@ -37,7 +37,7 @@ In a multi-agent system, context engineering is the substrate. Topology is downs
   - **OpenTrons Flex Python API + library documentation** — the hardware-facing surface. The agents needed to know what the API actually supported.
 - The constraint that shaped this: in June 2024, the primitives were managing messages, system prompts, and appended context. Topology was *easy* to invent; what was hard was deciding what each agent should know.
 - Result: roughly 8× throughput against the lab techs' baseline estimate — hackathon-grade, directionally right, not rigorously measured. First place out of ~10 teams. The deeper result was an operating principle for agentic systems I've carried into Scholion.
-- What we didn't build, honestly: explicit long-term memory management, token-efficiency optimization, more efficient workflow patterns we didn't get to explore. Some of this was era constraint; some we'd have done better with more time.
+- Cost of context-first in 48 hours: we didn't get to explore topology variants we'd otherwise have iterated on — long-term memory management, token-efficiency optimization, more efficient coordination shapes. Going deep on the context layer bought us the throughput; it cost us breadth on the topology layer. Some of that was era constraint (pre-MCP); some was just the tax of picking a lane and committing to it.
 - Lesson, mapped to current work: in Scholion's extraction pipeline, the same principle holds — what context the model has access to (paper structure, the citation graph, prior extractions as constraint) is the design problem; agent topology is downstream. It's the same "never dispatch without context" instinct in a different domain.
 
 ## Verify

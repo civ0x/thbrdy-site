@@ -31,6 +31,7 @@ Each observed failure became a specific constraint in the next version of the pr
 - Outcome diverged: three distinct failure modes — register drift (culture prompt), story-arc collapse (governance prompt), and unsolicited editorializing (all three).
 - Mechanism: the prompts were specifying the goal but not specifying the failure modes the model would default to. Audience reminders are weak signals next to the model's prior toward analytical framing.
 - Adjustment: revised each prompt to encode the observed failure as an explicit negative instruction — "already covered" exclusions describe arcs not events; "provide structural facts and open questions, not interpretation"; "spot-check links."
+- Cost of the named-failure approach: every observed failure becomes a new negative instruction, and those constraints don't transfer cleanly to a different model — Grok's failure modes aren't Claude's. The corrections log is per-model. That's the price of model-specific reliability — and the reason swapping the underlying model in this pipeline would mean rewriting the prompts, not just changing an API endpoint.
 - Lesson: model selection is the cheaper part. The expensive part is observing the specific way a given model fails on a given task and codifying the constraint. Same principle as the editorial-tics work, applied across the harness boundary to a different model. [CONJECTURE: the model-selection framing — "Grok for scanning because X integration, Claude for editorial because reasoning depth" — is mine, not documented in the artifacts.]
 
 ## Verify

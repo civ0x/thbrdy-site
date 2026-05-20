@@ -31,6 +31,8 @@ A correction is only durable if it's encoded in the harness — a postmortem in 
 - Outcome diverged: the agent produced competent prose with persistent structural tells — the same handful of LLM patterns appearing across pieces despite voice guidance.
 - Mechanism: stylistic guidance ("be forensic") doesn't operate at the moment of generation. Named pattern recognition ("don't use triadic negation, defined as X, here's what it looks like, here's what to do instead") does.
 - Adjustment: codified each observed failure mode as a named pattern in CLAUDE.md and `editorial-review-rules.md`. The drafting prompt instructs the agent to enforce the limits and run the checklist before returning. Counts are reported. Limits enforced: ≤4 em-dashes per 500 words; ≤3 instances of "structural/structurally" per essay; zero instances of specific phrase-level tics.
+- Validation: the trust-boundary essay's final-draft audit reported 0 "structural/structurally," ~1.4 em-dashes per 500 words, 0 "precisely because," 0 "That's the [noun]," zero triadic negation, zero theatrical antithesis. Under every enforced limit. The checklist works because the agent self-reports counts and the counts are checkable against the limit list — not against my intuition.
+- Cost of harness-encoding: the corrections log grows monotonically and the drafting prompt has to run the checklist before every draft. Token overhead at generation time plus the discipline of adding new failure modes whenever I observe them. Cheaper than re-catching the same drift downstream — only because the log compounds and never has to relearn.
 - Lesson: the loop that matters isn't drafting → editing. It's drafting → audit → codification of new failure → next drafting prompt absorbs the new constraint.
 
 ## Verify
