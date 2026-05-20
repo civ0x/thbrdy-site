@@ -230,12 +230,17 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     updatedAt: number;
   };
 
+  type VerifyState = {
+    [storyId: string]: { [itemKey: string]: number };
+  };
+
   const HALF_LIFE_MS = 14 * 24 * 3600 * 1000;
   const PRUNE_BEFORE_MS = 6 * HALF_LIFE_MS;
   const ALPHA = 0.5;
   const FRECENCY_KEY = 'prep:v1:frecency';
   const MODE_KEY = 'prep:v1:mode';
   const PORTFOLIO_KEY = 'prep:v1:portfolio';
+  const VERIFY_KEY = 'prep:v1:verify';
   const SCHEMA_KEY = 'prep:v1:_schema_version';
 
   const corpus: Entry[] = JSON.parse(
@@ -321,6 +326,74 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     try {
       localStorage.removeItem(PORTFOLIO_KEY);
     } catch {}
+  }
+
+  function itemKey(text: string): string {
+    return text.trim().slice(0, 120);
+  }
+
+  function readVerify(
+    currentItemsByStory: Record<string, string[]>
+  ): VerifyState {
+    try {
+      const raw = localStorage.getItem(VERIFY_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw) as VerifyState;
+      if (!parsed || typeof parsed !== 'object') return {};
+      const out: VerifyState = {};
+      for (const [storyId, items] of Object.entries(parsed)) {
+        if (!items || typeof items !== 'object') continue;
+        const validSet = new Set(currentItemsByStory[storyId] ?? []);
+        // Stories not in the lookup map are skipped (current view doesn't
+        // know their item set). The state is preserved as-is on next write.
+        if (!(storyId in currentItemsByStory)) {
+          out[storyId] = items;
+          continue;
+        }
+        const filtered: Record<string, number> = {};
+        for (const [k, ts] of Object.entries(items)) {
+          if (validSet.has(k) && typeof ts === 'number') filtered[k] = ts;
+        }
+        if (Object.keys(filtered).length > 0) out[storyId] = filtered;
+      }
+      return out;
+    } catch {
+      return {};
+    }
+  }
+
+  function writeVerify(state: VerifyState): void {
+    try {
+      if (Object.keys(state).length === 0) {
+        localStorage.removeItem(VERIFY_KEY);
+        return;
+      }
+      localStorage.setItem(VERIFY_KEY, JSON.stringify(state));
+      if (!localStorage.getItem(SCHEMA_KEY)) {
+        localStorage.setItem(SCHEMA_KEY, '1');
+      }
+    } catch {}
+  }
+
+  function setVerifyItem(
+    state: VerifyState,
+    storyId: string,
+    key: string,
+    checked: boolean
+  ): VerifyState {
+    const next: VerifyState = { ...state };
+    const story = { ...(next[storyId] ?? {}) };
+    if (checked) {
+      story[key] = Date.now();
+    } else {
+      delete story[key];
+    }
+    if (Object.keys(story).length === 0) {
+      delete next[storyId];
+    } else {
+      next[storyId] = story;
+    }
+    return next;
   }
 
   function frecencyWeight(timestamps: number[] | undefined, now: number): number {
@@ -566,6 +639,114 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   });
 
   // ============================================================
+  // Verify check-off
+  // ============================================================
+  const verifyDetails = document.querySelector(
+    '.prep__details--verify'
+  ) as HTMLDetailsElement | null;
+  const verifySummary = verifyDetails
+    ? (verifyDetails.querySelector('.prep__summary') as HTMLElement | null)
+    : null;
+
+  let verifyTotalItems = 0;
+  let currentItemKeys: string[] = [];
+
+  function augmentVerifyItems(): {
+    totalItems: number;
+    itemKeys: string[];
+  } {
+    const list = document.querySelector(
+      '.prep__cue--verify .prep__prose ul'
+    );
+    if (!list) return { totalItems: 0, itemKeys: [] };
+    const items = Array.from(list.querySelectorAll<HTMLLIElement>('li'));
+    const keys: string[] = [];
+    items.forEach((li) => {
+      const text = li.textContent ?? '';
+      const key = itemKey(text);
+      keys.push(key);
+      const label = document.createElement('label');
+      label.className = 'prep__verify-item-label';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.className = 'prep__verify-item-checkbox';
+      cb.dataset.itemKey = key;
+      const span = document.createElement('span');
+      span.className = 'prep__verify-item-text';
+      while (li.firstChild) span.appendChild(li.firstChild);
+      label.appendChild(cb);
+      label.appendChild(span);
+      li.appendChild(label);
+      li.classList.add('prep__verify-item');
+    });
+    return { totalItems: items.length, itemKeys: keys };
+  }
+
+  function updateVerifySummary(checked: number, total: number): void {
+    if (!verifySummary || !verifyDetails) return;
+    let countSpan = verifySummary.querySelector(
+      '.prep__verify-count'
+    ) as HTMLElement | null;
+    if (!countSpan) {
+      countSpan = document.createElement('span');
+      countSpan.className = 'prep__verify-count';
+      verifySummary.appendChild(countSpan);
+    }
+    if (total === 0 || checked === 0) {
+      countSpan.textContent = '';
+      verifyDetails.classList.remove('prep__details--verify--active');
+    } else {
+      countSpan.textContent = `(${checked} / ${total} verified)`;
+      verifyDetails.classList.add('prep__details--verify--active');
+    }
+  }
+
+  function syncVerifyUI(): void {
+    if (verifyTotalItems === 0) {
+      updateVerifySummary(0, 0);
+      return;
+    }
+    const state = readVerify({ [selectedStoryId]: currentItemKeys });
+    const checked = state[selectedStoryId] ?? {};
+    let checkedCount = 0;
+    const checkboxes = Array.from(
+      document.querySelectorAll<HTMLInputElement>(
+        '.prep__verify-item-checkbox'
+      )
+    );
+    checkboxes.forEach((cb) => {
+      const isChecked = !!checked[cb.dataset.itemKey!];
+      cb.checked = isChecked;
+      const li = cb.closest('li');
+      if (li) li.classList.toggle('prep__verify-item--checked', isChecked);
+      if (isChecked) checkedCount += 1;
+    });
+    updateVerifySummary(checkedCount, verifyTotalItems);
+  }
+
+  document.addEventListener('change', (e) => {
+    const target = e.target as HTMLInputElement | null;
+    if (
+      !target ||
+      target.tagName !== 'INPUT' ||
+      !target.classList.contains('prep__verify-item-checkbox')
+    ) return;
+    const key = target.dataset.itemKey!;
+    const state = readVerify({ [selectedStoryId]: currentItemKeys });
+    const next = setVerifyItem(state, selectedStoryId, key, target.checked);
+    writeVerify(next);
+    const li = target.closest('li');
+    if (li) li.classList.toggle('prep__verify-item--checked', target.checked);
+    const checkboxes = Array.from(
+      document.querySelectorAll<HTMLInputElement>(
+        '.prep__verify-item-checkbox'
+      )
+    );
+    const checkedCount = checkboxes.filter((cb) => cb.checked).length;
+    updateVerifySummary(checkedCount, verifyTotalItems);
+  });
+
+  // ============================================================
   // Click delegation: persist frecency before navigation
   // ============================================================
   ribbon.addEventListener('click', (e) => {
@@ -637,6 +818,15 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   // ============================================================
   // Initial hydration
   // ============================================================
+  // Augment verify items before applyMode so drilling-mode auto-open
+  // sees the augmented HTML (no FOUC of unaugmented items).
+  {
+    const meta = augmentVerifyItems();
+    verifyTotalItems = meta.totalItems;
+    currentItemKeys = meta.itemKeys;
+    syncVerifyUI();
+  }
+
   applyMode(readMode());
   syncPortfolioUI();
 
@@ -1234,6 +1424,72 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
 
   .prep__handles li {
     margin: 0.4rem 0;
+  }
+
+  /* === Verify check-off === */
+  .prep__cue--verify .prep__prose ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .prep__verify-item {
+    margin: 0.25rem 0;
+  }
+
+  .prep__verify-item-label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    cursor: pointer;
+    min-height: 44px;
+    padding: 0.25rem 0;
+  }
+
+  .prep__verify-item-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin: 0;
+    position: relative;
+    top: 0.15rem;
+  }
+
+  .prep__verify-item-text {
+    flex: 1;
+    transition: color 0.15s ease;
+  }
+
+  .prep__verify-item--checked .prep__verify-item-text {
+    color: var(--text-muted);
+    font-style: italic;
+    /* No text-decoration: line-through — hurts re-read legibility */
+  }
+
+  .prep__verify-count {
+    margin-left: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: none;
+    transition: color 0.15s ease;
+  }
+
+  .prep__details--verify--active > .prep__summary {
+    color: var(--accent);
+  }
+
+  .prep__details--verify--active > .prep__summary .prep__verify-count {
+    color: var(--accent);
+  }
+
+  .prep__details--verify--active > .prep__summary::after {
+    content: '●';
+    color: var(--accent);
+    font-size: 0.5rem;
+    margin-left: auto;
   }
 
   /* === Responsive === */
