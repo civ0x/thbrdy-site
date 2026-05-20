@@ -29,6 +29,17 @@ const uniqueShapes = Array.from(
   new Set(corpus.map((s) => s.shape))
 ).sort();
 
+const corpusByProject = uniqueProjects.reduce<Record<string, typeof corpus>>(
+  (acc, p) => {
+    acc[p] = corpus
+      .filter((s) => s.project === p)
+      .slice()
+      .sort((a, b) => a.tagline.localeCompare(b.tagline));
+    return acc;
+  },
+  {}
+);
+
 const ribbonInitial = corpus
   .slice()
   .sort((a, b) => a.tagline.localeCompare(b.tagline))
@@ -133,24 +144,38 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
 
         <fieldset class="prep__portfolio-fieldset">
           <legend class="prep__portfolio-fieldset-legend">Stories in this portfolio</legend>
-          <ul class="prep__portfolio-checklist">
-            {corpus
-              .slice()
-              .sort((a, b) => a.tagline.localeCompare(b.tagline))
-              .map((s) => (
-                <li>
-                  <label class="prep__portfolio-check">
-                    <input
-                      type="checkbox"
-                      class="prep__portfolio-checkbox"
-                      data-story-id={s.id}
-                    />
-                    <span class="prep__portfolio-check-project">{s.project}</span>
-                    <span class="prep__portfolio-check-tagline">{s.tagline}</span>
-                  </label>
-                </li>
-              ))}
-          </ul>
+          <div class="prep__portfolio-tree">
+            {uniqueProjects.map((project) => (
+              <details class="prep__portfolio-tree-group" data-project={project} open>
+                <summary class="prep__portfolio-tree-group-summary">
+                  <span class="prep__portfolio-tree-group-name">{project}</span>
+                  <span
+                    class="prep__portfolio-tree-group-counts"
+                    id={`prep-tree-counts-${project}`}
+                  >0 / {corpusByProject[project].length}</span>
+                </summary>
+                <ul class="prep__portfolio-tree-stories">
+                  {corpusByProject[project].map((s) => (
+                    <li class="prep__portfolio-tree-story">
+                      <input
+                        type="checkbox"
+                        class="prep__portfolio-checkbox"
+                        data-story-id={s.id}
+                        aria-label={`Include ${s.tagline} in portfolio`}
+                      />
+                      <a
+                        class="prep__portfolio-tree-story-link"
+                        href={s.href}
+                        data-story-id={s.id}
+                      >
+                        <span class="prep__portfolio-tree-story-tagline">{s.tagline}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ))}
+          </div>
         </fieldset>
 
         <div class="prep__portfolio-actions">
@@ -216,6 +241,12 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     </nav>
 
     <article class="prep__focus" data-story-id={selectedStory.id}>
+      <nav
+        id="prep-tabs"
+        class="prep__tabs"
+        aria-label="Portfolio story tabs"
+        hidden
+      ></nav>
       <header class="prep__focus-header">
         <div class="prep__focus-tags">
           <span class="prep__tag prep__tag--project">{selectedStory.data.project}</span>
@@ -388,6 +419,7 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   const PORTFOLIOS_KEY = 'prep:v1:portfolios';
   const VERIFY_KEY = 'prep:v1:verify';
   const EDIT_MODE_KEY = 'prep:v1:editMode';
+  const TREE_OPEN_KEY = 'prep:v1:tree_open';
   const SCHEMA_KEY = 'prep:v1:_schema_version';
 
   const DEV = import.meta.env.DEV;
@@ -980,7 +1012,144 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     portfolioDelete.disabled = !p;
     renderPortfolioPicker();
     renderCoverageInEditor();
+    updateTreeCounts();
   }
+
+  // ============================================================
+  // Portfolio tree (project-grouped checklist) — Phase 6.8 Layer 1
+  // ============================================================
+  const runtimeProjects = Array.from(
+    new Set(corpus.map((e) => e.project))
+  ).sort();
+
+  const treeGroupEls = Array.from(
+    document.querySelectorAll<HTMLDetailsElement>('.prep__portfolio-tree-group')
+  );
+
+  function readTreeOpen(): Record<string, boolean> {
+    try {
+      const raw = localStorage.getItem(TREE_OPEN_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw) as Record<string, boolean>;
+      if (!parsed || typeof parsed !== 'object') return {};
+      // Decision 013 silent stale filter — drop projects not in current corpus
+      const validProjects = new Set(runtimeProjects);
+      const filtered: Record<string, boolean> = {};
+      for (const [k, v] of Object.entries(parsed)) {
+        if (validProjects.has(k) && typeof v === 'boolean') filtered[k] = v;
+      }
+      return filtered;
+    } catch {
+      return {};
+    }
+  }
+
+  function writeTreeOpen(state: Record<string, boolean>): void {
+    try {
+      if (Object.keys(state).length === 0) {
+        localStorage.removeItem(TREE_OPEN_KEY);
+        return;
+      }
+      localStorage.setItem(TREE_OPEN_KEY, JSON.stringify(state));
+      if (!localStorage.getItem(SCHEMA_KEY)) {
+        localStorage.setItem(SCHEMA_KEY, '1');
+      }
+    } catch {}
+  }
+
+  function syncTreeOpenState(): void {
+    const state = readTreeOpen();
+    treeGroupEls.forEach((d) => {
+      const project = d.dataset.project!;
+      if (project in state) {
+        if (state[project]) d.setAttribute('open', '');
+        else d.removeAttribute('open');
+      }
+      // Else: leave the HTML-default `open` attribute (all groups open on first load).
+    });
+  }
+
+  function updateTreeCounts(): void {
+    for (const project of runtimeProjects) {
+      const countEl = document.getElementById(`prep-tree-counts-${project}`);
+      if (!countEl) continue;
+      const groupCheckboxes = portfolioCheckboxes.filter(
+        (cb) =>
+          cb.closest('.prep__portfolio-tree-group')?.getAttribute('data-project') ===
+          project
+      );
+      const checked = groupCheckboxes.filter((cb) => cb.checked).length;
+      const total = groupCheckboxes.length;
+      countEl.textContent = `${checked} / ${total}`;
+    }
+  }
+
+  treeGroupEls.forEach((d) => {
+    d.addEventListener('toggle', () => {
+      const state = readTreeOpen();
+      state[d.dataset.project!] = d.open;
+      writeTreeOpen(state);
+    });
+  });
+
+  // ============================================================
+  // Multi-story tabs (focus pane) — Phase 6.8 Layer 2
+  // ============================================================
+  const tabsNav = document.getElementById('prep-tabs') as HTMLElement;
+
+  function renderTabHtml(
+    entry: Entry,
+    isUnpinned: boolean,
+    isCurrent: boolean
+  ): string {
+    const cls = [
+      'prep__tab',
+      isCurrent ? 'prep__tab--current' : '',
+      isUnpinned ? 'prep__tab--unpinned' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+    return `<a
+      class="${cls}"
+      href="${escapeHtml(entry.href)}"
+      data-story-id="${escapeHtml(entry.id)}"
+      aria-current="${isCurrent ? 'true' : 'false'}"
+    ><span class="prep__tab-project">${escapeHtml(entry.project)}</span><span class="prep__tab-tagline">${escapeHtml(entry.tagline)}</span></a>`;
+  }
+
+  function renderTabs(): void {
+    const p = readPortfolio();
+    if (!p || p.storyIds.length < 2) {
+      tabsNav.hidden = true;
+      tabsNav.innerHTML = '';
+      return;
+    }
+    const corpusById = new Map(corpus.map((e) => [e.id, e]));
+    const urlIsPinned = p.storyIds.includes(selectedStoryId);
+    const tabs: string[] = [];
+    if (!urlIsPinned) {
+      const entry = corpusById.get(selectedStoryId);
+      if (entry) {
+        tabs.push(renderTabHtml(entry, true, true));
+      }
+    }
+    for (const id of p.storyIds) {
+      const entry = corpusById.get(id);
+      if (!entry) continue;
+      tabs.push(renderTabHtml(entry, false, id === selectedStoryId && urlIsPinned));
+    }
+    tabsNav.innerHTML = tabs.join('');
+    tabsNav.hidden = false;
+  }
+
+  tabsNav.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+    const link = target.closest('.prep__tab') as HTMLAnchorElement | null;
+    if (!link || !link.dataset.storyId) return;
+    recordClick(link.dataset.storyId);
+    // Default <a href> page nav handles the navigation; no preventDefault.
+  });
 
   function renderPortfolioPicker(): void {
     const { items, activeId } = readPortfolios();
@@ -1110,9 +1279,12 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       uncovered.length > 0 ? ` · ${uncovered.length} gaps` : '';
   }
 
-  // Live re-render coverage as user toggles portfolio checkboxes
+  // Live re-render coverage + tree counts as user toggles portfolio checkboxes
   portfolioCheckboxes.forEach((cb) => {
-    cb.addEventListener('change', renderCoverageInEditor);
+    cb.addEventListener('change', () => {
+      renderCoverageInEditor();
+      updateTreeCounts();
+    });
   });
 
   // "+" button on a gap row checks the corresponding story's checkbox in the
@@ -1130,6 +1302,7 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     if (cb && !cb.checked) {
       cb.checked = true;
       renderCoverageInEditor();
+      updateTreeCounts();
     }
   });
 
@@ -1765,7 +1938,9 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   }
 
   applyMode(readMode());
+  syncTreeOpenState();
   syncPortfolioUI();
+  renderTabs();
 
   if (DEV) {
     applyEditMode(readEditMode());
@@ -2115,6 +2290,194 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   .prep__portfolio-pill-dot {
     font-size: 0.5rem;
     color: var(--accent);
+  }
+
+  /* === Portfolio tree (project-grouped checklist) === */
+  .prep__portfolio-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .prep__portfolio-tree-group {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--bg);
+  }
+
+  .prep__portfolio-tree-group-summary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-mid);
+    padding: 0.6rem 0.75rem;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+  }
+
+  .prep__portfolio-tree-group-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .prep__portfolio-tree-group-summary::before {
+    content: '▸';
+    color: var(--accent);
+    transition: transform 0.15s ease;
+    display: inline-block;
+  }
+
+  .prep__portfolio-tree-group[open] > .prep__portfolio-tree-group-summary::before {
+    transform: rotate(90deg);
+  }
+
+  .prep__portfolio-tree-group-summary:hover,
+  .prep__portfolio-tree-group-summary:focus {
+    color: var(--accent);
+    outline: none;
+  }
+
+  .prep__portfolio-tree-group-name {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .prep__portfolio-tree-group-counts {
+    margin-left: auto;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: none;
+  }
+
+  .prep__portfolio-tree-stories {
+    list-style: none;
+    padding: 0 0.5rem 0.5rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .prep__portfolio-tree-story {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    gap: 0.7rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    min-height: 44px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .prep__portfolio-tree-story:hover {
+    border-color: var(--border-mid);
+    background: var(--bg-warm);
+  }
+
+  .prep__portfolio-tree-story .prep__portfolio-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    margin: 0;
+    align-self: center;
+  }
+
+  .prep__portfolio-tree-story-link {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    text-decoration: none;
+    line-height: 1.3;
+    align-self: center;
+  }
+
+  .prep__portfolio-tree-story-link:hover,
+  .prep__portfolio-tree-story-link:focus {
+    color: var(--accent);
+    outline: none;
+  }
+
+  .prep__portfolio-tree-story-tagline {
+    display: inline;
+  }
+
+  /* === Multi-story tabs (focus pane, when portfolio has 2+ stories) === */
+  .prep__tabs {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    margin: 0 -2rem 1.5rem;
+    padding: 0.25rem 2rem;
+    scroll-padding-inline: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prep__tab {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 140px;
+    max-width: 200px;
+    padding: 0.5rem 0.75rem;
+    text-decoration: none;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--bg-warm);
+    min-height: 44px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .prep__tab:hover,
+  .prep__tab:focus {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    outline: none;
+  }
+
+  .prep__tab--current {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+
+  .prep__tab--unpinned {
+    border-style: dashed;
+  }
+
+  .prep__tab-project {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .prep__tab-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 640px) {
+    .prep__tabs {
+      margin: 0 -1.25rem 1.5rem;
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+      scroll-padding-inline: 1.25rem;
+    }
   }
 
   /* === Chip filters === */
