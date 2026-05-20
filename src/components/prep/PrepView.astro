@@ -34,22 +34,37 @@ const ribbonInitial = corpus
   .sort((a, b) => a.tagline.localeCompare(b.tagline))
   .slice(0, 5);
 
-function splitBody(body: string): Record<string, string> {
-  const sections: Record<string, string> = {};
+function splitBody(body: string): {
+  rendered: Record<string, string>;
+  raw: Record<string, string>;
+} {
+  const rendered: Record<string, string> = {};
+  const raw: Record<string, string> = {};
   const regex = /^## (.+?)$\n([\s\S]*?)(?=^## |$(?![\s\S]))/gm;
   let match;
   while ((match = regex.exec(body)) !== null) {
-    sections[match[1].trim()] = marked.parse(match[2].trim()) as string;
+    const name = match[1].trim();
+    const text = match[2].trim();
+    raw[name] = text;
+    rendered[name] = marked.parse(text) as string;
   }
-  return sections;
+  return { rendered, raw };
 }
 
-const sections = splitBody(selectedStory.body ?? '');
+const { rendered: sections, raw: rawSections } = splitBody(selectedStory.body ?? '');
 const orientation = sections['Project orientation'] ?? '';
 const opener = sections['Opener'] ?? '';
 const punchline = sections['Punchline'] ?? '';
 const arcBeats = sections['Arc beats'] ?? '';
 const verify = sections['Verify'] ?? '';
+
+const rawOrientation = rawSections['Project orientation'] ?? '';
+const rawOpener = rawSections['Opener'] ?? '';
+const rawPunchline = rawSections['Punchline'] ?? '';
+const rawArcBeats = rawSections['Arc beats'] ?? '';
+const rawVerify = rawSections['Verify'] ?? '';
+
+const isDev = import.meta.env.DEV;
 
 const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
 ---
@@ -206,8 +221,17 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
           <span class="prep__tag prep__tag--project">{selectedStory.data.project}</span>
           <span class="prep__tag">{selectedStory.data.shape}</span>
           <span class="prep__tag">{selectedStory.data.agentRelevance}</span>
+          {isDev && (
+            <button
+              type="button"
+              class="prep__edit-pill"
+              id="prep-edit-pill"
+              aria-pressed="false"
+              title="Toggle edit mode (Cmd/Ctrl+E)"
+            >EDIT</button>
+          )}
         </div>
-        <h1 class="prep__focus-tagline">{selectedStory.data.tagline}</h1>
+        <h1 class="prep__focus-tagline" data-edit-field="tagline">{selectedStory.data.tagline}</h1>
         <button
           id="prep-mode-toggle"
           class="prep__mode-toggle"
@@ -219,20 +243,57 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
         </button>
       </header>
 
+      {isDev && (
+        <section class="prep__edit-frontmatter" aria-label="Story metadata (edit mode)">
+          <div class="prep__edit-block">
+            <p class="prep__edit-label">Questions</p>
+            <ul class="prep__edit-list" data-edit-field="questions">
+              {selectedStory.data.questions.map((q, i) => (
+                <li data-index={i}>{q}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
       <section class="prep__above" aria-label="Deploy content">
         <div class="prep__cue prep__cue--orientation">
           <p class="prep__cue-label">Project · {selectedStory.data.project}</p>
           <div class="prep__prose" set:html={orientation} />
+          {isDev && (
+            <textarea
+              class="prep__edit-textarea"
+              data-edit-field="section"
+              data-section-name="Project orientation"
+              spellcheck="false"
+            >{rawOrientation}</textarea>
+          )}
         </div>
 
         <div class="prep__verbatim prep__verbatim--opener">
           <p class="prep__verbatim-label">Opener</p>
           <div class="prep__prose" set:html={opener} />
+          {isDev && (
+            <textarea
+              class="prep__edit-textarea"
+              data-edit-field="section"
+              data-section-name="Opener"
+              spellcheck="false"
+            >{rawOpener}</textarea>
+          )}
         </div>
 
         <div class="prep__verbatim prep__verbatim--punchline">
           <p class="prep__verbatim-label">Punchline</p>
           <div class="prep__prose" set:html={punchline} />
+          {isDev && (
+            <textarea
+              class="prep__edit-textarea"
+              data-edit-field="section"
+              data-section-name="Punchline"
+              spellcheck="false"
+            >{rawPunchline}</textarea>
+          )}
         </div>
       </section>
 
@@ -242,11 +303,19 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
           <div class="prep__cue">
             <p class="prep__cue-label">Arc beats</p>
             <div class="prep__prose" set:html={arcBeats} />
+            {isDev && (
+              <textarea
+                class="prep__edit-textarea"
+                data-edit-field="section"
+                data-section-name="Arc beats"
+                spellcheck="false"
+              >{rawArcBeats}</textarea>
+            )}
           </div>
           <div class="prep__cue">
             <p class="prep__cue-label">Handles</p>
-            <ul class="prep__handles">
-              {selectedStory.data.handles.map((h) => <li>{h}</li>)}
+            <ul class="prep__handles" data-edit-field="handles">
+              {selectedStory.data.handles.map((h, i) => <li data-index={i}>{h}</li>)}
             </ul>
           </div>
         </div>
@@ -257,6 +326,14 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
         <div class="prep__details-body">
           <div class="prep__cue prep__cue--verify">
             <div class="prep__prose" set:html={verify} />
+            {isDev && (
+              <textarea
+                class="prep__edit-textarea"
+                data-edit-field="section"
+                data-section-name="Verify"
+                spellcheck="false"
+              >{rawVerify}</textarea>
+            )}
           </div>
         </div>
       </details>
@@ -310,7 +387,10 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   const PORTFOLIO_KEY = 'prep:v1:portfolio'; // legacy single-portfolio key (migrated)
   const PORTFOLIOS_KEY = 'prep:v1:portfolios';
   const VERIFY_KEY = 'prep:v1:verify';
+  const EDIT_MODE_KEY = 'prep:v1:editMode';
   const SCHEMA_KEY = 'prep:v1:_schema_version';
+
+  const DEV = import.meta.env.DEV;
 
   const corpus: Entry[] = JSON.parse(
     document.getElementById('prep-corpus')!.textContent!
@@ -1314,6 +1394,365 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   });
 
   // ============================================================
+  // Dev-only edit mode (Decision 015)
+  // ============================================================
+  // All edit-mode code is gated by `DEV` so the production bundle
+  // tree-shakes it. No edit affordance, no fetch, no key handling.
+
+  type SectionName =
+    | 'Project orientation'
+    | 'Opener'
+    | 'Punchline'
+    | 'Arc beats'
+    | 'Verify';
+
+  type DirtyPayload = {
+    storyId: string;
+    updates: {
+      tagline?: string;
+      questions?: string[];
+      handles?: string[];
+      sections?: Partial<Record<SectionName, string>>;
+    };
+  };
+
+  const editDirty: DirtyPayload = {
+    storyId: selectedStoryId,
+    updates: {},
+  };
+
+  const prepRoot = document.querySelector('.prep') as HTMLElement | null;
+  const editPill = document.getElementById('prep-edit-pill') as HTMLButtonElement | null;
+
+  if (DEV) {
+    // eslint-disable-next-line no-console
+    console.log('[prep edit] dev edit mode initialized — chord: Cmd/Ctrl+E, button: EDIT pill in focus header');
+  }
+
+  function readEditMode(): boolean {
+    if (!DEV) return false;
+    try {
+      return localStorage.getItem(EDIT_MODE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  function writeEditMode(on: boolean): void {
+    if (!DEV) return;
+    try {
+      if (on) localStorage.setItem(EDIT_MODE_KEY, '1');
+      else localStorage.removeItem(EDIT_MODE_KEY);
+    } catch {}
+  }
+
+  function markDirty(el: HTMLElement, isDirty: boolean): void {
+    if (isDirty) el.setAttribute('data-dirty', '1');
+    else el.removeAttribute('data-dirty');
+  }
+
+  function collectQuestions(): string[] {
+    const items = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        '.prep__edit-list[data-edit-field="questions"] > li',
+      ),
+    );
+    return items.map((li) => (li.textContent ?? '').trim()).filter((t) => t.length > 0);
+  }
+
+  function collectHandles(): string[] {
+    const items = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        '.prep__handles[data-edit-field="handles"] > li',
+      ),
+    );
+    return items.map((li) => (li.textContent ?? '').trim()).filter((t) => t.length > 0);
+  }
+
+  function setEditableElements(on: boolean): void {
+    if (!DEV) return;
+    const tagline = document.querySelector<HTMLElement>(
+      '[data-edit-field="tagline"]',
+    );
+    if (tagline) {
+      if (on) tagline.setAttribute('contenteditable', 'plaintext-only');
+      else {
+        tagline.removeAttribute('contenteditable');
+        markDirty(tagline, false);
+      }
+    }
+
+    const questionItems = document.querySelectorAll<HTMLElement>(
+      '.prep__edit-list[data-edit-field="questions"] > li',
+    );
+    questionItems.forEach((li) => {
+      if (on) li.setAttribute('contenteditable', 'plaintext-only');
+      else {
+        li.removeAttribute('contenteditable');
+        markDirty(li, false);
+      }
+    });
+
+    const handleItems = document.querySelectorAll<HTMLElement>(
+      '.prep__handles[data-edit-field="handles"] > li',
+    );
+    handleItems.forEach((li) => {
+      if (on) li.setAttribute('contenteditable', 'plaintext-only');
+      else {
+        li.removeAttribute('contenteditable');
+        markDirty(li, false);
+      }
+    });
+
+    // Textareas already exist (rendered when isDev). Visibility is CSS-driven.
+    // Clear dirty markers on them when turning off.
+    if (!on) {
+      const textareas = document.querySelectorAll<HTMLElement>(
+        '.prep__edit-textarea',
+      );
+      textareas.forEach((t) => markDirty(t, false));
+    }
+  }
+
+  function autoSizeTextarea(t: HTMLTextAreaElement): void {
+    t.style.height = 'auto';
+    t.style.height = t.scrollHeight + 'px';
+  }
+
+  let detailsOpenSnapshot: boolean[] | null = null;
+
+  function snapshotDetailsAndOpenAll(): void {
+    const detailsEls = Array.from(
+      document.querySelectorAll<HTMLDetailsElement>('.prep__details'),
+    );
+    detailsOpenSnapshot = detailsEls.map((d) => d.open);
+    detailsEls.forEach((d) => {
+      d.open = true;
+    });
+  }
+
+  function restoreDetailsSnapshot(): void {
+    if (!detailsOpenSnapshot) return;
+    const detailsEls = Array.from(
+      document.querySelectorAll<HTMLDetailsElement>('.prep__details'),
+    );
+    detailsEls.forEach((d, i) => {
+      const prior = detailsOpenSnapshot![i];
+      if (prior !== undefined) d.open = prior;
+    });
+    detailsOpenSnapshot = null;
+  }
+
+  function applyEditMode(on: boolean): void {
+    if (!DEV || !prepRoot) return;
+    if (on) prepRoot.setAttribute('data-edit-mode', '1');
+    else prepRoot.removeAttribute('data-edit-mode');
+    if (editPill) {
+      editPill.setAttribute('aria-pressed', on ? 'true' : 'false');
+      editPill.classList.toggle('prep__edit-pill--active', on);
+    }
+    setEditableElements(on);
+    if (on) {
+      snapshotDetailsAndOpenAll();
+      document
+        .querySelectorAll<HTMLTextAreaElement>('.prep__edit-textarea')
+        .forEach(autoSizeTextarea);
+    } else {
+      restoreDetailsSnapshot();
+      // Clear in-memory dirty payload when leaving edit mode without saving.
+      editDirty.updates = {};
+    }
+  }
+
+  function focusTrailingEnd(el: HTMLElement): void {
+    el.focus();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    if (sel) {
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
+  function addListItem(
+    list: HTMLElement,
+    after: HTMLElement,
+    max: number,
+  ): HTMLElement | null {
+    const items = Array.from(list.querySelectorAll(':scope > li'));
+    if (items.length >= max) return null;
+    const li = document.createElement('li');
+    li.setAttribute('contenteditable', 'plaintext-only');
+    after.after(li);
+    // Re-index data-index attributes
+    Array.from(list.querySelectorAll(':scope > li')).forEach((node, i) => {
+      (node as HTMLElement).dataset.index = String(i);
+    });
+    focusTrailingEnd(li);
+    return li;
+  }
+
+  function removeListItem(
+    list: HTMLElement,
+    li: HTMLElement,
+    min: number,
+  ): boolean {
+    const items = Array.from(list.querySelectorAll(':scope > li'));
+    if (items.length <= min) return false;
+    const idx = items.indexOf(li);
+    li.remove();
+    Array.from(list.querySelectorAll(':scope > li')).forEach((node, i) => {
+      (node as HTMLElement).dataset.index = String(i);
+    });
+    const remaining = Array.from(list.querySelectorAll<HTMLElement>(':scope > li'));
+    const target = remaining[Math.max(0, idx - 1)];
+    if (target) focusTrailingEnd(target);
+    return true;
+  }
+
+  function syncTaglineEverywhere(newValue: string): void {
+    if (!DEV) return;
+    const trimmed = newValue.trim();
+    // Ribbon — the "tabs at the top". Update the entry that matches the current story.
+    document
+      .querySelectorAll<HTMLElement>(
+        `.prep__ribbon-item[data-story-id="${selectedStoryId}"] .prep__ribbon-tagline`,
+      )
+      .forEach((el) => {
+        el.textContent = trimmed;
+      });
+    // Portfolio editor checklist (also shows taglines).
+    document
+      .querySelectorAll<HTMLElement>(
+        `.prep__portfolio-checkbox[data-story-id="${selectedStoryId}"]`,
+      )
+      .forEach((cb) => {
+        const taglineSpan = cb.parentElement?.querySelector<HTMLElement>(
+          '.prep__portfolio-check-tagline',
+        );
+        if (taglineSpan) taglineSpan.textContent = trimmed;
+      });
+    // In-memory corpus, so search results pick up the new tagline.
+    const entry = corpus.find((e) => e.id === selectedStoryId);
+    if (entry) entry.tagline = trimmed;
+    // Document title.
+    if (trimmed.length > 0) document.title = `${trimmed} — Prep`;
+  }
+
+  if (DEV) {
+    // Tagline input → dirty + live sync to ribbon
+    const tagline = document.querySelector<HTMLElement>(
+      '[data-edit-field="tagline"]',
+    );
+    tagline?.addEventListener('input', () => {
+      const value = (tagline.textContent ?? '').trim();
+      editDirty.updates.tagline = value;
+      markDirty(tagline, true);
+      syncTaglineEverywhere(value);
+    });
+
+    // Section textareas → dirty + auto-size
+    document
+      .querySelectorAll<HTMLTextAreaElement>('.prep__edit-textarea')
+      .forEach((t) => {
+        const name = t.dataset.sectionName as SectionName | undefined;
+        if (!name) return;
+        t.addEventListener('input', () => {
+          if (!editDirty.updates.sections) editDirty.updates.sections = {};
+          editDirty.updates.sections[name] = t.value;
+          markDirty(t, true);
+          autoSizeTextarea(t);
+        });
+      });
+
+    // Questions list → dirty + Enter/Backspace handling
+    const questionsList = document.querySelector<HTMLElement>(
+      '.prep__edit-list[data-edit-field="questions"]',
+    );
+    if (questionsList) {
+      questionsList.addEventListener('input', () => {
+        editDirty.updates.questions = collectQuestions();
+        questionsList.querySelectorAll<HTMLElement>(':scope > li').forEach((li) => markDirty(li, true));
+      });
+      questionsList.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (!readEditMode()) return;
+        const target = e.target as HTMLElement;
+        const li = target.closest('li');
+        if (!li || li.parentElement !== questionsList) return;
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (addListItem(questionsList, li, 3)) {
+            editDirty.updates.questions = collectQuestions();
+          }
+        } else if (e.key === 'Backspace' && (li.textContent ?? '').trim().length === 0) {
+          if (removeListItem(questionsList, li, 1)) {
+            e.preventDefault();
+            editDirty.updates.questions = collectQuestions();
+          }
+        }
+      });
+    }
+
+    // Handles list → dirty + Enter/Backspace handling
+    const handlesList = document.querySelector<HTMLElement>(
+      '.prep__handles[data-edit-field="handles"]',
+    );
+    if (handlesList) {
+      handlesList.addEventListener('input', () => {
+        editDirty.updates.handles = collectHandles();
+        handlesList.querySelectorAll<HTMLElement>(':scope > li').forEach((li) => markDirty(li, true));
+      });
+      handlesList.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (!readEditMode()) return;
+        const target = e.target as HTMLElement;
+        const li = target.closest('li');
+        if (!li || li.parentElement !== handlesList) return;
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (addListItem(handlesList, li, 3)) {
+            editDirty.updates.handles = collectHandles();
+          }
+        } else if (e.key === 'Backspace' && (li.textContent ?? '').trim().length === 0) {
+          if (removeListItem(handlesList, li, 1)) {
+            e.preventDefault();
+            editDirty.updates.handles = collectHandles();
+          }
+        }
+      });
+    }
+
+    // EDIT pill click → toggle
+    editPill?.addEventListener('click', () => {
+      const next = !readEditMode();
+      writeEditMode(next);
+      applyEditMode(next);
+    });
+
+    // Cmd+E / Ctrl+E toggle, Cmd+S / Ctrl+S log payload (save lands in slice 2)
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+      const key = e.key.toLowerCase();
+      if (key === 'e') {
+        e.preventDefault();
+        e.stopPropagation();
+        const next = !readEditMode();
+        writeEditMode(next);
+        applyEditMode(next);
+        // eslint-disable-next-line no-console
+        console.log('[prep edit] toggled via chord →', next);
+      } else if (key === 's' && readEditMode()) {
+        e.preventDefault();
+        // Save endpoint lands in session-edit-mode-save.md. For now, surface payload.
+        // eslint-disable-next-line no-console
+        console.log('[prep edit] dirty payload (save not yet wired):', JSON.parse(JSON.stringify(editDirty)));
+      }
+    }, { capture: true });
+  }
+
+  // ============================================================
   // Initial hydration
   // ============================================================
   // Augment verify items before applyMode so drilling-mode auto-open
@@ -1327,6 +1766,10 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
 
   applyMode(readMode());
   syncPortfolioUI();
+
+  if (DEV) {
+    applyEditMode(readEditMode());
+  }
 
   const initialFrec = readFrecency();
   const initialPortfolio = readPortfolio();
@@ -2278,4 +2721,131 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       font-size: 1.2rem;
     }
   }
+
+  /* === Dev-only edit mode (Decision 015) === */
+  /* Production HTML doesn't ship these elements (Astro `isDev` gate),
+     so the selectors below only ever match in dev. */
+
+  .prep__edit-pill {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: transparent;
+    padding: 0.25rem 0.55rem;
+    border: 1px solid var(--border-mid);
+    border-radius: 2px;
+    align-self: center;
+    cursor: pointer;
+    transition: color 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    min-height: 24px;
+  }
+
+  .prep__edit-pill:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .prep__edit-pill--active {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .prep__edit-frontmatter {
+    display: none;
+    margin: 0.5rem 0 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-warm);
+    border-left: 2px solid var(--accent);
+  }
+
+  .prep[data-edit-mode="1"] .prep__edit-frontmatter {
+    display: block;
+  }
+
+  .prep__edit-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.4rem;
+  }
+
+  .prep__edit-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    list-style: disc;
+  }
+
+  .prep__edit-list > li {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--text);
+    padding: 0.15rem 0;
+    line-height: 1.5;
+  }
+
+  .prep__edit-textarea {
+    display: none;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border-mid);
+    border-radius: 2px;
+    resize: vertical;
+    min-height: 4rem;
+  }
+
+  .prep[data-edit-mode="1"] .prep__edit-textarea {
+    display: block;
+  }
+
+  /* When edit mode is on, hide the rendered prose inside any container that
+     also holds an edit textarea — the textarea is the working surface. */
+  .prep[data-edit-mode="1"] .prep__cue--orientation .prep__prose,
+  .prep[data-edit-mode="1"] .prep__verbatim--opener .prep__prose,
+  .prep[data-edit-mode="1"] .prep__verbatim--punchline .prep__prose,
+  .prep[data-edit-mode="1"] .prep__details--beats .prep__cue:first-child .prep__prose,
+  .prep[data-edit-mode="1"] .prep__cue--verify .prep__prose {
+    display: none;
+  }
+
+  /* Visual cue: dashed outline + accent-dim background on editable regions. */
+  .prep[data-edit-mode="1"] [contenteditable] {
+    outline: 1px dashed var(--accent);
+    outline-offset: 4px;
+    background: var(--accent-dim);
+    border-radius: 1px;
+  }
+
+  .prep[data-edit-mode="1"] .prep__edit-textarea {
+    outline: 1px dashed var(--accent);
+    outline-offset: 2px;
+    background: var(--accent-dim);
+  }
+
+  /* Per-field dirty marker — small ● before the element when data-dirty=1. */
+  .prep[data-edit-mode="1"] [data-dirty="1"]::before {
+    content: '●';
+    color: var(--accent);
+    font-size: 0.65rem;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+
+  /* Edit-mode tagline keeps its typography; just add some breathing room. */
+  .prep[data-edit-mode="1"] .prep__focus-tagline {
+    padding: 0.1rem 0.3rem;
+  }
+
 </style>
