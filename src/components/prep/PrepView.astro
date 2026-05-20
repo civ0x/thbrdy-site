@@ -246,6 +246,8 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
 
   type Frecency = { [id: string]: number[] };
 
+  type QueryFrecency = { [query: string]: { [storyId: string]: number[] } };
+
   type Portfolio = {
     id: string;
     name: string;
@@ -266,7 +268,9 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
   const HALF_LIFE_MS = 14 * 24 * 3600 * 1000;
   const PRUNE_BEFORE_MS = 6 * HALF_LIFE_MS;
   const ALPHA = 0.5;
+  const BETA = 1.0;
   const FRECENCY_KEY = 'prep:v1:frecency';
+  const QUERY_FRECENCY_KEY = 'prep:v1:query_frecency';
   const MODE_KEY = 'prep:v1:mode';
   const PORTFOLIO_KEY = 'prep:v1:portfolio'; // legacy single-portfolio key (migrated)
   const PORTFOLIOS_KEY = 'prep:v1:portfolios';
@@ -320,6 +324,59 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
         localStorage.setItem(SCHEMA_KEY, '1');
       }
     } catch {}
+  }
+
+  function normalizeQuery(q: string): string {
+    return q.trim().toLowerCase();
+  }
+
+  function readQueryFrecency(): QueryFrecency {
+    try {
+      const raw = localStorage.getItem(QUERY_FRECENCY_KEY);
+      return raw ? (JSON.parse(raw) as QueryFrecency) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeQueryFrecency(state: QueryFrecency): void {
+    try {
+      if (Object.keys(state).length === 0) {
+        localStorage.removeItem(QUERY_FRECENCY_KEY);
+        return;
+      }
+      localStorage.setItem(QUERY_FRECENCY_KEY, JSON.stringify(state));
+      if (!localStorage.getItem(SCHEMA_KEY)) {
+        localStorage.setItem(SCHEMA_KEY, '1');
+      }
+    } catch {}
+  }
+
+  function recordQueryClick(rawQuery: string, storyId: string): void {
+    const q = normalizeQuery(rawQuery);
+    if (q.length < 2) return; // align with fuse minMatchCharLength
+    const now = Date.now();
+    const state = readQueryFrecency();
+    const bucket = state[q] ?? {};
+    const existing = (bucket[storyId] || []).filter(
+      (t) => t > now - PRUNE_BEFORE_MS
+    );
+    existing.push(now);
+    bucket[storyId] = existing;
+    state[q] = bucket;
+    // Prune entire query entries where no story has any live timestamps.
+    for (const key of Object.keys(state)) {
+      const sub = state[key];
+      let hasLive = false;
+      for (const ids of Object.values(sub)) {
+        if (ids.some((t) => t > now - PRUNE_BEFORE_MS)) {
+          hasLive = true;
+          break;
+        }
+      }
+      if (!hasLive) delete state[key];
+    }
+    writeQueryFrecency(state);
   }
 
   function genPortfolioId(): string {
@@ -545,6 +602,12 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
     existing.push(now);
     frec[id] = existing;
     writeFrecency(frec);
+    // Also record query-specific click if the user clicked while searching.
+    // Per-query frecency strengthens "type X → expect story Y" learning.
+    const q = input.value;
+    if (q.trim().length > 0) {
+      recordQueryClick(q, id);
+    }
   }
 
   function renderRibbon(entries: Entry[], statusText: string): void {
@@ -649,12 +712,19 @@ const corpusJson = JSON.stringify(corpus).replace(/</g, '\\u003c');
       return;
     }
 
+    const queryFrec = readQueryFrecency();
+    const queryBucket = queryFrec[normalizeQuery(q)] ?? {};
+
     const ranked = fuseResults
-      .map((r) => ({
-        item: r.item,
-        finalScore:
-          (r.score ?? 1) / (1 + ALPHA * frecencyWeight(frec[r.item.id], now)),
-      }))
+      .map((r) => {
+        const globalW = frecencyWeight(frec[r.item.id], now);
+        const queryW = frecencyWeight(queryBucket[r.item.id], now);
+        return {
+          item: r.item,
+          finalScore:
+            (r.score ?? 1) / (1 + ALPHA * globalW + BETA * queryW),
+        };
+      })
       .sort((a, b) => a.finalScore - b.finalScore)
       .map((r) => r.item);
 
